@@ -3,7 +3,7 @@ logging:
     org:
       hibernate: info
 server:
-  port: 7777
+  port: 7770
 spring:
   datasource:
     driverClassName: org.mariadb.jdbc.Driver
