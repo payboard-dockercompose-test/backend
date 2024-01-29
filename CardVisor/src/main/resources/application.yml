@@ -1,0 +1,25 @@
+logging:
+  level:
+    org:
+      hibernate: info
+server:
+  port: 7777
+spring:
+  datasource:
+    driverClassName: org.mariadb.jdbc.Driver
+    password: cardvisor
+    url: jdbc:mariadb://localhost:3306/cardvisor
+    username: cardvisor
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        format_sql: true
+        show-sql: true
+    show-sql: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
