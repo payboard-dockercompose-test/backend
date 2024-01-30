@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.project.cardvisor.vo.JobListVO;
 
-public interface JobRepository extends CrudRepository<JobListVO, String>{
+public interface JobRepository extends CrudRepository<JobListVO, Integer>{
 	
 }
