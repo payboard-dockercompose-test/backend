@@ -13,6 +13,7 @@ class CardVisorApplicationTests {
 	@Autowired
 	JobRepository jrepo;
 	
+
 	@Test
 	void f1() {
 		
@@ -25,6 +26,7 @@ class CardVisorApplicationTests {
 	
 	//@Test
 	void contextLoads() {
+		
 	}
 
 }

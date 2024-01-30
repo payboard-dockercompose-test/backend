@@ -1,6 +1,8 @@
 package com.project.cardvisor.vo;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -27,7 +29,8 @@ import lombok.ToString;
 public class BenefitVO {
 	
 	@Id
-	private String benefit_id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int benefit_id;
 	
 	private String benefit_detail;
 	
@@ -37,3 +40,4 @@ public class BenefitVO {
 	
 
 }
+
