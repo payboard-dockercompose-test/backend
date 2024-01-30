@@ -39,7 +39,7 @@ public class CustomerVO {
 	private Date cust_birth;
 	private String cust_phone;
 	private String cust_email;
-	private int cust_salary;
+	private String cust_salary;
 	
 	@ManyToOne
 	@JoinColumn(name="job_id")
