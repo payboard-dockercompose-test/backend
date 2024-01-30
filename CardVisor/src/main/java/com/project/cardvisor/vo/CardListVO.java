@@ -1,3 +1,4 @@
+
 package com.project.cardvisor.vo;
 
 import jakarta.persistence.Entity;
