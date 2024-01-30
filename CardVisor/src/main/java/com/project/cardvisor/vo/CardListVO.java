@@ -1,6 +1,8 @@
 package com.project.cardvisor.vo;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -25,7 +27,8 @@ import lombok.ToString;
 public class CardListVO {
 	
 	@Id
-	private String card_type;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int card_type;
 	
 	private String card_name;
 	private String card_img_url;
