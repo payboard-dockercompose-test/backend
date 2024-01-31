@@ -1,5 +1,6 @@
 package com.project.cardvisor.vo;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -25,7 +26,8 @@ import lombok.ToString;
 public class MccVO {
 	
 	@Id
-	private int mcc_code;
+	@Column(length = 4)
+	private String mcc_code;
 	
 	private String ctg_name;
 }
