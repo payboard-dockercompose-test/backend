@@ -1,5 +1,6 @@
 package com.project.cardvisor.vo;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -43,9 +44,9 @@ public class CardRegInfoVO {
 	private String card_num;
 	
 	@CreationTimestamp
-	private Timestamp reg_date;
+	private Date reg_date;
 	
-	private Timestamp expire_date;
+	private Date expire_date;
 	
 	
 	

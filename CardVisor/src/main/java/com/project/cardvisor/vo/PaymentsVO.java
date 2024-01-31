@@ -44,7 +44,7 @@ public class PaymentsVO {
 	private String pay_store;
 	private long pay_amount;
 	
-	@CreationTimestamp
+	//@CreationTimestamp
 	private Timestamp pay_date;
 	
 	@ManyToOne

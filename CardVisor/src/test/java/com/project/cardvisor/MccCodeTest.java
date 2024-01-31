@@ -1,16 +1,12 @@
 package com.project.cardvisor;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.project.cardvisor.repo.InterestRepository;
 import com.project.cardvisor.repo.MccCodeRepository;
-import com.project.cardvisor.vo.InterestVO;
 import com.project.cardvisor.vo.MccVO;
 
 @SpringBootTest
@@ -25,7 +21,7 @@ public class MccCodeTest {
 				"편의점/마트/잡화", "취미/여가", "술/유흥", "보험/세금/기타금융", "기타" };
 		IntStream.range(0, mcclist.length).forEach(i -> {
 			MccVO mcc = MccVO.builder()
-					.mcc_code(String.format("%04d", i))
+					.mcc_code(String.format("%04d", i+1))
 					.ctg_name(mcclist[i])
 					.build();
 			mccrepo.save(mcc);
