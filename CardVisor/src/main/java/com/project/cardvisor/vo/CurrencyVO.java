@@ -27,7 +27,6 @@ import lombok.ToString;
 
 @Table(name="currency")
 public class CurrencyVO {
-	private Integer result; //결과
 	@Id
 	private String currency_code;
 	
