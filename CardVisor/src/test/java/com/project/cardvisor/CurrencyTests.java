@@ -23,6 +23,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -40,13 +41,15 @@ public class CurrencyTests {
 	
 	@Autowired
 	CurrencyRepository crepo;
-	
+	@Value("${exchange-authkey}")
+	String authkey;
+	@Value("${exchange-data}")
+    String data ;
 	@Test
 	void f1() {
-		String authkey = "csT7O2x25zF7tMyxTpOEql7E8Zzmad5F";
+		
 ObjectMapper objectmapper = new ObjectMapper();
 
-	    String data = "AP01";
 		
 	    HttpURLConnection connection = null;
 	    BigDecimal defaultExchangeRate = BigDecimal.valueOf(1300);
@@ -99,14 +102,12 @@ ObjectMapper objectmapper = new ObjectMapper();
                         String currency_nation = (String)exchangeRateInfo.get("cur_nm");
                         Long result1Long = (Long) exchangeRateInfo.get("result");
                         Integer result1 = result1Long.intValue();
-                   
-                           CurrencyVO currency = CurrencyVO.builder()
-                        		   .result(result1)
-                         		  .currency_code(currency_code)
-                         		  .currency_nation(currency_nation)
-                         		  .currency_rate(currency_rate)
-                         		  .build();
-                           crepo.save(currency);
+                   System.out.println("result"+result1);
+						/*
+						 * CurrencyVO currency = CurrencyVO.builder() .result(result1)
+						 * .currency_code(currency_code) .currency_nation(currency_nation)
+						 * .currency_rate(currency_rate) .build(); crepo.save(currency);
+						 */
                             	
                           
                       
