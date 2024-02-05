@@ -15,7 +15,7 @@ public class InterestTest {
 	@Autowired
 	InterestRepository irepo;
 	
-	//@Test
+	@Test
 	void f1() {
 		 String[] iList = {"주유/교통","생활","쇼핑","문화/교육","외식/카페","여행","사업자"};
 		

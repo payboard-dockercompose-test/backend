@@ -13,7 +13,6 @@ public class JobListTest {
 	@Autowired
 	JobRepository jrepo;
 	
-	
 	@Test
 	void f1() {
 	

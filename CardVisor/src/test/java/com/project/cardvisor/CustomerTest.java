@@ -34,6 +34,7 @@ public class CustomerTest {
 	List<String> phoneList = new ArrayList<String>();
 	List<String> emailList = new ArrayList<String>();
 
+
 	// 성별 정보 배열
 	char[] gender = { '남', '여' };
 

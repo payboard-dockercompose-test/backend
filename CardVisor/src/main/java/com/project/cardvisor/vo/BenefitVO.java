@@ -33,6 +33,10 @@ public class BenefitVO {
 	private int benefit_id;
 	
 	private String benefit_detail;
+		
+	private String mcc_code;
+	
+	private double benefit_pct;
 	
 	@ManyToOne
 	@JoinColumn(name="interest_id")

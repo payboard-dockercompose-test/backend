@@ -40,6 +40,22 @@ public class PaymentTest {
 	CustomerRepository custrep;
 	
 	@Test
+	public void f2() {
+		prep.findAll().forEach(p -> {
+			
+			p.getMcc_code();
+			
+
+			CardRegInfoVO cvo = crep.findById(p.getReg_id().getReg_id()).orElse(null);
+			cvo.getCard_type().getCard_type();
+			
+			
+			PaymentsVO vo = p.builder()
+			.benefit_amount(0)
+			.build();
+		});
+	}
+	
 	public void f1() {
 		
 		LinkedList<String[]> mlist = new LinkedList<>();

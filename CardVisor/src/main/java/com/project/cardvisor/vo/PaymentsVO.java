@@ -50,6 +50,7 @@ public class PaymentsVO {
 	@ManyToOne
 	@JoinColumn(name="mcc_code")
 	private MccVO mcc_code;
-
+	
+	private int benefit_amount;
 
 }

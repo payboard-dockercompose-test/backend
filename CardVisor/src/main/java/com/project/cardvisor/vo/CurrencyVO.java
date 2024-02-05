@@ -27,7 +27,6 @@ import lombok.ToString;
 
 @Table(name="currency")
 public class CurrencyVO {
-
 	@Id
 	private String currency_code;
 	

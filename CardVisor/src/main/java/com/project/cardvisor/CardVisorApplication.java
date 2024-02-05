@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @ComponentScan(basePackages={"com.project.cardvisor"}) 
 @SpringBootApplication
+@EnableJpaRepositories(basePackages = {"com.project.cardvisor"})
 public class CardVisorApplication {
 
 	public static void main(String[] args) {
