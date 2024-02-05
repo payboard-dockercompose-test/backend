@@ -43,7 +43,6 @@ public class CardRegInfoVO {
 	
 	private String card_num;
 	
-	@CreationTimestamp
 	private Date reg_date;
 	
 	private Date expire_date;
