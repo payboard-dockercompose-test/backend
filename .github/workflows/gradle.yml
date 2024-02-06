@@ -70,4 +70,4 @@ jobs:
     - run: |
         docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f backend/.github/workflows/Dockerfile .
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest
-        working-directory: working-directory: backend
+        working-directory: backend
