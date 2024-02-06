@@ -20,9 +20,9 @@ jobs:
         
     - name: 'Build backend with Gradle'
       run: | 
-        touch ./backend/BackEnd/CardVisor/src/main/resources/application.yml
-        echo "${{ secrets.APPLICATION_YML }}" > ./backend/BackEnd/CardVisor/src/main/resources/application.yml
-        cat ./backend/BackEnd/CardVisor/src/main/resources/application.yml 
+        touch ../CardVisor/src/main/resources/application.yml
+        echo "${{ secrets.APPLICATION_YML }}" > ../CardVisor/src/main/resources/application.yml
+        cat ../CardVisor/src/main/resources/application.yml 
 
     - name: 'Set up JDK 17'
       uses: actions/setup-java@v2
