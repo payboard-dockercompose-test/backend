@@ -32,10 +32,10 @@ jobs:
         distribution: 'adopt'
         
     - name: 'Gradle grant permission'
-      run: chmod +x gradlew
+      run: chmod +x ./CardVisor/gradlew
 
     - name: 'Gradle build'
-      run: ./backend/CardVisor/gradlew  clean build
+      run: ./backend/CardVisor/gradlew clean build
       env:
         CI: "false"
     
