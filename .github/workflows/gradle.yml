@@ -29,10 +29,10 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: '17'
-        distribution: 'temurin'
+        distribution: 'adopt'
         
     - name: 'Gradle grant permission'
-      run: ./backend/CardVisor/gradlew chmod +x gradlew
+      run: chmod +x ./backend/CardVisor/gradlew
 
     - name: 'Gradle build'
       run: ./backend/CardVisor/gradlew clean build
