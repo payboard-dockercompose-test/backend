@@ -32,13 +32,12 @@ jobs:
         distribution: 'temurin'
         
     - name: 'Gradle grant permission'
-      run: ./gradlew chmod +x gradlew
+      run: ./backend/CardVisor/gradlew chmod +x gradlew
 
     - name: 'Gradle build'
-      run: ./gradlew clean build
+      run: ./backend/CardVisor/gradlew clean build
       env:
         CI: "false"
-      working-directory: ./backend/CardVisor
     
     # React build NODE
     - name: 'Checkout frontend repository'
