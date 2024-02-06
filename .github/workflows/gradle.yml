@@ -17,19 +17,19 @@ jobs:
         repository: CardVisor/BackEnd
         path: ./BackEnd
         token: ${{ secrets.REPO_PAT }}
-        
+
+    - name: 'build yml'
     - run: touch ./BackEnd/src/main/resources/application.yml
-    - run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./BackEnd/src/main/resources/application.yml
+    - run: echo "${{ secrets.APPLICATION_YML }}" > ./BackEnd/src/main/resources/application.yml
     - run: cat ./BackEnd/src/main/resources/application.yml 
+      working-directory: ./BackEnd
     
     - name: 'Set up JDK 17'
       uses: actions/setup-java@v2
       with:
         java-version: '17'
         distribution: 'adopt'
-
-
-    
+        
     - name: 'Build backend with Gradle'
       run: chmod +x ./gradlew && ./gradlew build
       working-directory: ./BackEnd
