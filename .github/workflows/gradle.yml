@@ -66,6 +66,7 @@ jobs:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: pwd    
     - run: |
         docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f backend/.github/workflows/Dockerfile .
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest
