@@ -32,9 +32,8 @@ jobs:
         distribution: 'temurin'
         
     - name: 'Build backend with Gradle'
-      run: chmod +x ./gradlew && ./gradlew build
-      env:
-          CI: "false"  
+      run: chmod +x ./gradlew && ./gradlew clean --stacktrace --info build
+      shell: bash    
       working-directory: ./backend/CardVisor
     
     # React build NODE
