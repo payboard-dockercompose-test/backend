@@ -23,15 +23,12 @@ jobs:
       with:
         java-version: '17'
         distribution: 'adopt'
-        
-    - uses: actions/checkout@v2
-    - run: touch ./src/main/resources/application.yml
-    - run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
-    - run: cat ./src/main/resources/application.yml   
-      working-directory: ./BackEnd
       
     - name: 'Build backend with Gradle'
-      run: chmod +x ./gradlew && ./gradlew build
+    - run: touch ./src/main/resources/application.yml
+    - run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
+    - run: cat ./src/main/resources/application.yml  
+    - run: chmod +x ./gradlew && ./gradlew build
       working-directory: ./BackEnd
     
     # React build NODE
