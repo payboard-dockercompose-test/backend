@@ -23,12 +23,14 @@ jobs:
       with:
         java-version: '17'
         distribution: 'adopt'
-      
-    - name: 'Build backend with Gradle'
+
+    - uses: actions/checkout@v3
     - run: touch ./src/main/resources/application.yml
     - run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
-    - run: cat ./src/main/resources/application.yml  
-    - run: chmod +x ./gradlew && ./gradlew build
+    - run: cat ./src/main/resources/application.yml 
+    
+    - name: 'Build backend with Gradle'
+      run: chmod +x ./gradlew && ./gradlew build
       working-directory: ./BackEnd
     
     # React build NODE
