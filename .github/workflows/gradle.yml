@@ -15,14 +15,13 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CardVisor/BackEnd
-        path: ./BackEnd
+        path: ./backend
         token: ${{ secrets.REPO_PAT }}
 
-    - name: 'build yml'
-    - run: touch ./BackEnd/src/main/resources/application.yml
-    - run: echo "${{ secrets.APPLICATION_YML }}" > ./BackEnd/src/main/resources/application.yml
-    - run: cat ./BackEnd/src/main/resources/application.yml 
-      working-directory: ./BackEnd
+    - run: touch ./backend/src/main/resources/application.yml
+    - run: echo "${{ secrets.APPLICATION_YML }}" > ./backend/src/main/resources/application.yml
+    - run: cat ./backend/src/main/resources/application.yml 
+      working-directory: ./backend
     
     - name: 'Set up JDK 17'
       uses: actions/setup-java@v2
@@ -32,14 +31,14 @@ jobs:
         
     - name: 'Build backend with Gradle'
       run: chmod +x ./gradlew && ./gradlew build
-      working-directory: ./BackEnd
+      working-directory: ./backend
     
     # React build NODE
     - name: 'Checkout frontend repository'
       uses: actions/checkout@v2
       with:
         repository: CardVisor/FrontEnd
-        path: ./FrontEnd
+        path: ./frontend
         token: ${{ secrets.REPO_PAT }}
 
     - name: 'Set up Node.js'
@@ -53,7 +52,7 @@ jobs:
         npm run build
       env:
           CI: "false"  
-      working-directory: ./FrontEnd
+      working-directory: ./frontend
   
     - name: 'Azure Container Login AND Build and push Docker image'
       uses: azure/docker-login@v1
