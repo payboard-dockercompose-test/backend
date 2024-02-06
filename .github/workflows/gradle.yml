@@ -18,9 +18,12 @@ jobs:
         path: ./backend
         token: ${{ secrets.REPO_PAT }}
 
-    - run: touch ./backend/../src/main/resources/application.yml
-    - run: echo "${{ secrets.APPLICATION_YML }}" > ./backend/../src/main/resources/application.yml
-    - run: cat ./backend/../src/main/resources/application.yml 
+    - run: touch ./src/main/resources/application.yml
+      working-directory: ./backend
+    - run: echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+      working-directory: ./backend
+    - run: cat ./src/main/resources/application.yml 
+      working-directory: ./backend
     
     - name: 'Set up JDK 17'
       uses: actions/setup-java@v2
