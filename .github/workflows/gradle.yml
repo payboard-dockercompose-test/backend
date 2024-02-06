@@ -18,10 +18,9 @@ jobs:
         path: ./backend
         token: ${{ secrets.REPO_PAT }}
 
+    - uses: actions/checkout@v2
     - run: touch ./backend/src/main/resources/application.yml
-      working-directory: ./backend
     - run: echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
-      working-directory: ./backend
     - run: cat ./src/main/resources/application.yml 
       working-directory: ./backend
     
