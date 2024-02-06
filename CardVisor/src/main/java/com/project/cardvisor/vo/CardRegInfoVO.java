@@ -30,7 +30,6 @@ import lombok.ToString;
 
 @Table(name="card_reg_info")
 public class CardRegInfoVO {
-	
 	@Id
 	private String reg_id;
 	

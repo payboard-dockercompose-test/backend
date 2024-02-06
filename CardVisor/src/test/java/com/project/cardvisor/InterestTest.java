@@ -1,7 +1,5 @@
 package com.project.cardvisor;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;

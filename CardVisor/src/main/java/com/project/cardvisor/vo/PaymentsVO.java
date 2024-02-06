@@ -44,12 +44,13 @@ public class PaymentsVO {
 	private String pay_store;
 	private long pay_amount;
 	
-	@CreationTimestamp
+	//@CreationTimestamp
 	private Timestamp pay_date;
 	
 	@ManyToOne
 	@JoinColumn(name="mcc_code")
 	private MccVO mcc_code;
-
+	
+	private int benefit_amount;
 
 }
