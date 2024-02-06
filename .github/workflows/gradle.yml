@@ -33,6 +33,8 @@ jobs:
         
     - name: 'Build backend with Gradle'
       run: chmod +x ./gradlew && ./gradlew build
+      env:
+          CI: "false"  
       working-directory: ./backend/CardVisor
     
     # React build NODE
