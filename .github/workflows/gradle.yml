@@ -32,7 +32,7 @@ jobs:
         distribution: 'adopt'
         
     - name: 'Build backend with Gradle'
-      run: chmod +x ./gradlew && ./gradlew clean build
+      run: chmod +x ./gradlew && ./gradlew clean build -i
       env:
           CI: "false"  
       working-directory: ./backend/CardVisor
