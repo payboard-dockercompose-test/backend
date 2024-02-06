@@ -32,8 +32,8 @@ ENV LC_ALL ko_KR.UTF-8
 
 COPY --from=backend-build /app/*.jar /app/
 COPY --from=frontend-build /app /var/www/html
-COPY ./000-default.conf /etc/apache2/sites-available/
-COPY ./start.sh /start.sh
+COPY 000-default.conf /etc/apache2/sites-available/
+COPY start.sh /start.sh
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/bin/bash", "/start.sh"]
 
