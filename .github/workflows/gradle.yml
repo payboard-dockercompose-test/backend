@@ -15,15 +15,15 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CardVisor/BackEnd
-        path: ./backend/CardVisor
+        path: ./backend
         token: ${{ secrets.REPO_PAT }}
         
     - name: 'Build backend with Gradle'
       run: | 
         touch ./backend/CardVisor/src/main/resources/application.yml
-        echo "${{ secrets.APPLICATION_YML }}" > ./backend/src/main/resources/application.yml
-        cat ./backend/CardVisor/CardVisor/src/main/resources/application.yml 
-      working-directory: ./backend/CardVisor
+        echo "${{ secrets.APPLICATION_YML }}" > ./backend/CardVisor/src/main/resources/application.yml
+        cat ./backend/CardVisor/src/main/resources/application.yml 
+      working-directory: ./backend
 
     - name: 'Set up JDK 17'
       uses: actions/setup-java@v2
