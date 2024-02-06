@@ -32,12 +32,14 @@ jobs:
         distribution: 'adopt'
         
     - name: 'Gradle grant permission'
-      run: chmod +x ./CardVisor/gradlew
-
-    - name: 'Gradle build'
-      run: ./backend/CardVisor/gradlew clean build
+      run: chmod +x .backend/CardVisor/gradlew && clean build
       env:
         CI: "false"
+        
+    # - name: 'Gradle build'
+    #   run: ./backend/CardVisor/gradlew clean build
+    #   env:
+    #     CI: "false"
     
     # React build NODE
     - name: 'Checkout frontend repository'
