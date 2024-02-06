@@ -33,7 +33,7 @@ jobs:
         
     - name: 'Build backend with Gradle'
       # run: chmod +x ./gradlew && ./gradlew clean --stacktrace --info build
-      run: chmod +x ./gradlew && ./gradlew clean
+      run: chmod +x ./gradlew && ./gradlew clean build
       shell: bash
       env:
           CI: "false"
