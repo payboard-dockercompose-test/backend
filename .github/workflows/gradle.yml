@@ -25,7 +25,11 @@ jobs:
         distribution: 'adopt'
         
     - name: 'Build backend with Gradle'
-      run: chmod +x ./gradlew && ./gradlew build
+      run: |
+        touch ./src/main/resources/application.properties
+        echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
+        cat ./src/main/resources/application.properties
+        chmod +x ./gradlew && ./gradlew build
       working-directory: ./BackEnd
     
     # React build NODE
@@ -45,6 +49,8 @@ jobs:
       run: |
         npm install
         npm run build
+      env:
+          CI: "false"  
       working-directory: ./FrontEnd
   
     - name: 'Azure Container Login AND Build and push Docker image'
