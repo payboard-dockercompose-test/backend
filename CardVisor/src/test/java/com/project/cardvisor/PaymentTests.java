@@ -2,30 +2,34 @@ package com.project.cardvisor;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.project.cardvisor.repo.BenefitRepository;
+import com.project.cardvisor.repo.CardBenefitRepository;
+import com.project.cardvisor.repo.CardListRepository;
 import com.project.cardvisor.repo.CardRegRepository;
 import com.project.cardvisor.repo.CustomerRepository;
 import com.project.cardvisor.repo.MccCodeRepository;
 import com.project.cardvisor.repo.PaymentRepository;
+import com.project.cardvisor.vo.BenefitVO;
 import com.project.cardvisor.vo.CardRegInfoVO;
-import com.project.cardvisor.vo.CustomerVO;
 import com.project.cardvisor.vo.MccVO;
 import com.project.cardvisor.vo.PaymentsVO;
 
+import lombok.extern.slf4j.Slf4j;
+
 @SpringBootTest
-public class PaymentTest {
+@Slf4j
+public class PaymentTests {
 	
 	@Autowired
 	PaymentRepository prep;
@@ -39,89 +43,79 @@ public class PaymentTest {
 	@Autowired
 	CustomerRepository custrep;
 	
-	@Test
-	public void f2() {
-		prep.findAll().forEach(p -> {
-			
-			p.getMcc_code();
-			
-
-			CardRegInfoVO cvo = crep.findById(p.getReg_id().getReg_id()).orElse(null);
-			cvo.getCard_type().getCard_type();
-			
-			
-			PaymentsVO vo = p.builder()
-			.benefit_amount(0)
-			.build();
-		});
-	}
+	@Autowired
+	CardBenefitRepository cbrep;
+	
+	@Autowired
+	CardListRepository clrep;
+	
+	@Autowired
+	BenefitRepository brep;
 	
 	public void f1() {
 		
-		LinkedList<String[]> mlist = new LinkedList<>();
-		mrep.findAll().forEach(m -> {
-			if(!m.getMcc_code().equals("0015")) {
-				mlist.add(new String[] {m.getMcc_code(),m.getCtg_name()});
-			}
-			
-		});
+		//고객 리스트
 		LinkedList<CardRegInfoVO> clist = new LinkedList<>();
 		crep.findAll().forEach(c -> {
 			clist.add(c);
 		});
-		
-		
+		//mcc 코드 타입
 		String[] mccCode = {
 				"0001", "0002", "0003", "0004", "0005","0006", "0007", "0008", "0009", "0010", "0011",
-				"0012", "0013", "0014", "0016"
+				"0012", "0013", "0014", "0015","0016"
 		};
-		
-		String[] mcclist = { "음식점", "편의점", "교통비", "쇼핑몰", "미용실", "병원", "숙박시설", "오락시설", "교육비", "카페", "주거/통신",
-				"편의점", "레저/테마", "술/유흥", "기타" };
-		
-		
+		String[] 업종 = { "음식점", "편의점", "교통비", "쇼핑몰", "미용실", "병원", "숙박시설", "오락시설", "교육비", "카페", "주거/통신",
+				"편의점", "레저/테마", "술/유흥", "국세납입","기타" };
+
 		Random random = new Random();
 		
 		for(int i=0; i<40000; i++) { //34000
 			UUID uuid = UUID.randomUUID();
-			int mccidx = random.nextInt(mlist.size()); // mlist의 크기에 맞게 난수 범위 조정
-			int regidx = random.nextInt(clist.size());
-			int amoundidx = random.nextInt(100);
+			int mccidx = random.nextInt(16); // mcc 16개
+			int regidx = random.nextInt(clist.size()); //999개
+			int amountidx = random.nextInt(100); //곱할 숫자
 			MccVO mvo = mrep.findById(mccCode[mccidx]).orElse(null);
-			
 			
 			Date regDate = clist.get(regidx).getReg_date(); // 등록일
 		    Date expDate = clist.get(regidx).getExpire_date(); // 만기일
 		    java.util.Date randomDate = getRandomDate(regDate, expDate);
 		    if (randomDate != null) { // randomDate가 null이 아닌 경우에만 save
 		        Timestamp timestamp = new Timestamp(randomDate.getTime());
-		        
-				
-				//regrandom
-				
-				//nation
-				//currency
-				//currency rate
-				//paystore
-				
 				
 				PaymentsVO vo = PaymentsVO.builder()
 						.pay_id("PA-"+uuid)
-						.reg_id(clist.get(mccidx))
+						.reg_id(clist.get(regidx))
 						.nation("KOR")
 						.currency_code("KRW")
 						.currency_rate(1)
-						.pay_amount(amoundidx*1000)
+						.pay_amount(amountidx*1000)
 						.pay_date(timestamp)
-						.pay_store(mcclist[mccidx])
+						.pay_store(업종[mccidx])
 						.mcc_code(mvo)
 						.build();
 				prep.save(vo);
-		    }    
-		    
+		    }
 		}
-		
-		
+	}
+	
+	
+	public void f2() {
+		prep.findAll().forEach(p -> {
+			
+			if(p.getBenefit_amount() > 0) {
+				return;
+			}
+			MccVO curMcc = p.getMcc_code();
+			
+			List<BenefitVO> bvo = brep.findByPay_id(p.getPay_id());
+			
+			bvo.forEach(b -> {
+				if(b.getMcc_code().equals(curMcc.getMcc_code())) {
+					p.setBenefit_amount((int)Math.floor(p.getPay_amount()*b.getBenefit_pct()));
+					prep.save(p);
+				}
+			});
+		});
 	}
 	
 	public static java.util.Date getRandomDate(java.util.Date start, java.util.Date end) {
@@ -130,6 +124,11 @@ public class PaymentTest {
 	    // end가 현재 시간보다 이후이면, end를 현재 시간으로 설정
 	    if (end.after(now)) {
 	        end = now;
+	        if(end.after(start)) {
+	        	
+	        } else {
+	        	return null;
+	        }
 	    }
 
 	    // start와 end 사이에서 랜덤 날짜 생성
@@ -148,18 +147,22 @@ public class PaymentTest {
 	    cal.set(Calendar.MINUTE, ThreadLocalRandom.current().nextInt(60)); // 분
 	    cal.set(Calendar.SECOND, ThreadLocalRandom.current().nextInt(60)); // 초
 
-	    // 생성된 랜덤 날짜가 현재로부터 2년 이내인지 확인
+	    // 생성된 랜덤 날짜가 현재로부터 4년 이내인지 확인
 	    cal = Calendar.getInstance();
 	    cal.setTime(now);
-	    cal.add(Calendar.YEAR, -2); // 2년 전
-	    java.util.Date twoYearsAgo = cal.getTime(); // 현재로부터 2년 전
-	    if (randomDate.before(twoYearsAgo)) {
-	        return null; // 생성된 랜덤 날짜가 현재로부터 2년 이전이면, null 반환
+	    cal.add(Calendar.YEAR, -4); // 4년 전
+	    java.util.Date fourYearsAgo = cal.getTime(); // 현재로부터 4년 전
+	    if (randomDate.before(fourYearsAgo)) {
+	        return null; // 생성된 랜덤 날짜가 현재로부터 4년 이전이면, null 반환
 	    }
 
 	    // 생성된 랜덤 날짜 반환
 	    return randomDate;
 	}
+	
+	
+	
+	
 
 
 	
