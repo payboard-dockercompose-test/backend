@@ -122,6 +122,9 @@ public class CardRegInfoTest {
 			
 			Date cal = c1.getCust_birth();
 			
+			
+			
+			
 			LocalDate birthDate = LocalDate.parse(cal.toString());
 			LocalDate startDate = birthDate.plusYears(19);
 			LocalDate today = LocalDate.now();
