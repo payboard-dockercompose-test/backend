@@ -6,6 +6,6 @@ import com.project.cardvisor.vo.CurrencyVO;
 
 
 
-public interface CurrencyRepository extends CrudRepository<CurrencyVO, String>{
+public interface CurrencyRepository extends CrudRepository<CurrencyVO, Integer>{
 
 }
