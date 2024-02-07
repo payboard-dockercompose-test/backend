@@ -1,6 +1,5 @@
 package com.project.cardvisor.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.project.cardvisor.repo.CustomerRepository;
@@ -11,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-
 public class CustClusterService {
 
-	@Autowired
-    CustomerRepository crepo;
+    private final CustomerRepository crepo;
+
+    public CustClusterService(CustomerRepository customerRepository) {
+        this.crepo = customerRepository;
+    }
 
     public Map<String, Long> getGenderRatio() {
         List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
@@ -24,15 +25,8 @@ public class CustClusterService {
 
         Map<String, Long> genderRatio = new HashMap<>();
         genderRatio.put("남성", maleCount);
-        
         genderRatio.put("여성", femaleCount);
 
         return genderRatio;
-    }
-    
-    public int CustomerTotalCount() {
-    	List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
-    	int CustomerCount = customers.size();
-    	return CustomerCount;
     }
 }
