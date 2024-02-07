@@ -18,7 +18,7 @@ jobs:
         path: ./backend
         token: ${{ secrets.REPO_PAT }}
         
-    - name: 'Build backend with Gradle'
+    - name: 'Mk yml'
       run: | 
         touch ./src/main/resources/application.yml
         echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
@@ -32,10 +32,15 @@ jobs:
         distribution: 'adopt'
         
     - name: 'Build backend with Gradle'
-      run: chmod +x ./gradlew && ./gradlew build --scan --console=plain
+      run: chmod +x ./gradlew && ./gradlew build -x test
       env:
-          CI: "false"  
+          CI: "false"
       working-directory: ./backend/CardVisor
+        
+    # - name: 'Gradle build'
+    #   run: ./backend/CardVisor/gradlew clean build
+    #   env:
+    #     CI: "false"
     
     # React build NODE
     - name: 'Checkout frontend repository'
@@ -64,6 +69,7 @@ jobs:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: pwd    
     - run: |
-        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f backend/.github/workflows/Dockerfile .
+        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f ./backend/.github/workflows/Dockerfile .
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest

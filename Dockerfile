@@ -1,7 +1,7 @@
 # Stage 1: Copy the React application
 FROM alpine as frontend-build
 WORKDIR /app
-COPY frontend/build/ ./
+COPY ../../frontend/build/ ./
 
 # Stage 2: Copy the Spring Boot application
 FROM alpine as backend-build
@@ -30,7 +30,7 @@ ENV LANG ko_KR.UTF-8
 ENV LANGUAGE ko_KR:ko  
 ENV LC_ALL ko_KR.UTF-8
 
-COPY --from=backend-build /app/*.jar /app/
+COPY --from=backend-build /app/CardVisor-0.0.1-SNAPSHOT.jar /app/
 COPY --from=frontend-build /app /var/www/html
 COPY ../../backend/.github/workflows/000-default.conf /etc/apache2/sites-available/
 COPY ../../backend/.github/workflows/start.sh /start.sh
