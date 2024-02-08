@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.cardvisor.repo.PaymentRepository;
+
+import com.project.cardvisor.service.CardReginfoService;
+
 import com.project.cardvisor.service.CustClusterService;
 import com.project.cardvisor.vo.CustomerVO;
 import com.project.cardvisor.vo.PaymentsVO;
@@ -22,12 +25,19 @@ import com.project.cardvisor.vo.PaymentsVO;
 @RequestMapping("/customer")
 public class CustClusterController {
 	
+
 	@Autowired
 	private CustClusterService cService;
 
 	public CustClusterController(CustClusterService cService) {
         this.cService = cService;
     }
+@Autowired
+ CustClusterService genderRatioService;
+
+@Autowired
+CardReginfoService cardreginfoservice;
+   
 
     @GetMapping("/genderRatio")
     public Map<String, Long> getGenderRatio() {

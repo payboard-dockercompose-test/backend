@@ -21,15 +21,9 @@ import com.project.cardvisor.vo.PaymentsVO;
 @Service
 public class CustClusterService {
 
-	@Autowired
-    private CustomerRepository crepo;
-	
-    @Autowired
-    private PaymentRepository prepo;
 
-    public CustClusterService(CustomerRepository customerRepository) {
-        this.crepo = customerRepository;
-    }
+	@Autowired
+    CustomerRepository crepo;
 
 
     //성별 조회
@@ -40,6 +34,7 @@ public class CustClusterService {
 
         Map<String, Long> genderRatio = new HashMap<>();
         genderRatio.put("남성", maleCount);
+        
         genderRatio.put("여성", femaleCount);
 
         return genderRatio;
@@ -128,3 +123,11 @@ public class CustClusterService {
     	}
       
   }
+
+    public int CustomerTotalCount() {
+    	List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
+    	int CustomerCount = customers.size();
+    	return CustomerCount;
+    }
+}
+
