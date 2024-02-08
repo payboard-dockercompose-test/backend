@@ -49,7 +49,7 @@ public class CurrencyTests {
 	@Value("${exchange-data}")
     String data ;
 	
-	//@Test 
+	//@Test x
 	void f2() {
 		 LocalDate currentDate = LocalDate.now();
 
@@ -88,7 +88,7 @@ ObjectMapper objectmapper = new ObjectMapper();
    	 LocalDate currentDate = LocalDate.now();
 
      // Calculate the date 3 years ago
-   	LocalDate startdate = LocalDate.of(2023, 4, 17);
+   	LocalDate startdate = LocalDate.of(2024, 2, 7);
 
      // Loop through the days from 3 years ago until the current date
  
