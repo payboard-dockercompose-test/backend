@@ -2,6 +2,7 @@ package com.project.cardvisor.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.project.cardvisor.repo.CardListRepository;
@@ -10,6 +11,7 @@ import com.project.cardvisor.repo.CardListRepository;
 public class CardClusterService {
 	
 	private final CardListRepository clrepo;
+	
 	
 	public CardClusterService(CardListRepository clrepo) {
 		this.clrepo = clrepo;
