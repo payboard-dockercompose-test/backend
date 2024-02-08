@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.cardvisor.service.CardReginfoService;
 import com.project.cardvisor.service.CustClusterService;
+import com.project.cardvisor.service.PaymentsService;
 
 @RestController
 @RequestMapping("/main")
@@ -16,7 +17,8 @@ public class MainController {
 
 	@Autowired
 	CardReginfoService cardreginfoservice;
-	
+	@Autowired
+	PaymentsService paymentservice;
 	
 	
 	
@@ -37,8 +39,30 @@ public class MainController {
     	}
     
     @GetMapping("/totalAmount")
-    public int TotalAmountPayments() {
-    	
-    	return 0;
+    public Long TotalAmountPayments() {
+    	Long amount2 = paymentservice.TotalAmountPayments(); 
+        System.out.println("amount2"+amount2);
+    	return amount2;
+    }
+    
+    @GetMapping("/lastMonthTotalAmount")
+    public Long LastMonthTotalAmountPayments() {
+     	Long totalamount = paymentservice.LastMonthTotalAmountPayments();
+    System.out.println("totalamount"+totalamount);
+    	return totalamount;
+    }
+    
+    @GetMapping("/abroadTotalAmount")
+    public Long AbroadTotalAmountPayments() {
+    	Long amount2 = paymentservice.AbroadTotalAmountPayments(); 
+        System.out.println("Abroadamount2"+amount2);
+    	return amount2;
+    }
+    
+    @GetMapping("/abroadLastMonthTotalAmount")
+    public Long AbroadLastMonthTotalAmountPayments() {
+     	Long totalamount = paymentservice.AbroadLastMonthTotalAmountPayments();
+    System.out.println("Abroadtotalamount"+totalamount);
+    	return totalamount;
     }
 }
