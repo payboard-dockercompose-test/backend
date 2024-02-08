@@ -11,9 +11,29 @@ public class PaymentsService {
 	@Autowired
 	PaymentRepository payrepo;
 	
-	public int TotalAmountPayments() {
+	public Long TotalAmountPayments() {
 		
-		return 0;
+		Long amount = payrepo.TotalAmountPayments();
+		return amount;
 	}
+public Long LastMonthTotalAmountPayments() {
+		
+	Long amount1 = payrepo.TotalAmountPayments();
+	Long amount = payrepo.LastMonthTotalAmountPayments(); 
+	Long totalamount= amount1- amount;
+	System.out.println("total:"+totalamount);
+		return totalamount;
+	}
+public Long AbroadTotalAmountPayments() {
+	Long amount =payrepo.AbroadTotalAmountPayments();
+	return amount;
+}
+
+public Long AbroadLastMonthTotalAmountPayments() {
+	Long amount = payrepo.AbroadLastMonthTotalAmountPayments();
+	Long amount1 = payrepo.AbroadTotalAmountPayments();
+	
+	return amount1-amount;
+}
 	
 }

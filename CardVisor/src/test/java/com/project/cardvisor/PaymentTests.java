@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.project.cardvisor.repo.BenefitRepository;
 import com.project.cardvisor.repo.CardBenefitRepository;
@@ -20,6 +21,7 @@ import com.project.cardvisor.repo.CardRegRepository;
 import com.project.cardvisor.repo.CustomerRepository;
 import com.project.cardvisor.repo.MccCodeRepository;
 import com.project.cardvisor.repo.PaymentRepository;
+import com.project.cardvisor.service.PaymentsService;
 import com.project.cardvisor.vo.BenefitVO;
 import com.project.cardvisor.vo.CardRegInfoVO;
 import com.project.cardvisor.vo.MccVO;
@@ -52,6 +54,24 @@ public class PaymentTests {
 	@Autowired
 	BenefitRepository brep;
 	
+	@Autowired
+	PaymentsService paymentservice;
+	
+	
+	@Test
+	public void f3() {
+		  
+		
+	 	Long amount= paymentservice.AbroadTotalAmountPayments();
+    	Long amount1 = paymentservice.AbroadLastMonthTotalAmountPayments(); 
+    	Long totalamount= amount1- amount;
+    	System.out.println("amount1:"+amount1);
+    	System.out.println("amount:"+amount);
+    	System.out.println("total:"+totalamount);
+    
+	}
+	
+	//@Test
 	public void f1() {
 		
 		//고객 리스트
@@ -98,7 +118,7 @@ public class PaymentTests {
 		}
 	}
 	
-	
+	//@Test
 	public void f2() {
 		prep.findAll().forEach(p -> {
 			
