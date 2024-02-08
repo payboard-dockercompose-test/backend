@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.project.cardvisor.repo.BenefitRepository;
 import com.project.cardvisor.repo.CardBenefitRepository;
@@ -23,6 +24,7 @@ import com.project.cardvisor.repo.CurrencyRepository;
 import com.project.cardvisor.repo.CustomerRepository;
 import com.project.cardvisor.repo.MccCodeRepository;
 import com.project.cardvisor.repo.PaymentRepository;
+import com.project.cardvisor.service.PaymentsService;
 import com.project.cardvisor.vo.BenefitVO;
 import com.project.cardvisor.vo.CardRegInfoVO;
 import com.project.cardvisor.vo.CurrencyVO;
@@ -57,6 +59,7 @@ public class PaymentTests {
 	BenefitRepository brep;
 	
 	@Autowired
+
 	CurrencyRepository currrep;
 	
 	//@Test
@@ -234,7 +237,7 @@ public class PaymentTests {
 		}
 	}
 	
-	
+	//@Test
 	public void f2() {
 		prep.findAll().forEach(p -> {
 			
