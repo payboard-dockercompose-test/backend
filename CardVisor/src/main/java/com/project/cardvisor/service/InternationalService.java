@@ -25,6 +25,7 @@ public class InternationalService {
         return payrep.selectDiffPaymentThisYearAndLastYear(month);
     }
 
+	//올해 건수가 제일 많은 나라 (순위 리스트업)
 	public List<Map<String, Object>> getHighestOrderPayment() {
 		return payrep.selectHighestOrderPayment();
 	}
