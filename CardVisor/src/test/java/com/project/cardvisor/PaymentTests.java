@@ -52,6 +52,7 @@ public class PaymentTests {
 	@Autowired
 	BenefitRepository brep;
 	
+	
 	public void f1() {
 		
 		//고객 리스트
