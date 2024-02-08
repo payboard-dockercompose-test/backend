@@ -12,6 +12,7 @@ import com.project.cardvisor.vo.CurrencyVO;
 
 
 public interface CurrencyRepository extends CrudRepository<CurrencyVO, Integer>{
+
 	@Query(value = "select * from currency c where c.currency_date = :currency_date",nativeQuery = true)
 	List<CurrencyVO> findByCurrency_date(@Param("currency_date") Timestamp currency_date);
 }
