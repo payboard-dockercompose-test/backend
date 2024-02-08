@@ -32,4 +32,5 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 			+ "WHERE currency_code != 'KRW' and pay_date >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH + INTERVAL 1 DAY, '%Y-%m-01 00:00:00') "
 			+ "AND pay_date <= DATE_FORMAT(NOW() - INTERVAL 1 MONTH , '%Y-%m-%d %H:%i:%s')",nativeQuery = true)
 	 Long AbroadLastMonthTotalAmountPayments();
+
 }
