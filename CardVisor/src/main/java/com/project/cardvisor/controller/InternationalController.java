@@ -1,7 +1,11 @@
 package com.project.cardvisor.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.cardvisor.service.InternationalService;
@@ -24,15 +28,27 @@ public class InternationalController {
 	}
 	
 	//전년 월 대비 올해 월 증감
+	@GetMapping("/comparePaymentSamePeriod")
+	public Long getComparePaymentSamePeriod(@RequestParam(name = "month", required = false) Integer month) {
+		month = 2;
+		return iservice.getComparePaymentSamePeriod(month);
+	}
 	
+	//올해 건수가 제일 많은 나라 (순위 리스트업)
+	@GetMapping("/highestOrderPayment")
+	public List<Map<String, Object>> getHighestOrderPayment() {
+		List<Map<String, Object>> result = iservice.getHighestOrderPayment();
+		//System.out.println(">>>>>>>>>>>>"+ result.size());
+		return result;
+	}
 }
 
 
 /*
 해야 할 일
-- 해외 토탈 결제 금액
+- 해외 토탈 결제 금액  --> 올해로 수정해야함
 - 전년 월 대비 올해 월 증감 (+/-)
-- 건수가 제일 많은 나라 (순위 리스트업)
+- 올해 건수가 제일 많은 나라 (순위 리스트업)
 
 ---------------------------------------------------------------
 
