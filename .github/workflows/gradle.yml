@@ -32,7 +32,7 @@ jobs:
         distribution: 'adopt'
         
     - name: 'Build backend with Gradle'
-      run: chmod +x ./gradlew && ./gradlew build -x test
+      run: chmod +x ./gradlew && ./gradlew clean build -x test
       env:
           CI: "false"
       working-directory: ./backend/CardVisor
@@ -47,6 +47,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CardVisor/FrontEnd
+        ref: 'hwasoo'
         path: ./frontend
         token: ${{ secrets.REPO_PAT }}
 
