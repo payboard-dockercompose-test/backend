@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.project.cardvisor.vo.BenefitVO;
 
+import jakarta.persistence.Tuple;
+
 public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 	
 	@Query(value = "select * from benefit b "
@@ -25,4 +27,24 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "group by mcc_code", nativeQuery = true)
 	List<BenefitVO> findByPay_id(@Param("pay_id") String pay_id);
 	
+	@Query(value = "SELECT m.ctg_name, SUM(p.benefit_amount) benefit_amount_sum, b.benefit_id, b.benefit_detail, b.benefit_pct, cl.card_name, b.interest_id, b.mcc_code "
+			+ "FROM payments p "
+			+ "JOIN card_reg_info cri ON p.reg_id = cri.reg_id "
+			+ "JOIN card_list cl ON cri.card_type = cl.card_type "
+			+ "JOIN card_benefit cb ON cl.card_type = cb.card_type "
+			+ "JOIN benefit b ON cb.benefit_id = b.benefit_id "
+			+ "JOIN mcc m ON p.mcc_code = m.mcc_code "
+			+ "WHERE p.pay_date < CURRENT_TIMESTAMP() "
+			+ "AND p.benefit_amount > 0 "
+			+ "GROUP BY b.benefit_id "
+			+ "ORDER BY b.mcc_code asc,SUM(p.benefit_amount) desc, b.benefit_id asc", nativeQuery = true)
+	List<Tuple> findByMCC();
+	
+	@Query(value = "SELECT DISTINCT(m.ctg_name) "
+			+ "FROM payments p join mcc m "
+			+ "on p.mcc_code = m.mcc_code "
+			+ "WHERE p.benefit_amount > 0 "
+			+ "AND p.pay_date < CURRENT_TIMESTAMP() "
+			+ "ORDER BY p.mcc_code asc;", nativeQuery = true)
+	List<String> findDistinctMCC();
 }
