@@ -27,16 +27,16 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "group by mcc_code", nativeQuery = true)
 	List<BenefitVO> findByPay_id(@Param("pay_id") String pay_id);
 	
-	@Query(value = "SELECT m.ctg_name, SUM(p.benefit_amount) benefit_amount_sum, b.benefit_id, b.benefit_detail, b.benefit_pct, cl.card_name, b.interest_id, b.mcc_code "
-			+ "FROM payments p "
-			+ "JOIN card_reg_info cri ON p.reg_id = cri.reg_id "
-			+ "JOIN card_list cl ON cri.card_type = cl.card_type "
-			+ "JOIN card_benefit cb ON cl.card_type = cb.card_type "
-			+ "JOIN benefit b ON cb.benefit_id = b.benefit_id "
-			+ "JOIN mcc m ON p.mcc_code = m.mcc_code "
-			+ "WHERE p.pay_date < CURRENT_TIMESTAMP() "
-			+ "AND p.benefit_amount > 0 "
-			+ "GROUP BY b.benefit_id "
+	@Query(value = "SELECT b.mcc_code, m.ctg_name, b.benefit_detail,SUM(p.benefit_amount) benefit_amount_sum, b.benefit_id,  b.benefit_pct, cl.card_name, b.interest_id\r\n"
+			+ "FROM payments p\r\n"
+			+ "JOIN card_reg_info cri ON p.reg_id = cri.reg_id\r\n"
+			+ "JOIN card_list cl ON cri.card_type = cl.card_type\r\n"
+			+ "JOIN card_benefit cb ON cl.card_type = cb.card_type\r\n"
+			+ "JOIN benefit b ON cb.benefit_id = b.benefit_id\r\n"
+			+ "JOIN mcc m ON b.mcc_code = m.mcc_code  \r\n"
+			+ "WHERE p.pay_date < CURRENT_TIMESTAMP()\r\n"
+			+ "AND p.benefit_amount > 0    \r\n"
+			+ "GROUP BY b.benefit_id\r\n"
 			+ "ORDER BY b.mcc_code asc,SUM(p.benefit_amount) desc, b.benefit_id asc", nativeQuery = true)
 	List<Tuple> findByMCC();
 	
