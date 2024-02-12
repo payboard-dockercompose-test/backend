@@ -1,9 +1,11 @@
 package com.project.cardvisor.vo;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -52,5 +54,10 @@ public class PaymentsVO {
 	private MccVO mcc_code;
 	
 	private int benefit_amount;
-
+	
+	@Nullable
+	private int inserted_benefit_id;
+	
+	@Nullable
+	private Date data_insert_date;
 }

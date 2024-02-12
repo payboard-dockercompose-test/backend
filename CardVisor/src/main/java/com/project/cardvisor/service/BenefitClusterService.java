@@ -83,7 +83,21 @@ public class BenefitClusterService {
 
 			benefitTop.add(categoryMap);
 		}
-		
+
+		Collections.sort(benefitTop, new Comparator<LinkedHashMap<String, Object>>() {
+
+			@Override
+			public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
+
+				int compare = ((Integer) o2.get("value")).compareTo((Integer) o1.get("value"));
+				if (compare != 0) {
+					return compare;
+				}
+
+				return 0;
+			}
+		});
+
 		// bottom 5
 		List<LinkedHashMap<String, Object>> benefitBottom = new ArrayList<>();
 		Collections.sort(benefitDtos, new Comparator<BenefitDTO>() {
@@ -91,14 +105,14 @@ public class BenefitClusterService {
 			@Override
 			public int compare(BenefitDTO o1, BenefitDTO o2) {
 				int mccComparison = o1.getMcc_code().compareTo(o2.getMcc_code());
-				if(mccComparison != 0) {
+				if (mccComparison != 0) {
 					return mccComparison;
 				} else {
 					return Integer.compare(o1.getBenefit_amount_sum(), o2.getBenefit_amount_sum());
 				}
-				
+
 			}
-		
+
 		});
 		for (String name : mcclist) {
 			LinkedHashMap<String, Object> categoryMap = new LinkedHashMap<>();
@@ -139,6 +153,20 @@ public class BenefitClusterService {
 
 			benefitBottom.add(categoryMap);
 		}
+		
+		Collections.sort(benefitBottom, new Comparator<LinkedHashMap<String, Object>>() {
+
+			@Override
+			public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
+
+				int compare = ((Integer) o2.get("value")).compareTo((Integer) o1.get("value"));
+				if (compare != 0) {
+					return compare;
+				}
+
+				return 0;
+			}
+		});
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("top", benefitTop);
@@ -146,7 +174,6 @@ public class BenefitClusterService {
 		return result;
 	}
 
-	
 	// 전체 끌어오는 로직
 	public List<LinkedHashMap<String, Object>> benefitAllByMCC() {
 		List<String> mcclist = brep.findDistinctMCC();
@@ -195,7 +222,6 @@ public class BenefitClusterService {
 		return benefitList;
 	}
 
-	
 	public LinkedList<Object> benefitTreeMapByMCC() {
 
 		List<String> mcclist = brep.findDistinctMCC();
@@ -223,6 +249,7 @@ public class BenefitClusterService {
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
+		
 		benefitDtos.forEach(b -> {
 			String curCtg = (String) b.getCtg_name();
 			((ArrayList<Object>) root.get("children")).forEach(i -> {
