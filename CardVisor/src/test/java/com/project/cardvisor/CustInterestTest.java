@@ -39,7 +39,7 @@ public class CustInterestTest {
 			CustInterestVO vo = CustInterestVO.builder()
 					.id(compoId)
 					.build();
-			custInter.save(vo);
+			/* custInter.save(vo); */
 		});
 	}
 	

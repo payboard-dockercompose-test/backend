@@ -29,13 +29,11 @@ import lombok.ToString;
 public class CurrencyVO {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int currency_id;
+	private int currencyId;
 	
-	private String currency_code;
-	
-	private String currency_nation;
-	private double currency_rate;
-	
-	
-	private Timestamp currency_date;
+	private String currencyCode;
+	private String currencyFlagUrl;
+	private String currencyNation;
+	private double currencyRate;
+	private Timestamp currencyDate;
 }

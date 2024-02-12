@@ -1,11 +1,15 @@
 package com.project.cardvisor;
 
+import static org.hamcrest.CoreMatchers.is;
+
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -59,15 +63,32 @@ public class PaymentTests {
 	BenefitRepository brep;
 	
 	@Autowired
-
 	CurrencyRepository currrep;
+	
+	@Autowired
+	PaymentsService pays;
+	@Test
+	public void f998() {
+	Double d = pays.TotalIncrese();
+	int a = pays.perMonthTotalAmount();
+	System.out.println(a);
+	 DecimalFormat df = new DecimalFormat("0.0");
+
+     // Format the double value using DecimalFormat
+     String formattedValue = df.format(d);
+     System.out.println(formattedValue);
+     double parsedValue = Double.parseDouble(formattedValue);
+     System.out.println(parsedValue);
+   
+		}
 	
 	//@Test
 	public void f999() {
 		CurrencyVO curr=currrep.findById(1).orElse(null);
 		System.out.println(curr.toString());
-		List<CurrencyVO> currList = currrep.findByCurrency_date(curr.getCurrency_date());
+		List<CurrencyVO> currList = currrep.findByCurrency_date(curr.getCurrencyDate());
 		System.out.println(currList.toString());
+		
 	}
 	
 	//@Test
@@ -157,7 +178,7 @@ public class PaymentTests {
 		    			.filter(curr->{
 //		    				System.out.println(curr.getCurrency_code().toString()+"===========" + currencyCode[curridx]);
 //		    				System.out.println(curr.getCurrency_code().equals(currencyCode[curridx]));
-		    				return curr.getCurrency_code().equals(currencyCode[curridx]);
+		    				return curr.getCurrencyCode().equals(currencyCode[curridx]);
 		    				})
 		    			.findFirst().get();
 		    	
@@ -169,7 +190,7 @@ public class PaymentTests {
 		    	        .reg_id(clist.get(regidx))
 		    	        .nation(nation)
 		    	        .currency_code(currencyCode[curridx])		    	        
-		    	        .currency_rate(currency.getCurrency_rate())
+		    	        .currency_rate(currency.getCurrencyRate())
 		    	        .pay_amount(amountidx * 100)
 		    	        .pay_date(timestamp)
 		    	        .pay_store(업종[mccidx])
