@@ -239,10 +239,7 @@ public class PaymentTests {
 	//@Test
 	public void f2() {
 		prep.findAll().forEach(p -> {
-			
-			if(p.getBenefitAmount() > 0) {
-				return;
-			}
+
 			MccVO curMcc = p.getMccCode();
 			
 			List<BenefitVO> bvo = brep.findByPay_id(p.getPay_id());
