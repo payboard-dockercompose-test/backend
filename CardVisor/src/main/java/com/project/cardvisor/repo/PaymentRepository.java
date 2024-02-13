@@ -40,10 +40,10 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 
 	/////// 은경 ///////
 	//올해 해외 토탈 결제 금액
-	@Query("SELECT SUM(p.pay_amount * p.currency_rate)"
+	@Query("SELECT SUM(p.payAmount * p.currencyRate)"
 			+ " FROM PaymentsVO p"
-			+ " WHERE p.currency_code != 'KRW'"
-			+ " AND YEAR(p.pay_date) = YEAR(CURRENT_DATE)")
+			+ " WHERE p.currencyCode != 'KRW'"
+			+ " AND YEAR(p.payDate) = YEAR(CURRENT_DATE)")
 	Long selectTotalOverseasPayment();
 	
 	//전년 월 대비 올해 월 증감 (+/-)
@@ -68,8 +68,8 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 
 	//올해 결제 건수가 제일 많은 나라 (순위 리스트업)
 	@Query(value ="SELECT COUNT(P.CURRENCY_CODE) AS PAYMENT_CNT, P.CURRENCY_CODE, C.CURRENCY_NATION, SUM(P.PAY_AMOUNT *P.CURRENCY_RATE) as TOTAL_PAYMENT"
-			+ " FROM PAYMENTS P"
-			+ " JOIN CURRENCY C ON (P.CURRENCY_CODE = C.CURRENCY_CODE)"
+			+ " FROM payments P"
+			+ " JOIN currency C ON (P.CURRENCY_CODE = C.CURRENCY_CODE)"
 			+ " WHERE P.CURRENCY_CODE != 'KRW'"
 			+ " AND YEAR(P.PAY_DATE) = YEAR(CURRENT_DATE)"
 			+ " GROUP BY P.CURRENCY_CODE, C.CURRENCY_NATION"
