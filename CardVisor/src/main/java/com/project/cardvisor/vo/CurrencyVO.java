@@ -30,7 +30,6 @@ public class CurrencyVO {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int currencyId;
-
 	private String currencyCode;
 	private String currencyFlagUrl;
 	private String currencyNation;
