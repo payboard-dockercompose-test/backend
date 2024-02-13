@@ -25,8 +25,8 @@ public class CustClusterService {
     //성별 조회
     public Map<String, Long> getGenderRatio() {
         List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
-        long maleCount = customers.stream().filter(customer -> customer.getCust_gender() == '남').count();
-        long femaleCount = customers.stream().filter(customer -> customer.getCust_gender() == '여').count();
+        long maleCount = customers.stream().filter(customer -> customer.getCustGender() == '남').count();
+        long femaleCount = customers.stream().filter(customer -> customer.getCustGender() == '여').count();
         Map<String, Long> genderRatio = new HashMap<>();
         genderRatio.put("남성", maleCount);
         
@@ -39,7 +39,7 @@ public class CustClusterService {
         Iterable<CustomerVO> customers = crepo.findAll();
         Map<String, Integer> ageGroupCount = new HashMap<>();
         for (CustomerVO customer : customers) {
-          String ageGroup = calculateAgeGroup(customer.getCust_birth());
+          String ageGroup = calculateAgeGroup(customer.getCustBirth());
           if (ageGroupCount.containsKey(ageGroup)) {
             ageGroupCount.put(ageGroup, ageGroupCount.get(ageGroup) + 1);
           } else {
@@ -83,8 +83,8 @@ public class CustClusterService {
             List<PaymentsVO> payments = (List<PaymentsVO>) prepo.findAll();
             Map<String, List<Long>> salaryToPayAmounts = new HashMap<>();
             for (PaymentsVO payment : payments) {
-                String custSalary = payment.getReg_id().getCust_id().getCust_salary();
-                long payAmount = payment.getPay_amount();
+                String custSalary = payment.getRegId().getCustId().getCustSalary();
+                long payAmount = payment.getPayAmount();
                 if (!salaryToPayAmounts.containsKey(custSalary)) {
                     salaryToPayAmounts.put(custSalary, new ArrayList<>());
                 }

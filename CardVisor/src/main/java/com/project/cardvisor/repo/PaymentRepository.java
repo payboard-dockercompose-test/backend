@@ -40,10 +40,10 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 	
 	/////// 은경 ///////
 	//올해 해외 토탈 결제 금액
-	@Query("SELECT SUM(p.pay_amount)"
+	@Query("SELECT SUM(p.payAmount)"
 			+ " FROM PaymentsVO p"
-			+ " WHERE p.currency_code != 'KRW'"
-			+ " AND YEAR(p.pay_date) = YEAR(CURRENT_DATE)")
+			+ " WHERE p.currencyCode != 'KRW'"
+			+ " AND YEAR(p.payDate) = YEAR(CURRENT_DATE)")
 	Long selectTotalOverseasPayment();
 	
 	//전년 월 대비 올해 월 증감 (+/-)
