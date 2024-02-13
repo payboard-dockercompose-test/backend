@@ -21,20 +21,21 @@ public class InternationalController {
 
 	final InternationalService iservice;
 	
-	//해외 토탈 결제 금액
+	//올해 해외 토탈 결제 금액
 	@GetMapping("/totalPayment")
 	public Long getTotalpayment() {
 		return iservice.getTotalpayment();
 	}
-	
+
 	//전년 월 대비 올해 월 증감
 	@GetMapping("/comparePaymentSamePeriod")
-	public Long getComparePaymentSamePeriod(@RequestParam(name = "month", required = false) Integer month) {
-		month = 2;
+	public Map<String, Object> getComparePaymentSamePeriod(@RequestParam(name = "month", required = false) Integer month) {
+		//month = 2;
+		System.out.println(">>>>>>>>>>>>>>>>>"+ month);
 		return iservice.getComparePaymentSamePeriod(month);
 	}
 	
-	//올해 건수가 제일 많은 나라 (순위 리스트업)
+	//올해 결제 건수가 제일 많은 나라 (순위 리스트업)
 	@GetMapping("/highestOrderPayment")
 	public List<Map<String, Object>> getHighestOrderPayment() {
 		List<Map<String, Object>> result = iservice.getHighestOrderPayment();
