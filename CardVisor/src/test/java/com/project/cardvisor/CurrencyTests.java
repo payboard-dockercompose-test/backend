@@ -135,9 +135,9 @@ ObjectMapper objectmapper = new ObjectMapper();
                         System.out.println(timestamp);
 						
 						  CurrencyVO currency = CurrencyVO.builder()
-						  .currency_code(currency_code) .currency_nation(currency_nation)
-						  .currency_date(timestamp)
-						  .currency_rate(currency_rate) .build();
+						  .currencyCode(currency_code) .currencyNation(currency_nation)
+						  .currencyDate(timestamp)
+						  .currencyRate(currency_rate) .build();
 						 crepo.save(currency);
                             	
                           
