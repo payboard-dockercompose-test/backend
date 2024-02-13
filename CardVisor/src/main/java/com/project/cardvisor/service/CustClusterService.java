@@ -1,8 +1,12 @@
+
 package com.project.cardvisor.service;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
+
+
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -17,17 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.project.cardvisor.repo.CardRegInfoRepository;
+
 import com.project.cardvisor.repo.CustomerRepository;
 import com.project.cardvisor.repo.PaymentRepository;
 import com.project.cardvisor.vo.CustomerVO;
 import com.project.cardvisor.vo.PaymentsVO;
-
 @Service
 public class CustClusterService {
-
-
-	@Autowired
+    @Autowired
     CustomerRepository crepo;
+
 	
 	@Autowired
 	PaymentRepository prepo;
@@ -36,17 +39,16 @@ public class CustClusterService {
 	CardRegInfoRepository crirepo;
 
 
+
     //성별 조회
     public Map<String, Long> getGenderRatio() {
         List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
-        long maleCount = customers.stream().filter(customer -> customer.getCust_gender() == '남').count();
-        long femaleCount = customers.stream().filter(customer -> customer.getCust_gender() == '여').count();
-
+        long maleCount = customers.stream().filter(customer -> customer.getCustGender() == '남').count();
+        long femaleCount = customers.stream().filter(customer -> customer.getCustGender() == '여').count();
         Map<String, Long> genderRatio = new HashMap<>();
         genderRatio.put("남성", maleCount);
         
         genderRatio.put("여성", femaleCount);
-
         return genderRatio;
     }
     
@@ -63,28 +65,32 @@ public class CustClusterService {
     public Map<String, Integer> getAgeGroupCount() {
         Iterable<CustomerVO> customers = crepo.findAll();
         Map<String, Integer> ageGroupCount = new HashMap<>();
+
         int totalCustomers = 0;
 
+
         for (CustomerVO customer : customers) {
+
             totalCustomers++;
-            String ageGroup = calculateAgeGroup(customer.getCust_birth());
+            String ageGroup = calculateAgeGroup(customer.getCustBirth());
             if (ageGroupCount.containsKey(ageGroup)) {
                 ageGroupCount.put(ageGroup, ageGroupCount.get(ageGroup) + 1);
             } else {
                 ageGroupCount.put(ageGroup, 1);
             }
+
         }
 
+
         ageGroupCount.put("all", totalCustomers);
+
         return ageGroupCount;
     }
-
       private String calculateAgeGroup(Date birthDate) {
-    	//java.sql.Date 인스턴스를 java.util.Date 인스턴스로 변환한 후 toInstant() 메소드를 호출
+        //java.sql.Date 인스턴스를 java.util.Date 인스턴스로 변환한 후 toInstant() 메소드를 호출
         LocalDate localBirthDate = new java.util.Date(birthDate.getTime()).toInstant()
                 .atZone(ZoneId.systemDefault()).toLocalDate();
         int age = Period.between(localBirthDate, LocalDate.now()).getYears();
-
         // 연령대 계산 로직
         if (age >= 20 && age < 30) {
             return "20대";
@@ -100,7 +106,6 @@ public class CustClusterService {
             return "70대 이상";
         }
       }
-
       //직업별 조회
       public List<Map<String, Object>> findAllJobTypes() {
           return crepo.findAllJobTypes();
@@ -108,17 +113,18 @@ public class CustClusterService {
       
       //연봉별 조회 
       public List<Object[]> findAllCustSalary() {
-    	  return crepo.findAllCustSalary();
+          return crepo.findAllCustSalary();
       }
       
       //payment에서 custSalary,payAmount만 출력
       public List<Object[]> getAveragePayAmountBySalary() {
+
     	    List<PaymentsVO> payments = (List<PaymentsVO>) prepo.findAll();
     	    Map<String, List<Long>> salaryToPayAmounts = new HashMap<>();
 
     	    for (PaymentsVO payment : payments) {
-    	        String custSalary = payment.getReg_id().getCust_id().getCust_salary();
-    	        long payAmount = payment.getPay_amount();
+    	        String custSalary = payment.getRegId().getCustId().getCustSalary();
+    	        long payAmount = payment.getPayAmount();
 
     	        if (!salaryToPayAmounts.containsKey(custSalary)) {
     	            salaryToPayAmounts.put(custSalary, new ArrayList<>());
@@ -146,10 +152,11 @@ public class CustClusterService {
     	    return salaryToAveragePayAmount;
     	}
 
+
     public int CustomerTotalCount() {
-    	List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
-    	int CustomerCount = customers.size();
-    	return CustomerCount;
+        List<CustomerVO> customers = (List<CustomerVO>) crepo.findAll();
+        int CustomerCount = customers.size();
+        return CustomerCount;
     }
     
     // 고객 수 조회
@@ -376,4 +383,5 @@ public class CustClusterService {
     
 
 }
+
 

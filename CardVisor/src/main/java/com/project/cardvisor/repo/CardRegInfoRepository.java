@@ -20,6 +20,7 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 			+ "WHERE reg_date < DATE_ADD(LAST_DAY(DATE_SUB(NOW(), INTERVAL 1 MONTH)), INTERVAL 1 DAY))",nativeQuery = true)
 	int addOnedaycustomer();
 	
+
 	
 	////지현
 	//성별(남,녀) 사용카드 상위 3개
@@ -58,6 +59,11 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 			+ "GROUP BY c.age_range, t.card_name) as subquery1 WHERE rn <= 3) as subquery2", nativeQuery = true)
 	List<Object[]> findTop3CardTypesByAgeRange();
 
+
+
+	@Query(value="select count(*) from card_reg_info",nativeQuery = true)
+	int totalcardregamount();
+	
 
 }
 

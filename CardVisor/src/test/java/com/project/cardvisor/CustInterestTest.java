@@ -33,13 +33,13 @@ public class CustInterestTest {
 			InterestVO interst = irepo.findById(id).orElse(null);
 			
 			CustInterestComposite compoId = CustInterestComposite.builder()
-					.cust_id(cust)
-					.interest_id(interst)
+					.custId(cust)
+					.interestId(interst)
 					.build();
 			CustInterestVO vo = CustInterestVO.builder()
 					.id(compoId)
 					.build();
-			custInter.save(vo);
+			/* custInter.save(vo); */
 		});
 	}
 	
