@@ -39,10 +39,10 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 	List<String> findTop3CardTypes();
 	
 	//최근 6개월간 카드 가입자
-	@Query("SELECT c.cust_gender AS custGender, " + "YEAR(r.reg_date) AS regYear, " + "MONTH(r.reg_date) AS regMonth, "
-			+ "COUNT(r.reg_id) AS regCount " + "FROM CardRegInfoVO r " + "JOIN r.cust_id c "
-			+ "WHERE r.reg_date >= :sixMonthsAgo AND r.reg_date < :lastMonth "
-			+ "GROUP BY c.cust_gender, regYear, regMonth")
+	@Query("SELECT c.custGender AS custGender, " + "YEAR(r.regDate) AS regYear, " + "MONTH(r.regDate) AS regMonth, "
+			+ "COUNT(r.regId) AS regCount " + "FROM CardRegInfoVO r " + "JOIN r.custId c "
+			+ "WHERE r.regDate >= :sixMonthsAgo AND r.regDate < :lastMonth "
+			+ "GROUP BY c.custGender, regYear, regMonth")
 	List<Object[]> countMonthlyRegistrationsByGender(@Param("sixMonthsAgo") LocalDate sixMonthsAgo,
 			@Param("lastMonth") LocalDate lastMonth);
 	

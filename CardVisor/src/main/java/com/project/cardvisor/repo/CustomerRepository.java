@@ -25,15 +25,15 @@ public interface CustomerRepository extends CrudRepository<CustomerVO, String> {
 	@Query("SELECT COUNT(c) FROM CustomerVO c")
     long getTotalCustomers();
 	//남성 고객 수
-    @Query("SELECT COUNT(c) FROM CustomerVO c WHERE c.cust_gender = '남'")
+    @Query("SELECT COUNT(c) FROM CustomerVO c WHERE c.custGender = '남'")
     long getMaleCustomers();
     //여성 고객 수
-    @Query("SELECT COUNT(c) FROM CustomerVO c WHERE c.cust_gender = '여'")
+    @Query("SELECT COUNT(c) FROM CustomerVO c WHERE c.custGender = '여'")
     long getFemaleCustomers();
     
 	//전체(남,여)평균 연령
-	@Query("SELECT CAST(c.cust_gender AS string), AVG(TIMESTAMPDIFF(YEAR, c.cust_birth, CURDATE())) FROM CustomerVO c GROUP BY c.cust_gender "
-			+ "UNION ALL " + "SELECT 'all', AVG(TIMESTAMPDIFF(YEAR, c.cust_birth, CURDATE())) FROM CustomerVO c")
+	@Query("SELECT CAST(c.custGender AS string), AVG(TIMESTAMPDIFF(YEAR, c.custBirth, CURDATE())) FROM CustomerVO c GROUP BY c.custGender "
+			+ "UNION ALL " + "SELECT 'all', AVG(TIMESTAMPDIFF(YEAR, c.custBirth, CURDATE())) FROM CustomerVO c")
 	List<Object[]> getAverageAge();
 	
 	//가장 많은 수의 고객을 가진 연봉 카테고리
