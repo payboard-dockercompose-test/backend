@@ -108,32 +108,6 @@ public class CustClusterController {
     }
 
 
-	@GetMapping("/genderRatio")
-	public Map<String, Long> getGenderRatio() {
-		return cService.getGenderRatio();
-	}
-
-	@GetMapping("/ageGroup")
-	public ResponseEntity<Map<String, Integer>> getAgeGroupCount() {
-		Map<String, Integer> ageGroupCount = cService.getAgeGroupCount();
-		return new ResponseEntity<>(ageGroupCount, HttpStatus.OK);
-	}
-
-	@GetMapping("/jobTypes")
-	public List<Map<String, Object>> getAllJobTypes() {
-		return cService.findAllJobTypes();
-	}
-
-	@GetMapping("/custSalary")
-	public List<Object[]> getAllCustSalary() {
-		return cService.findAllCustSalary();
-	}
-
-	@GetMapping("/amountBySalary")
-	public ResponseEntity<List<Object[]>> getAveragePayAmountBySalary() {
-		List<Object[]> averagePayAmountBySalary = cService.getAveragePayAmountBySalary();
-		return ResponseEntity.ok(averagePayAmountBySalary);
-	}
-
+	
 
 }

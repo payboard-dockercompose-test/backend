@@ -81,8 +81,8 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 	
 	////지현
 	//고객 성별에 따른 평균 소비금액
-	@Query("SELECT c.cust_gender, AVG(p.pay_amount) " + "FROM PaymentsVO p JOIN p.reg_id r JOIN r.cust_id c "
-			+ "GROUP BY c.cust_gender")
+	@Query("SELECT c.custGender, AVG(p.payAmount) " + "FROM PaymentsVO p JOIN p.regId r JOIN r.custId c "
+			+ "GROUP BY c.custGender")
 	List<Object[]> getAveragePaymentAmount();
 	
 	//고객 성별에 따른 상위 3개의 MCC
