@@ -18,4 +18,5 @@ public interface CustomerRepository extends CrudRepository<CustomerVO, String> {
 	@Query("SELECT cust_salary as custsalary, COUNT(*) as count FROM CustomerVO GROUP BY cust_salary")
 	List<Object[]> findAllCustSalary();
 
+	
 }
