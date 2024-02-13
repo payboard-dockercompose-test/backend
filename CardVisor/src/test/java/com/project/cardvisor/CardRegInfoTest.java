@@ -81,7 +81,7 @@ public class CardRegInfoTest {
 		return ThreadLocalRandom.current().nextLong(startMillis, endMillis);
 	}
 
-	@Test
+	//@Test
 	void f2() {
 		int count = cservice.addOnedaycustomer();
 		System.out.println(count);
@@ -169,4 +169,5 @@ public class CardRegInfoTest {
 		}
 
 	}
+
 }
