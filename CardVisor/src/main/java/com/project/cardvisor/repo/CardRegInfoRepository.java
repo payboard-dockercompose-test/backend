@@ -16,4 +16,7 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 			+ "WHERE reg_date < DATE_ADD(LAST_DAY(DATE_SUB(NOW(), INTERVAL 1 MONTH)), INTERVAL 1 DAY))",nativeQuery = true)
 	int addOnedaycustomer();
 	
+	@Query(value="select count(*) from card_reg_info",nativeQuery = true)
+	int totalcardregamount();
+	
 }

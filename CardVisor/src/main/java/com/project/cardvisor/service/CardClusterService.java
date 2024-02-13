@@ -1,6 +1,7 @@
 package com.project.cardvisor.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,10 @@ public class CardClusterService {
 	public List<String> getCardImg(){
 		
 		return null;
+	}
+	public List<Map<String,Object>> SelectTop5CardList(){
+		List<Map<String,Object>> top5 = clrepo.selectTop5CardList();
+		return top5;
 	}
 	
 	

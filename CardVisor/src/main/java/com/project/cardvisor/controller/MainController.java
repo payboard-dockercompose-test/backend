@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.cardvisor.service.CardClusterService;
 import com.project.cardvisor.service.CardReginfoService;
 import com.project.cardvisor.service.CurrencyService;
 import com.project.cardvisor.service.CustClusterService;
@@ -21,6 +22,8 @@ public class MainController {
 	@Autowired
 	 CustClusterService genderRatioService;
 
+	@Autowired
+	CardClusterService cardservice;
 	@Autowired
 	CardReginfoService cardreginfoservice;
 	@Autowired
@@ -142,6 +145,16 @@ public class MainController {
     @GetMapping("/selectWeektransaction")
     public int selectWeektransaction() {
     	int amount = paymentservice.selectWeektransaction();
+    	return amount;
+    }
+    @GetMapping("/selectTop5CardList")
+    public List<Map<String, Object>> SelectTop5CardList() {
+   	 List<Map<String, Object>> clist = cardservice.SelectTop5CardList();
+   	return clist;
+   }
+    @GetMapping("/totalCardRegAmount")
+	public int TotalCardRegAmount() {
+    	int amount = cardreginfoservice.totalcardregamount();
     	return amount;
     }
 }
