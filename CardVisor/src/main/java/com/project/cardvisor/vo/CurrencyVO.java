@@ -32,10 +32,8 @@ public class CurrencyVO {
 	private int currencyId;
 	
 	private String currencyCode;
-	
+	private String currencyFlagUrl;
 	private String currencyNation;
 	private double currencyRate;
-	
-	
 	private Timestamp currencyDate;
 }

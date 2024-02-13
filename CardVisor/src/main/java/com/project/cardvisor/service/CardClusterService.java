@@ -2,6 +2,7 @@ package com.project.cardvisor.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,10 @@ public class CardClusterService {
 		 return ResponseEntity.ok(cardList);
 		
 	
+	}
+	public List<Map<String,Object>> SelectTop5CardList(){
+		List<Map<String,Object>> top5 = clrepo.selectTop5CardList();
+		return top5;
 	}
 	
 	
