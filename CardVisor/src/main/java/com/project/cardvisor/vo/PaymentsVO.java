@@ -55,9 +55,7 @@ public class PaymentsVO {
 	
 	private int benefit_amount;
 	
-	@Nullable
-	private int inserted_benefit_id;
+	private int applied_benefit_id;
 	
-	@Nullable
 	private Date data_insert_date;
 }
