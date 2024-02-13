@@ -25,17 +25,14 @@ import lombok.ToString;
 
 @Entity
 
-@Table(name="currency")
+@Table(name = "currency")
 public class CurrencyVO {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int currency_id;
-	
-	private String currency_code;
-	
-	private String currency_nation;
-	private double currency_rate;
-	
-	
-	private Timestamp currency_date;
+	private int currencyId;
+	private String currencyCode;
+	private String currencyFlagUrl;
+	private String currencyNation;
+	private double currencyRate;
+	private Timestamp currencyDate;
 }

@@ -81,7 +81,7 @@ public class CardRegInfoTest {
 		return ThreadLocalRandom.current().nextLong(startMillis, endMillis);
 	}
 
-	@Test
+	//@Test
 	void f2() {
 		int count = cservice.addOnedaycustomer();
 		System.out.println(count);
@@ -129,7 +129,7 @@ public class CardRegInfoTest {
 			int randomNumber = random.nextInt(62) + 1;
 			CardListVO vo = clrepo.findById(randomNumber).orElse(null);;
 			
-			Date cal = c1.getCust_birth();
+			Date cal = c1.getCustBirth();
 			
 			
 			
@@ -157,16 +157,17 @@ public class CardRegInfoTest {
 			
 			
 			CardRegInfoVO criVO = CardRegInfoVO.builder()
-					.reg_id("REG-" + uuid) // uuid 생성 겹칠일 없음
-					.card_type(vo) // 카드 번호 3개중에 랜덤으로 ?
-					.card_num(CardNumList.get(i)) //카드번호 리스트에서 순차적으로 가져옴
-					.reg_date(sqlDate) //
-					.expire_date(sqlDate2) // regdate + 5년후
-					.cust_id(c1) // 고객번호에서 순차적으로 가져옴
+					.regId("REG-" + uuid) // uuid 생성 겹칠일 없음
+					.cardType(vo) // 카드 번호 3개중에 랜덤으로 ?
+					.cardNum(CardNumList.get(i)) //카드번호 리스트에서 순차적으로 가져옴
+					.regDate(sqlDate) //
+					.expireDate(sqlDate2) // regdate + 5년후
+					.custId(c1) // 고객번호에서 순차적으로 가져옴
 					.build();
 			
 			crirepo.save(criVO);
 		}
 
 	}
+
 }

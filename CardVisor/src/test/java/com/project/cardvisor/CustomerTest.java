@@ -55,7 +55,7 @@ public class CustomerTest {
 		return ThreadLocalRandom.current().nextLong(startMillis, endMillis);
 	}
 
-	@Test
+	//@Test
 	void f1() throws IOException {
 
 		// 1. 이름 리스트업
@@ -113,9 +113,9 @@ public class CustomerTest {
 
 			j = jrepo.findById(randomNumber).orElse(null);
 
-			CustomerVO c1 = CustomerVO.builder().cust_id("US-" + uuid).cust_name(nameList.get(i)).cust_gender(gen)
-					.cust_birth(sqlDate).cust_email(emailList.get(i) + emailDomain[randomEmailDomain])
-					.cust_phone("010" + phoneList.get(i)).cust_salary(salaryList[randomSalary]).job_id(j).build();
+			CustomerVO c1 = CustomerVO.builder().custId("US-" + uuid).custName(nameList.get(i)).custGender(gen)
+					.custBirth(sqlDate).custEmail(emailList.get(i) + emailDomain[randomEmailDomain])
+					.custPhone("010" + phoneList.get(i)).custSalary(salaryList[randomSalary]).jobId(j).build();
 
 			crepo.save(c1);
 		}
@@ -146,9 +146,9 @@ public class CustomerTest {
 
 			j = jrepo.findById(randomNumber).orElse(null);
 
-			CustomerVO c1 = CustomerVO.builder().cust_id("US-" + uuid).cust_name(nameList.get(i)).cust_gender(gen)
-					.cust_birth(sqlDate).cust_email(emailList.get(i) + emailDomain[randomEmailDomain])
-					.cust_phone("010" + phoneList.get(i)).cust_salary(salaryList[randomSalary]).job_id(j).build();
+			CustomerVO c1 = CustomerVO.builder().custId("US-" + uuid).custName(nameList.get(i)).custGender(gen)
+					.custBirth(sqlDate).custEmail(emailList.get(i) + emailDomain[randomEmailDomain])
+					.custPhone("010" + phoneList.get(i)).custSalary(salaryList[randomSalary]).jobId(j).build();
 
 			crepo.save(c1);
 		}

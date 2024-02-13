@@ -33,7 +33,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.cardvisor.repo.CardListRepository;
 import com.project.cardvisor.repo.CurrencyRepository;
+import com.project.cardvisor.service.CurrencyService;
 import com.project.cardvisor.vo.CurrencyVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +51,33 @@ public class CurrencyTests {
 	@Value("${exchange-data}")
     String data ;
 	
-	//@Test x
+	@Autowired
+	CurrencyService cService;
+	
+	@Autowired
+	CardListRepository clrepo;
+	@Test
+	void f4() {
+		List<Map<String, Object>> top5 = clrepo.selectTop5CardList();
+		for(Map<String, Object> o : top5) {
+			for(Map.Entry<String, Object> entry : o.entrySet()) {
+	            System.out.println(entry.getKey() + ": " + entry.getValue());
+	        }
+		}
+	}
+	
+	//@Test
+	void f3() {
+		List<CurrencyVO>  cList = cService.LatestCurrencyData();
+		for(CurrencyVO clist : cList) {
+			System.out.println(clist.getCurrencyCode());
+			System.out.println(clist.getCurrencyRate());
+		}
+		
+	}
+	
+	
+	//@Test 
 	void f2() {
 		 LocalDate currentDate = LocalDate.now();
 
@@ -60,12 +88,12 @@ public class CurrencyTests {
 	        LocalDate date = threeYearsAgo;
 	        
 	        while (date.isBefore(currentDate) || date.isEqual(currentDate)) {
-	           
+	           System.out.println(date);
 	            date = date.plusDays(1);
 	        }
 	}
 	
-	@Test
+	//@Test
 	void f1() {
 		
 ObjectMapper objectmapper = new ObjectMapper();
@@ -88,17 +116,18 @@ ObjectMapper objectmapper = new ObjectMapper();
    	 LocalDate currentDate = LocalDate.now();
 
      // Calculate the date 3 years ago
-   	LocalDate startdate = LocalDate.of(2024, 2, 7);
-
+   	LocalDate startdate = LocalDate.of(2022, 2, 14);
+    //LocalDate threeYearsAgo = currentDate.minusYears(3);
+   	LocalDate threeYearsAgo = LocalDate.of(2021, 1, 1);
      // Loop through the days from 3 years ago until the current date
- 
-     
-     while (startdate.isBefore(currentDate) || startdate.isEqual(currentDate)) {
-    	 System.out.println(startdate);
+    LocalDate date =threeYearsAgo;
+    String currency_flagUrl = null ;
+     while (date.isBefore(startdate) || startdate.isEqual(startdate)) {
+    	 
    
         try {
             // Request URL
-            URL url = new URL("https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=" + authkey + "&searchdate=" + startdate + "&data=" + data);
+            URL url = new URL("https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=" + authkey + "&searchdate=" + date + "&data=" + data);
             connection = (HttpURLConnection) url.openConnection();
            
             // Request 초기 세팅
@@ -120,7 +149,7 @@ ObjectMapper objectmapper = new ObjectMapper();
             } else { // 성공했을 경우 환율 정보 추출
                 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 while ((line = reader.readLine()) != null) {
-
+                	System.out.println(startdate);
                     JSONArray exchangeRateInfoList = (JSONArray) parser.parse(line);
 
                     for (Object o : exchangeRateInfoList) {
@@ -130,14 +159,86 @@ ObjectMapper objectmapper = new ObjectMapper();
                         String valueWithoutCommas = currency_rate1.replaceAll(",", "");
                         Double currency_rate = Double.parseDouble(valueWithoutCommas);
                         String currency_nation = (String)exchangeRateInfo.get("cur_nm");
-                        LocalDateTime localDateTime = startdate.atStartOfDay();
+                        
+                        LocalDateTime localDateTime = date.atStartOfDay();
                         Timestamp timestamp = Timestamp.valueOf(localDateTime);
                         System.out.println(timestamp);
-						
+						switch (currency_code) {
+						case "USD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/usd.svg";
+							break;
+						case "THB":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/thb.svg";
+							break;
+						case "SGD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/sgd.svg";
+							break;
+						case "SEK":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/sek.svg";
+							break;
+						case "SAR":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/sar.png";
+						break;
+						case "NZD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/NZD.png";
+							break;
+						case "NOK":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/NOK.png";
+							break;
+						case "MYR":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/MYR.png";
+							break;
+						case "KWD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/KWD.png";
+							break;
+						case "KRW":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/KRW.png";
+							break;
+						case "JPY(100)":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/JPY.png";
+							break;
+						case "IDR(100)":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/IDR.png";
+							break;
+						case "HKD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/HKD.png";
+							break;
+						case "GBP":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/GBP.png";
+							break;
+						case "EUR":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/EUR.png";
+							break;
+						case "DKK":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/DKK.png";
+							break;
+						case "CNH":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/CNH.png";
+							break;
+						case "CAD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/CAD.png";
+							break;
+						case "BND":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/BND.png";
+							break;
+						case "BHD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/BHD.png";
+							break;
+						case "AUD":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/AUD.png";
+							break;
+						case "AED":
+							currency_flagUrl="https://farmfarmimagess.s3.ap-northeast-2.amazonaws.com/currency_img/AED.png";
+							break;
+							
+						default:
+							break;
+						}
 						  CurrencyVO currency = CurrencyVO.builder()
-						  .currency_code(currency_code) .currency_nation(currency_nation)
-						  .currency_date(timestamp)
-						  .currency_rate(currency_rate) .build();
+						  .currencyCode(currency_code) .currencyNation(currency_nation)
+						  .currencyDate(timestamp)
+						  .currencyFlagUrl(currency_flagUrl)
+						  .currencyRate(currency_rate) .build();
 						 crepo.save(currency);
                             	
                           
@@ -164,7 +265,7 @@ ObjectMapper objectmapper = new ObjectMapper();
         } finally {
             connection.disconnect();
         }
-        startdate = startdate.plusDays(1);
+        date = date.plusDays(1);
        }
         if (exchangeRate == null) {
             exchangeRate = defaultExchangeRate;
