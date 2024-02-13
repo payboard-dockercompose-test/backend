@@ -111,8 +111,7 @@ public class PaymentTests {
 			UUID uuid = UUID.randomUUID();
 			int mccidx = random.nextInt(16); // mcc 16개
 			int regidx = random.nextInt(clist.size()); //999개
-			
-			int amountidx = random.nextInt(1000); //곱할 숫자
+			int amountidx = random.nextInt(100) == 0 ? 1 : random.nextInt(100); //곱할 숫자
 
 			String nation = "";
 			 
