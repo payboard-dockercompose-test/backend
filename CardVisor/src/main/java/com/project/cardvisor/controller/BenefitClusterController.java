@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +29,11 @@ public class BenefitClusterController {
 	@GetMapping("/benefitTopAndBottom")
 	public Map<String, Object> benefitTop5ByMCC(){
 		return bser.benefitTopAndBottomByMCC();
+	}
+	
+	@GetMapping("/BenefitDetail")
+	public Map<String, Object> BenefitDetail(@RequestBody String category){
+		return bser.benefitDetailByCategory(category);
 	}
 	
 //	@GetMapping("/benefitBottom")

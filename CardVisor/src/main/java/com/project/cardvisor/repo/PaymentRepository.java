@@ -8,9 +8,14 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.project.cardvisor.vo.PaymentsVO;
+import java.sql.Date;
+
 
 public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 
+	@Query(value="select * from payments p where p.data_insert_date = :data", nativeQuery = true)
+	List<PaymentsVO> findByDataInsertDateForBenefit(@Param("data")Date dataInsertDate);
+	
 	@Query(value="SELECT sum(pay_amount) "
 			+ "FROM payments "
 			+ "WHERE currency_code = 'KRW' and pay_date >= DATE_FORMAT(NOW() - INTERVAL 0 MONTH + INTERVAL 1 DAY, '%Y-%m-01 00:00:00')  "

@@ -236,20 +236,23 @@ public class PaymentTests {
 		}
 	}
 	
-	//@Test
+	//혜택 입력 테스트
+	@Test
 	public void f2() {
-		prep.findAll().forEach(p -> {
-
-			MccVO curMcc = p.getMccCode();
-			
-			List<BenefitVO> bvo = brep.findByPay_id(p.getPay_id());
-			
-			bvo.forEach(b -> {
-				if(b.getMccCode().equals(curMcc.getMccCode())) {
-					p.setBenefitAmount((int)Math.floor(p.getPayAmount()*b.getBenefitPct()));
-					prep.save(p);
-				}
-			});
+		SimpleDateFormat sdf = new SimpleDateFormat("2024-01-22");
+		String str = sdf.format(new java.util.Date());
+		Date date1 = java.sql.Date.valueOf(str);
+		prep.findByDataInsertDateForBenefit(date1).forEach(p-> {
+			String curMcc = p.getMccCode().getMccCode();
+			String curRegId = p.getRegId().getRegId();
+			BenefitVO bInfo = brep.selectBenefitPctAndId(curRegId, curMcc);
+			System.out.println(bInfo);
+			if(bInfo!=null) {
+				long curPayAmount = p.getPayAmount();
+				p.setAppliedBenefitId(bInfo.getBenefitId());
+				p.setBenefitAmount((int)Math.floor(curPayAmount*bInfo.getBenefitPct()));
+				prep.save(p);
+			}
 		});
 	}
 	

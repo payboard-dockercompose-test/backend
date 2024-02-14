@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.project.cardvisor.dto.BenefitDTO;
 import com.project.cardvisor.repo.BenefitRepository;
+import com.project.cardvisor.repo.MccCodeRepository;
+import com.project.cardvisor.vo.MccVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,59 @@ import lombok.RequiredArgsConstructor;
 public class BenefitClusterService {
 
 	private final BenefitRepository brep;
+	private final MccCodeRepository mrep;
+
+	public Map<String, Object> benefitDetailByCategory(String category) {
+		
+		String mccCtg = mrep.findByCtgName(category).getMccCode();
+		
+		// 
+		ArrayList<LinkedHashMap<String, Object>> benefitIdAndCardCnt = new ArrayList<>();
+		brep.cardCntBYMccCtg(mccCtg).forEach(b -> {
+			LinkedHashMap<String, Object> inData = new LinkedHashMap<>();
+			inData.put("benefit_id", (Integer)b.get("benefit_id"));
+			inData.put("card_cnt", (Integer)b.get("card_cnt"));
+            benefitIdAndCardCnt.add(inData); 
+		});
+		
+		Collections.sort(benefitIdAndCardCnt, new Comparator<LinkedHashMap<String, Object>>() {
+			@Override
+			public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
+
+				int compare = ((Integer) o2.get("card_cnt")).compareTo((Integer) o1.get("card_cnt"));
+				if (compare != 0) {
+					return compare;
+				}
+				return 0;
+			}
+		});
+		
+		//사용처별 혜택리스트 + 혜택과 연관된 카드의 정보
+		LinkedList<LinkedHashMap<String, Object>> benefitDetailAndCardInfo = new LinkedList<>();
+		brep.benefitDetailByCategory(mccCtg).forEach(b -> {
+			LinkedHashMap<String, Object> inData = new LinkedHashMap<>();
+			int benefit_id = (Integer)b.get("benefit_id");
+			String card_type = (String)b.get("card_type");
+			
+			// ㅇ기서부터다시
+			
+			inData.put("benefit_id", benefit_id);
+			inData.put("benefit_detail", (String)b.get("benefit_detail"));
+			inData.put("benefit_pct", (BigDecimal)b.get("benefit_pct"));
+			inData.put("card_type", card_type); // 이거 안넣어도돼 복수야, 밑도
+			inData.put("card_name", (String)b.get("card_name"));
+			
+//			brep.accumulateDataByCard(card_type, benefit_id).forEach(b -> {
+//				LinkedHashMap<String, Object> inData2 = new LinkedHashMap<>();
+//				
+//			});
+			
+		});
+		
+		
+		
+		return null;
+	}
 
 	public Map<String, Object> benefitTopAndBottomByMCC() {
 		List<String> mcclist = brep.findDistinctMCC();
@@ -35,7 +90,6 @@ public class BenefitClusterService {
 			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
 			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
 			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setCard_name(tuple.get("card_name", String.class));
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
@@ -151,7 +205,7 @@ public class BenefitClusterService {
 
 			benefitBottom.add(categoryMap);
 		}
-		
+
 		Collections.sort(benefitBottom, new Comparator<LinkedHashMap<String, Object>>() {
 
 			@Override
@@ -185,7 +239,6 @@ public class BenefitClusterService {
 			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
 			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
 			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setCard_name(tuple.get("card_name", String.class));
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
@@ -243,11 +296,10 @@ public class BenefitClusterService {
 			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
 			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
 			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setCard_name(tuple.get("card_name", String.class));
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
-		
+
 		benefitDtos.forEach(b -> {
 			String curCtg = (String) b.getCtg_name();
 			((ArrayList<Object>) root.get("children")).forEach(i -> {
