@@ -67,12 +67,19 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 
 
 	//올해 결제 건수가 제일 많은 나라 (순위 리스트업)
-	@Query(value ="SELECT COUNT(P.CURRENCY_CODE) AS PAYMENT_CNT, P.CURRENCY_CODE, C.CURRENCY_NATION, SUM(P.PAY_AMOUNT *P.CURRENCY_RATE) as TOTAL_PAYMENT"
-			+ " FROM payments P"
-			+ " JOIN currency C ON (P.CURRENCY_CODE = C.CURRENCY_CODE)"
-			+ " WHERE P.CURRENCY_CODE != 'KRW'"
-			+ " AND YEAR(P.PAY_DATE) = YEAR(CURRENT_DATE)"
-			+ " GROUP BY P.CURRENCY_CODE, C.CURRENCY_NATION"
+	@Query(value ="SELECT COUNT(p.CURRENCY_CODE) AS PAYMENT_CNT"
+				+ " , SUM(p.PAY_AMOUNT * p.CURRENCY_RATE) AS TOTAL_PAYMENT"
+				+ " , p.CURRENCY_CODE"
+				+ " , c.CURRENCY_NATION"
+				+ " , DATE_FORMAT(NOW(), '%Y') AS CURRENT_YEAR"
+			+ " FROM payments p"
+			+ " LEFT OUTER JOIN ("
+				+ " SELECT DISTINCT CURRENCY_CODE, CURRENCY_NATION"
+				+ " FROM currency"
+			+ " ) c ON (p.CURRENCY_CODE = c.CURRENCY_CODE)"
+			+ " WHERE p.CURRENCY_CODE != 'KRW'"
+			+ " AND DATE_FORMAT(p.PAY_DATE, '%Y') = DATE_FORMAT(NOW(), '%Y')"
+			+ " GROUP BY p.CURRENCY_CODE, c.CURRENCY_NATION"
 			+ " ORDER BY PAYMENT_CNT DESC, TOTAL_PAYMENT DESC", nativeQuery = true)
 	List<Map<String, Object>> selectHighestOrderPayment();
 	
