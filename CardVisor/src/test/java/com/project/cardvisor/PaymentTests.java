@@ -164,7 +164,7 @@ public class PaymentTests {
 		    	if (currency != null) {
 		    	    //double currencyRate = currency.getCurrencyRate();
 		    	    PaymentsVO vo = PaymentsVO.builder()
-		    	        .pay_id("PA-" + uuid)
+		    	        .payId("PA-" + uuid)
 		    	        .regId(clist.get(regidx))
 		    	        .nation(nation)
 		    	        .currencyCode(currencyCode[curridx])		    	        
@@ -221,7 +221,7 @@ public class PaymentTests {
 		        Timestamp timestamp = new Timestamp(randomDate.getTime());
 				
 				PaymentsVO vo = PaymentsVO.builder()
-						.pay_id("PA-"+uuid)
+						.payId("PA-"+uuid)
 						.regId(clist.get(regidx))
 						.nation("KOR")
 						.currencyCode("KRW")
@@ -245,7 +245,7 @@ public class PaymentTests {
 			}
 			MccVO curMcc = p.getMccCode();
 			
-			List<BenefitVO> bvo = brep.findByPay_id(p.getPay_id());
+			List<BenefitVO> bvo = brep.findByPay_id(p.getPayId());
 			
 			bvo.forEach(b -> {
 				if(b.getMccCode().equals(curMcc.getMccCode())) {
