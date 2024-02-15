@@ -205,7 +205,7 @@ public class PaymentTests {
 				    Double currencyRate = currency.getCurrencyRate();
 				    
 					PaymentsVO vo = PaymentsVO.builder()
-							.pay_id("PA-" + uuid)
+							.payId("PA-" + uuid)
 							.regId(clist.get(regidx))
 							
 
@@ -312,14 +312,16 @@ public class PaymentTests {
 				CurrencyVO currency = currencyList.stream().filter(curr -> {
 //		    				System.out.println(curr.getCurrency_code().toString()+"===========" + currencyCode[curridx]);
 //		    				System.out.println(curr.getCurrency_code().equals(currencyCode[curridx]));
+
 					return curr.getCurrencyCode().equals(currencyCode[curridx]);
 				}).findFirst().get();
+
 
 //		    	System.out.println("currency:" + currency);
 				if (currency != null) {
 					// double currencyRate = currency.getCurrencyRate();
 					PaymentsVO vo = PaymentsVO.builder()
-							.pay_id("PA-" + uuid)
+							.payId("PA-" + uuid)
 							.regId(clist.get(regidx))
 							.nation(nation)
 							.currencyCode(currencyCode[curridx])
@@ -367,14 +369,16 @@ public class PaymentTests {
 			MccVO mvo = mrep.findById(mccCode[mccidx]).orElse(null);
 
 			Date regDate = clist.get(regidx).getRegDate(); // 등록일
+
 			Date expDate = clist.get(regidx).getExpireDate(); // 만기일
 			java.util.Date randomDate = getRandomDate(regDate, expDate);
 			if (randomDate != null) { // randomDate가 null이 아닌 경우에만 save
 				Timestamp timestamp = new Timestamp(randomDate.getTime());
 
-				PaymentsVO vo = PaymentsVO.builder().pay_id("PA-" + uuid).regId(clist.get(regidx)).nation("KOR")
+				PaymentsVO vo = PaymentsVO.builder().payId("PA-" + uuid).regId(clist.get(regidx)).nation("KOR")
 						.currencyCode("KRW").currencyRate(1).payAmount(amountidx * 1000).payDate(timestamp)
 						.payStore(업종[mccidx]).mccCode(mvo).build();
+
 				prep.save(vo);
 			}
 		}
@@ -389,7 +393,8 @@ public class PaymentTests {
 			}
 			MccVO curMcc = p.getMccCode();
 
-			List<BenefitVO> bvo = brep.findByPay_id(p.getPay_id());
+
+			List<BenefitVO> bvo = brep.findByPay_id(p.getPayId());
 
 			bvo.forEach(b -> {
 				if (b.getMccCode().equals(curMcc.getMccCode())) {
