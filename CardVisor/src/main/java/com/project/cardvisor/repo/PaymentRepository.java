@@ -10,9 +10,10 @@ import org.springframework.data.repository.query.Param;
 
 import com.project.cardvisor.vo.PaymentsVO;
 
-public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 
-	//// bohyeon start ////
+
+public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
+	////bohyeon start ////
 
 	@Query(value = "select sum(pay_amount) from payments p \n" + "where reg_id in (select reg_id \n"
 			+ "from card_reg_info "
@@ -22,8 +23,11 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 
 
 	//// bohyeon end ////
-
-	@Query(value = "SELECT sum(pay_amount) " + "FROM payments "
+	
+	
+	/////// 화수쿤 ///////
+	@Query(value="SELECT sum(pay_amount) "
+			+ "FROM payments "
 			+ "WHERE currency_code = 'KRW' and pay_date >= DATE_FORMAT(NOW() - INTERVAL 0 MONTH + INTERVAL 1 DAY, '%Y-%m-01 00:00:00')  "
 			+ "AND pay_date <= DATE_FORMAT(NOW() - INTERVAL 0 MONTH , '%Y-%m-%d %H:%i:%s')", nativeQuery = true)
 	Long TotalAmountPayments();
@@ -59,16 +63,33 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 			+ " FROM thisYear, lastYear", nativeQuery = true)
 	Map<String, Object> selectDiffPaymentThisYearAndLastYear(@Param("month") int month);
 
-	// 올해 결제 건수가 제일 많은 나라 (순위 리스트업)
-	@Query(value = "SELECT COUNT(P.CURRENCY_CODE) AS PAYMENT_CNT, P.CURRENCY_CODE, C.CURRENCY_NATION, SUM(P.PAY_AMOUNT *P.CURRENCY_RATE) as TOTAL_PAYMENT"
-			+ " FROM payments P" + " JOIN currency C ON (P.CURRENCY_CODE = C.CURRENCY_CODE)"
-			+ " WHERE P.CURRENCY_CODE != 'KRW'" + " AND YEAR(P.PAY_DATE) = YEAR(CURRENT_DATE)"
-			+ " GROUP BY P.CURRENCY_CODE, C.CURRENCY_NATION"
-			+ " ORDER BY PAYMENT_CNT DESC, TOTAL_PAYMENT DESC", nativeQuery = true)
+
+	//올해 결제 건수가 제일 많은 나라 (순위 리스트업)
+	@Query(value ="SELECT COUNT(p.CURRENCY_CODE) AS PAYMENT_CNT"
+				+ " , SUM(p.PAY_AMOUNT * p.CURRENCY_RATE) AS TOTAL_PAYMENT"
+				+ " , p.CURRENCY_CODE"
+				+ "	, p.NATION"
+				+ " , DATE_FORMAT(p.PAY_DATE, '%Y') AS CURRENT_YEAR"
+			+ " FROM payments p"
+			+ " WHERE p.CURRENCY_CODE != 'KRW'"
+			+ " AND DATE_FORMAT(p.PAY_DATE, '%Y') = DATE_FORMAT(NOW(), '%Y')"
+			+ " GROUP BY p.CURRENCY_CODE"
+			+ " ORDER BY PAYMENT_CNT DESC, TOTAL_PAYMENT DESC"
+			+ " LIMIT 20", nativeQuery = true)
+
 	List<Map<String, Object>> selectHighestOrderPayment();
 
-	//// 지현
-	// 고객 성별에 따른 평균 소비금액
+	
+	//(차트 데이터) 월별 데이터 추출
+//	@Query
+//	List<Map<String, Object>> selectNationPaymentsDataList();
+	
+	
+
+
+
+	////지현
+	//고객 성별에 따른 평균 소비금액
 	@Query("SELECT c.custGender, AVG(p.payAmount) " + "FROM PaymentsVO p JOIN p.regId r JOIN r.custId c "
 			+ "GROUP BY c.custGender")
 	List<Object[]> getAveragePaymentAmount();
@@ -132,70 +153,143 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 			+ "ORDER BY month asc ", nativeQuery = true)
 	List<Map<String, Object>> selectPerMonthamount();
 
-	@Query(value = "SELECT  " + "  DATE_FORMAT(pay_date, '%Y-%m') AS month, " + "  SUM(pay_amount) AS total_amount "
-			+ "FROM payments\r\n" + "WHERE pay_date > DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND "
-			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR) " + "GROUP BY month "
-			+ "ORDER BY month", nativeQuery = true)
+	
+	@Query(value= "SELECT  "
+			+ "  DATE_FORMAT(pay_date, '%Y-%m') AS month, "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments "
+			+ "WHERE pay_date > DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND "
+			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR) "
+			+ "GROUP BY month "
+			+ "ORDER BY month",nativeQuery = true)
 	List<Map<String, Object>> selectLastYearPerMonthamount();
 
-	@Query(value = "SELECT \r\n" + "  SUM(pay_amount) AS total_amount\r\n" + "FROM payments\r\n"
-			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE , INTERVAL 5 MONTH)\r\n", nativeQuery = true)
+	
+	@Query(value="SELECT  "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE , INTERVAL 5 MONTH) ",nativeQuery = true)
 	Long perMonthTotalAmount();
 
-	@Query(value = "SELECT \r\n" + "  SUM(pay_amount) AS total_amount\r\n" + "FROM payments\r\n"
-			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND\r\n"
-			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)", nativeQuery = true)
+	
+	@Query(value= "SELECT  "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND "
+			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)",nativeQuery = true)
 	Long lastYearPerMonthTotalAmount();
 
-	@Query(value = "SELECT\r\n" + "  WEEK(pay_date) AS week,\r\n" + "  SUM(pay_amount) AS total_amount\r\n"
-			+ "FROM payments\r\n" + "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK)\r\n"
-			+ "GROUP BY week\r\n" + "ORDER BY week", nativeQuery = true)
+	
+	
+	@Query(value="SELECT "
+			+ "  WEEK(pay_date) AS week, "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK) "
+			+ "GROUP BY week "
+			+ "ORDER BY week", nativeQuery = true)
 	List<Map<String, Object>> selectPerWeeklyamount();
 
-	@Query(value = "SELECT\r\n" + "  WEEK(pay_date) AS week,\r\n" + "  SUM(pay_amount) AS total_amount\r\n"
-			+ "FROM payments\r\n" + "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 52 WEEK)\r\n"
-			+ "and	  pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 47 WEEK)\r\n" + "GROUP BY week\r\n"
+	
+	@Query(value="SELECT "
+			+ "  WEEK(pay_date) AS week, "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments"
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 52 WEEK)"
+			+ "and	  pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 47 WEEK) "
+			+ "GROUP BY week "
 			+ "ORDER BY week", nativeQuery = true)
 	List<Map<String, Object>> selectLastYearPerWeeklyamount();
 
-	@Query(value = "SELECT\r\n" + "  SUM(pay_amount) AS total_amount\r\n" + "FROM payments\r\n"
-			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK)", nativeQuery = true)
+	
+	
+	@Query(value="SELECT "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK)",nativeQuery = true)
 	Long perWeekTotalAmount();
 
-	@Query(value = "SELECT\r\n" + "  SUM(pay_amount) AS total_amount\r\n" + "FROM payments\r\n"
-			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 52 WEEK)\r\n"
-			+ "and	  pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 47 WEEK)", nativeQuery = true)
+	@Query(value= "SELECT "
+			+ "  SUM(pay_amount) AS total_amount "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 52 WEEK) "
+			+ "and	  pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 47 WEEK)",nativeQuery = true)
 	Long lastYearPerWeekTotalAmount();
 
-	// 월거래건수
-	@Query(value = "SELECT \r\n" + "  DATE_FORMAT(pay_date, '%Y-%m') AS month,\r\n" + "  count(*) As transaction\r\n"
-			+ "FROM payments\r\n" + "WHERE pay_date >= DATE_SUB(CURRENT_DATE , INTERVAL 5 MONTH)\r\n"
-			+ "GROUP BY month\r\n" + "ORDER BY month", nativeQuery = true)
+	//월거래건수
+	@Query(value="SELECT "
+			+ "  DATE_FORMAT(pay_date, '%Y-%m') AS month,"
+			+ "  count(*) As transaction "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE , INTERVAL 5 MONTH) "
+			+ "GROUP BY month "
+			+ "ORDER BY month", nativeQuery = true)
 	List<Map<String, Object>> selectPerMonthtransaction();
 
-	@Query(value = "SELECT \r\n" + "  count(*) As transaction\r\n" + "FROM payments\r\n"
+	
+	@Query(value="SELECT "
+			+ "  count(*) As transaction "
+			+ "FROM payments "
 			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE , INTERVAL 5 MONTH)", nativeQuery = true)
 	int selectMonthtransaction();
 
-	// 필요한가?..
-	@Query(value = "SELECT \r\n" + "  DATE_FORMAT(pay_date, '%Y-%m') AS month,\r\n" + "  count(*) As transaction\r\n"
-			+ "FROM payments\r\n" + "WHERE pay_date >= DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND\r\n"
-			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)\r\n" + "GROUP BY month\r\n"
+	//필요한가?..
+	@Query(value="SELECT \r\n"
+			+ "  DATE_FORMAT(pay_date, '%Y-%m') AS month, "
+			+ "  count(*) As transaction "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND "
+			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR) "
+			+ "GROUP BY month "
 			+ "ORDER BY month", nativeQuery = true)
 	List<Map<String, Object>> selectLastYearMonthtransaction();
 
-	// 주간
-	@Query(value = "SELECT\r\n" + "  WEEK(pay_date) AS week,\r\n" + "    count(*) As transaction\r\n"
-			+ "FROM payments\r\n" + "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK)\r\n"
-			+ "GROUP BY week\r\n" + "ORDER BY week", nativeQuery = true)
+	//주간
+	@Query(value="SELECT\r\n"
+			+ "  WEEK(pay_date) AS week, "
+			+ "    count(*) As transaction "
+			+ "FROM payments "
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK) "
+			+ "GROUP BY week "
+			+ "ORDER BY week",nativeQuery = true)
 	List<Map<String, Object>> selectPerWeeklytransaction();
 
-	@Query(value = "SELECT \r\n" + "  count(*) As transaction\r\n" + "FROM payments\r\n"
+	
+	@Query(value="SELECT  "
+			+ "  count(*) As transaction "
+			+ "FROM payments "
 			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK)", nativeQuery = true)
 	int selectWeektransaction();
 
-
-
-
-
+	
+	@Query(value="select cl.card_name, count(cri.card_type) as count, sum(p.pay_amount) as sumamount, cl.card_annual_fee  "
+			+ "from payments p,card_reg_info cri, card_list cl  "
+			+ "where p.reg_id = cri.reg_id and cri.card_type = cl.card_type "
+			+ "group by cri.card_type  "
+			+ "order by sumamount desc "
+			+ "limit 5", nativeQuery =true)
+	List<Map<String, Object>> PayAmountTop5Card();
+	@Query(value="SELECT c.currency_code, c.currency_nation,count(p.pay_amount) as countable, sum(p.pay_amount) AS amountable "
+			+ "FROM (select distinct currency_code, currency_nation from currency) c "
+			+ "LEFT OUTER JOIN payments p ON p.currency_code = c.currency_code "
+			+ "where c.currency_code != 'KRW' "
+			+ "GROUP BY c.currency_code  "
+			+ "order by amountable desc "
+			+ "limit 5", nativeQuery = true)
+	List<Map<String, Object>> AbroadPayAmountTop5Card();
+	
+	
+	@Query(value="SELECT cbl.card_name ,b.benefit_detail ,p.applied_benefit_id, sum(p.benefit_amount) as total "
+			+ "FROM "
+			+ "(select DISTINCT cl.card_type, cl.card_name, cb.benefit_id from card_list cl "
+			+ "join card_benefit cb on cl.card_type = cb.card_type) cbl left join benefit b "
+			+ "on cbl.benefit_id = b.benefit_id left join card_reg_info cri "
+			+ "on cbl.card_type = cri.card_type left join payments p on cri.reg_id = p.reg_id "
+			+ "WHERE cbl.benefit_id = p.applied_benefit_id "
+			+ "GROUP BY p.applied_benefit_id "
+			+ "order by total desc "
+			+ "limit 5", nativeQuery = true)
+	List<Map<String, Object>> benefitTop5Card();	
+	@Query(value="select sum(benefit_amount) from payments p", nativeQuery = true)
+	int benefitTotalAmount();
 }

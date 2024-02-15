@@ -57,6 +57,7 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer> 
 	
 	
 	
+
 	@Query(value ="SELECT \n"
 			+ "  c.cust_gender, \n"
 			+ "  round(COUNT(*) * 100.0 / sum(count(*)) over(),2) as percentage\n"
@@ -89,9 +90,19 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer> 
 
 	// bohyeon end
 
-	@Query(value = "select * from card_list cl,\r\n" + "(\r\n" + "select  card_type,\r\n" + "count(*) as col\r\n"
-			+ "from card_reg_info \r\n" + "group by card_type\r\n" + "order by col desc \r\n" + "limit 5\r\n"
-			+ ") ci \r\n" + "where cl.card_type = ci.card_type\r\n" + "order by ci.col desc", nativeQuery = true)
+	@Query(value="select * from card_list cl,\r\n"
+			+ "(\r\n"
+			+ "select  card_type,\r\n"
+			+ "count(*) as col\r\n"
+			+ "from card_reg_info\r\n"
+			+ "WHERE  expire_date > NOW() \r\n"
+			+ "group by card_type\r\n"
+			+ "order by col desc \r\n"
+			+ "limit 5\r\n"
+			+ ") ci \r\n"
+			+ "where cl.card_type = ci.card_type\r\n"
+			+ "order by ci.col desc", nativeQuery = true)
+
 	List<Map<String, Object>> selectTop5CardList();
 
 
