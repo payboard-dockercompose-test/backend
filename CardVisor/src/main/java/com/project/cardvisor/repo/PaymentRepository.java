@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.project.cardvisor.vo.PaymentsVO;
 
 public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
-
+	/////// 화수쿤 ///////
 	@Query(value="SELECT sum(pay_amount) "
 			+ "FROM payments "
 			+ "WHERE currency_code = 'KRW' and pay_date >= DATE_FORMAT(NOW() - INTERVAL 0 MONTH + INTERVAL 1 DAY, '%Y-%m-01 00:00:00')  "
@@ -70,22 +70,22 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 	@Query(value ="SELECT COUNT(p.CURRENCY_CODE) AS PAYMENT_CNT"
 				+ " , SUM(p.PAY_AMOUNT * p.CURRENCY_RATE) AS TOTAL_PAYMENT"
 				+ " , p.CURRENCY_CODE"
-				+ " , c.CURRENCY_NATION"
-				+ " , DATE_FORMAT(NOW(), '%Y') AS CURRENT_YEAR"
+				+ "	, p.NATION"
+				+ " , DATE_FORMAT(p.PAY_DATE, '%Y') AS CURRENT_YEAR"
 			+ " FROM payments p"
-			+ " LEFT OUTER JOIN ("
-				+ " SELECT DISTINCT CURRENCY_CODE, CURRENCY_NATION"
-				+ " FROM currency"
-			+ " ) c ON (p.CURRENCY_CODE = c.CURRENCY_CODE)"
 			+ " WHERE p.CURRENCY_CODE != 'KRW'"
 			+ " AND DATE_FORMAT(p.PAY_DATE, '%Y') = DATE_FORMAT(NOW(), '%Y')"
-			+ " GROUP BY p.CURRENCY_CODE, c.CURRENCY_NATION"
-			+ " ORDER BY PAYMENT_CNT DESC, TOTAL_PAYMENT DESC", nativeQuery = true)
+			+ " GROUP BY p.CURRENCY_CODE"
+			+ " ORDER BY PAYMENT_CNT DESC, TOTAL_PAYMENT DESC"
+			+ " LIMIT 20", nativeQuery = true)
 	List<Map<String, Object>> selectHighestOrderPayment();
 	
+	//(차트 데이터) 월별 데이터 추출
+//	@Query
+//	List<Map<String, Object>> selectNationPaymentsDataList();
+	
+	
 
-	
-	
 	////지현
 	//고객 성별에 따른 평균 소비금액
 	@Query("SELECT c.custGender, AVG(p.payAmount) " + "FROM PaymentsVO p JOIN p.regId r JOIN r.custId c "
