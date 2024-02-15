@@ -61,7 +61,8 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 
 
 
-	@Query(value="select count(*) from card_reg_info",nativeQuery = true)
+	@Query(value="select count(*) from card_reg_info "
+			+ "where expire_date>now()",nativeQuery = true)
 	int totalcardregamount();
 	
 

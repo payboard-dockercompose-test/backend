@@ -121,4 +121,20 @@ public List<Map<String, Object>> selectPerWeeklytransaction() {
 	  List<Map<String, Object>> pList = payrepo.selectPerWeeklytransaction();
 	    return pList;
 }
+public List<Map<String, Object>> PayAmountTop5Card(){
+	 List<Map<String, Object>> plist = payrepo.PayAmountTop5Card();
+	 return plist;
+}
+public List<Map<String, Object>> AbroadPayAmountTop5Card(){
+	List<Map<String, Object>> plist = payrepo.AbroadPayAmountTop5Card();
+	return plist;
+}
+public List<Map<String, Object>> benefitTop5Card(){
+	List<Map<String, Object>> blist =payrepo.benefitTop5Card();
+	return blist;
+}
+public int benefitTotalAmount() {
+	int amount = payrepo.benefitTotalAmount();
+	return amount;
+}
 }
