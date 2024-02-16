@@ -79,13 +79,13 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 
 	
 	
-	////지현
-	//고객 성별에 따른 평균 소비금액
+	//// 지현
+	// 고객 성별에 따른 평균 소비금액
 	@Query("SELECT c.custGender, AVG(p.payAmount) " + "FROM PaymentsVO p JOIN p.regId r JOIN r.custId c "
 			+ "GROUP BY c.custGender")
 	List<Object[]> getAveragePaymentAmount();
-	
-	//고객 성별에 따른 상위 3개의 MCC
+
+	// 고객 성별에 따른 상위 3개의 MCC
 	@Query(value = "SELECT subquery2.cust_gender, m.ctg_name " + "FROM ("
 			+ "    SELECT c.cust_gender, p.mcc_code, ROW_NUMBER() OVER(PARTITION BY c.cust_gender ORDER BY COUNT(*) DESC) as rn "
 			+ "    FROM customer c " + "    JOIN card_reg_info r ON c.cust_id = r.cust_id "
@@ -100,7 +100,7 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 			+ "    JOIN payments p ON r.reg_id = p.reg_id " + "    GROUP BY p.mcc_code " + ") as subquery "
 			+ "JOIN mcc m ON m.mcc_code = subquery.mcc_code " + "WHERE subquery.rn <= 3", nativeQuery = true)
 	List<Object[]> getTop3MccCodeByGender();
-	
+
 	// 연령대별의 평균 소비금액
 	@Query(value = "SELECT age_range, AVG(pay_amount) FROM ( " + "SELECT CASE  "
 			+ "WHEN age >= 20 AND age < 30 THEN '20대' " + "WHEN age >= 30 AND age < 40 THEN '30대' "
@@ -113,8 +113,8 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 			+ "GROUP BY age_range "
 			+ "ORDER BY CASE WHEN age_range = 'all' THEN 0 ELSE 1 END, age_range", nativeQuery = true)
 	List<Map<String, Object>> findAveragePaymentByAgeRange();
-	
-	//연령대별에 따른 상위 3개의 MCC
+
+	// 연령대별에 따른 상위 3개의 MCC
 	@Query(value = "" + "(SELECT subquery.age_range, m.ctg_name " + "FROM ("
 			+ "SELECT subquery1.age_range, subquery1.mcc_code, ROW_NUMBER() OVER(PARTITION BY subquery1.age_range ORDER BY subquery1.count DESC) as rn "
 			+ "FROM (" + "SELECT CASE "
@@ -124,15 +124,97 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String>{
 			+ "WHEN YEAR(CURRENT_DATE) - YEAR(c.cust_birth) >= 50 AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) < 60 THEN '50대' "
 			+ "WHEN YEAR(CURRENT_DATE) - YEAR(c.cust_birth) >= 60 AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) < 70 THEN '60대' "
 			+ "ELSE '70대 이상' END as age_range, p.mcc_code, COUNT(*) as count " + "FROM customer c "
-			+ "JOIN card_reg_info r ON c.cust_id = r.cust_id "
-			+ "JOIN payments p ON r.reg_id = p.reg_id " + "GROUP BY age_range, p.mcc_code "
-			+ ") as subquery1 " + ") as subquery " + "JOIN mcc m ON m.mcc_code = subquery.mcc_code "
-			+ "WHERE subquery.rn <= 3 " + "UNION " + "SELECT 'all' as age_range, m.ctg_name " + "FROM ("
+			+ "JOIN card_reg_info r ON c.cust_id = r.cust_id " + "JOIN payments p ON r.reg_id = p.reg_id "
+			+ "GROUP BY age_range, p.mcc_code " + ") as subquery1 " + ") as subquery "
+			+ "JOIN mcc m ON m.mcc_code = subquery.mcc_code " + "WHERE subquery.rn <= 3 " + "UNION "
+			+ "SELECT 'all' as age_range, m.ctg_name " + "FROM ("
 			+ "SELECT p.mcc_code, ROW_NUMBER() OVER(ORDER BY COUNT(*) DESC) as rn " + "FROM card_reg_info r "
 			+ "JOIN payments p ON r.reg_id = p.reg_id " + "GROUP BY p.mcc_code " + ") as subquery_all "
 			+ "JOIN mcc m ON m.mcc_code = subquery_all.mcc_code " + "WHERE subquery_all.rn <= 3)", nativeQuery = true)
 	List<Object[]> findTopMccCodes();
 
+	// 직업별 평균 소비금액
+	@Query(value = "(SELECT j.job_type, AVG(p.pay_amount) "
+			+ "FROM payments p JOIN card_reg_info r ON p.reg_id = r.reg_id JOIN customer c ON r.cust_id = c.cust_id JOIN job_list j ON c.job_id = j.job_id "
+			+ "GROUP BY j.job_type) " + "UNION ALL " + "(SELECT 'all', AVG(p.pay_amount) "
+			+ "FROM payments p)", nativeQuery = true)
+	List<Object[]> AveragePaymentByJobTypeAndAll();
+
+	// 직업별 주 사용처 상위 3개
+	@Query(value = "SELECT subquery2.job_type, m.ctg_name " + "FROM ("
+			+ " SELECT j.job_type, p.mcc_code, ROW_NUMBER() OVER(PARTITION BY j.job_type ORDER BY COUNT(*) DESC) as rn "
+			+ " FROM job_list j " + "    JOIN customer c ON j.job_id = c.job_id "
+			+ " JOIN card_reg_info r ON c.cust_id = r.cust_id " + "    JOIN payments p ON r.reg_id = p.reg_id "
+			+ " GROUP BY j.job_type, p.mcc_code " + ") as subquery " + "JOIN mcc m ON m.mcc_code = subquery.mcc_code "
+			+ "JOIN (" + " SELECT j.job_type, ROW_NUMBER() OVER(PARTITION BY j.job_type ORDER BY COUNT(*) DESC) as rn "
+			+ " FROM job_list j " + "    JOIN customer c ON j.job_id = c.job_id "
+			+ " JOIN card_reg_info r ON c.cust_id = r.cust_id " + "    JOIN payments p ON r.reg_id = p.reg_id "
+			+ " GROUP BY j.job_type " + ") as subquery2 ON subquery.job_type = subquery2.job_type AND subquery.rn <= 3 "
+			+ "UNION " + "SELECT 'all' as job_type, m.ctg_name " + "FROM ("
+			+ " SELECT p.mcc_code, ROW_NUMBER() OVER(ORDER BY COUNT(*) DESC) as rn " + " FROM card_reg_info r "
+			+ "    JOIN payments p ON r.reg_id = p.reg_id " + " GROUP BY p.mcc_code " + ") as subquery "
+			+ "JOIN mcc m ON m.mcc_code = subquery.mcc_code " + "WHERE subquery.rn <= 3", nativeQuery = true)
+	List<Object[]> getTop3MccCodeByJobType();
+	
+	//연봉별 평균 소비금액
+	@Query(value = "(SELECT c.cust_salary, AVG(p.pay_amount) "
+	        + "FROM payments p JOIN card_reg_info r ON p.reg_id = r.reg_id JOIN customer c ON r.cust_id = c.cust_id "
+	        + "GROUP BY c.cust_salary) " 
+	        + "UNION ALL " 
+	        + "(SELECT 'all', AVG(p.pay_amount) "
+	        + "FROM payments p)", nativeQuery = true)
+	List<Object[]> paymentBySalaryRangeAndAll();
+	
+	//연봉별 상위 3개 mcc
+	@Query(value = "SELECT subquery2.cust_salary, m.ctg_name " + "FROM ("
+			+ "    SELECT c.cust_salary, p.mcc_code, ROW_NUMBER() OVER(PARTITION BY c.cust_salary ORDER BY COUNT(*) DESC) as rn "
+			+ "    FROM customer c " + "    JOIN card_reg_info r ON c.cust_id = r.cust_id "
+			+ "    JOIN payments p ON r.reg_id = p.reg_id " + "    GROUP BY c.cust_salary, p.mcc_code "
+			+ ") as subquery " + "JOIN mcc m ON m.mcc_code = subquery.mcc_code " + "JOIN ("
+			+ "    SELECT c.cust_salary, ROW_NUMBER() OVER(PARTITION BY c.cust_salary ORDER BY COUNT(*) DESC) as rn "
+			+ "    FROM customer c " + "    JOIN card_reg_info r ON c.cust_id = r.cust_id "
+			+ "    JOIN payments p ON r.reg_id = p.reg_id " + "    GROUP BY c.cust_salary "
+			+ ") as subquery2 ON subquery.cust_salary = subquery2.cust_salary AND subquery.rn <= 3 " + "UNION "
+			+ "SELECT 'all' as cust_salary, m.ctg_name " + "FROM ("
+			+ "    SELECT p.mcc_code, ROW_NUMBER() OVER(ORDER BY COUNT(*) DESC) as rn " + "    FROM card_reg_info r "
+			+ "    JOIN payments p ON r.reg_id = p.reg_id " + "    GROUP BY p.mcc_code " + ") as subquery "
+			+ "JOIN mcc m ON m.mcc_code = subquery.mcc_code " + "WHERE subquery.rn <= 3", nativeQuery = true)
+	List<Object[]> getTop3MccCodeByCustSalary();
+	
+	
+	
+	// filter 평균 소비금액
+	@Query(value = "SELECT SUM(p.pay_amount) / COUNT(DISTINCT cri.cust_id) " + "FROM payments p "
+			+ "JOIN card_reg_info cri ON p.reg_id = cri.reg_id " + "JOIN customer c ON cri.cust_id = c.cust_id "
+			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender = :gender "
+			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
+			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
+			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
+			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
+			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
+			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
+			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + // 매우 큰 값으로 설정하여 모든 연령대를 포함
+			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange ", nativeQuery = true)
+	Double findAveragePaymentByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
+			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+	
+	// filter 사용처
+	@Query(value = "SELECT m.ctg_name " + "FROM payments p " + "JOIN card_reg_info cri ON p.reg_id = cri.reg_id "
+			+ "JOIN customer c ON cri.cust_id = c.cust_id " + "JOIN job_list j ON c.job_id = j.job_id "
+			+ "JOIN mcc m ON p.mcc_code = m.mcc_code " + "WHERE c.cust_gender = :gender "
+			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
+			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
+			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
+			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
+			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
+			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
+			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + // 매우 큰 값으로 설정하여 모든 연령대를 포함
+			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange " + "GROUP BY m.ctg_name "
+			+ "ORDER BY COUNT(m.ctg_name) DESC " + "LIMIT 5", nativeQuery = true)
+	List<String> findTop5CategoriesByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
+			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+	
+	
 	//WorldMap
 	// select 건수, 총금액, 연령대
 	// 22,23,24년도 월별
