@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -45,30 +46,42 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "ORDER BY p.mcc_code asc", nativeQuery = true)
 	List<String> findDistinctMCC();
 	
-	@Query(value = "select b.benefit_id, count(cb.card_type) card_cnt "
+	@Query(value = "SELECT b.benefit_id AS benefit_id, b.benefit_detail AS benefit_detail, b.benefit_pct AS benefit_pct, "
+			+ "IFNULL(SUM(p.benefit_amount),0) AS sum_benefit_amount, "
+			+ "COUNT(p.benefit_amount) AS count_benefit_used, "
+			+ "COUNT(DISTINCT p.reg_id) AS count_using_people "
+			+ "FROM benefit b "
+			+ "LEFT JOIN payments p "
+			+ "ON b.benefit_id = p.applied_benefit_id "
+			+ "WHERE b.mcc_code = :mcc_code "
+			+ "GROUP BY b.benefit_id "
+			+ "ORDER BY benefit_id ASC", nativeQuery = true)
+	List<Map<String, Object>> benefitInfoAndCalData(@Param("mcc_code") String mcc_code);
+	
+	@Query(value = "select b.benefit_id, count(cb.card_type) related_card_cnt, AVG(cl.card_annual_fee) avg_annual_fee "
 			+ "from benefit b "
 			+ "join card_benefit cb on b.benefit_id = cb.benefit_id "
-			+ "WHERE b.mcc_code = :mcc_code "
-			+ "GROUP BY b.benefit_id", nativeQuery = true)
-	ArrayList<LinkedHashMap<String, Object>> cardCntBYMccCtg(@Param("mcc_code") String mcc_code);
+			+ "join card_list cl on cb.card_type = cl.card_type "
+			+ "WHERE b.mcc_code =:mcc_code "
+			+ "GROUP BY b.benefit_id "
+			+ "ORDER BY b.benefit_id asc", nativeQuery = true)
+	List<Map<String, Object>> cardCalData(@Param("mcc_code") String mcc_code);
 	
-	@Query(value = "select b.benefit_id, b.benefit_detail, b.benefit_pct, cb.card_type, cl.card_name "
+	@Query(value = "select b.benefit_id, cb.card_type, cl.card_name "
 			+ "from card_benefit cb "
 			+ "join benefit b on cb.benefit_id = b.benefit_id "
-			+ "join card_list cl on cl.card_type =cb.card_type "
+			+ "join card_list cl on cl.card_type = cb.card_type "
 			+ "where b.benefit_id in "
 			+ "(select b.benefit_id "
 			+ "from benefit b "
-			+ "WHERE b.mcc_code = :mcc_code)"
-			+ "order BY 1", nativeQuery = true)
-	ArrayList<LinkedHashMap<String, Object>> benefitDetailByCategory(@Param("mcc_code") String mcc_code);
+			+ "WHERE b.mcc_code =:mcc_code) "
+			+ "order BY benefit_id", nativeQuery = true)
+	List<Map<String, Object>> cardDetailRelatedBenefit(@Param("mcc_code") String mcc_code);
 	
-	@Query(value = "select sum(p.benefit_amount) benefit_sum, count(p.benefit_amount) benefit_amount_cnt, count(DISTINCT p.reg_id) reg_id_cnt "
+	@Query(value = "select sum(p.benefit_amount) as cur_sum, count(p.benefit_amount) as cur_cnt, count(DISTINCT p.reg_id) as cur_use "
 			+ "from payments p "
 			+ "join card_reg_info cri on p.reg_id = cri.reg_id "
-			+ "WHERE cri.card_type = :card_type "
-			+ "and p.applied_benefit_id = :benefit_id", nativeQuery = true)
-	ArrayList<LinkedHashMap<String, Object>> accumulateDataByCard(@Param("card_type") String card_type, @Param("benefit_id") int benefit_id);
-	
-	
+			+ "WHERE cri.card_type =:card_type "
+			+ "and p.applied_benefit_id =:applied_benefit_id", nativeQuery = true)
+	Map<String, Object> cardComparison(@Param("card_type") int card_type, @Param("applied_benefit_id") int applied_benefit_id);
 }

@@ -27,56 +27,110 @@ public class BenefitClusterService {
 	private final BenefitRepository brep;
 	private final MccCodeRepository mrep;
 
-	public Map<String, Object> benefitDetailByCategory(String category) {
-		
-		String mccCtg = mrep.findByCtgName(category).getMccCode();
-		
-		// 
-		ArrayList<LinkedHashMap<String, Object>> benefitIdAndCardCnt = new ArrayList<>();
-		brep.cardCntBYMccCtg(mccCtg).forEach(b -> {
-			LinkedHashMap<String, Object> inData = new LinkedHashMap<>();
-			inData.put("benefit_id", (Integer)b.get("benefit_id"));
-			inData.put("card_cnt", (Integer)b.get("card_cnt"));
-            benefitIdAndCardCnt.add(inData); 
-		});
-		
-		Collections.sort(benefitIdAndCardCnt, new Comparator<LinkedHashMap<String, Object>>() {
-			@Override
-			public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
+	public List<Map<String, Object>> benefitDetailByCategory(String category) {
 
-				int compare = ((Integer) o2.get("card_cnt")).compareTo((Integer) o1.get("card_cnt"));
-				if (compare != 0) {
-					return compare;
+		String mccCtg = mrep.findByCtgName(category).getMccCode();
+		// (기간동안)혜택이 이용된 건수, (기간동안) 혜택으로 총 할인 금액
+		List<Map<String, Object>> benefitTotalInfo = new ArrayList<>();
+		brep.benefitInfoAndCalData(mccCtg).forEach(b -> {
+			Map<String, Object> inData = new HashMap<>();
+			inData.put("benefit_id", (Integer) b.get("benefit_id"));
+			inData.put("benefit_detail", (String) b.get("benefit_detail"));
+			inData.put("benefit_pct", (Double) b.get("benefit_pct"));
+			inData.put("total_count", (Long) b.get("count_benefit_used"));
+			BigDecimal bd = (BigDecimal) b.get("sum_benefit_amount");
+			Long total_sum = bd.longValue();
+			Long total_use = (Long) b.get("count_using_people");
+			inData.put("total_sum", total_sum);
+			if (total_sum == 0 || total_use == 0) {
+				inData.put("amount_per_person", 0);
+			} else {
+				inData.put("amount_per_person", total_sum / total_use);
+			}
+			benefitTotalInfo.add(inData);
+		});
+
+		// 특정 혜택의 카드 갯수, 카드 연회비 평균
+		brep.cardCalData(mccCtg).forEach(b -> {
+			Integer benefit_id = (Integer) b.get("benefit_id");
+			Long related_card_cnt = (Long) b.get("related_card_cnt");
+			BigDecimal bd = (BigDecimal) b.get("avg_annual_fee");
+			Long avg_annual_fee = bd.longValue();
+			System.out.println(related_card_cnt + ":" + avg_annual_fee);
+			for (Map<String, Object> data : benefitTotalInfo) {
+				System.out.println((Integer) data.get("benefit_id") == benefit_id);
+				System.out.println((Integer) data.get("benefit_id")+"////"+benefit_id);
+				if (((Integer)data.get("benefit_id")).equals(benefit_id)) {
+					data.put("related_card_cnt", related_card_cnt);
+					data.put("avg_annual_fee", avg_annual_fee);
 				}
-				return 0;
+			}
+		});
+
+		// 혜택 연관된 카드의 상세 정보
+		brep.cardDetailRelatedBenefit(mccCtg).forEach(b -> {
+			Integer cur_id = (Integer) b.get("benefit_id");
+			Integer cur_card_type = (Integer) b.get("card_type");
+			String cur_card_name = (String) b.get("card_name");
+
+			// 혜택 별로 카드의 혜택 정보를 조회
+			Map<String, Object> comparison = brep.cardComparison(cur_card_type, cur_id);
+			Long cur_sum = 0L;
+			Long cur_cnt = 0L;
+			Long cur_use = 0L;
+			if (comparison != null) {
+				if (comparison.get("cur_sum") != null) {
+					cur_sum = (Long)((BigDecimal) comparison.get("cur_sum")).longValue();
+				}
+				if (comparison.get("cur_cnt") != null) {
+					cur_cnt = (Long) comparison.get("cur_cnt");
+				}
+				if (comparison.get("cur_use") != null) {
+					cur_use = (Long) comparison.get("cur_use");
+				}
+			}
+
+			// benefitTotalInfo에서 현재 benefit_id와 일치하는 항목을 찾아서 업데이트
+			for (Map<String, Object> benefit : benefitTotalInfo) {
+				if (((Integer) benefit.get("benefit_id")).equals(cur_id)) {
+					// max value 체크
+					Long max_sum = benefit.containsKey("max_sum") ? (Long) benefit.get("max_sum") : 0L;
+					Long max_cnt = benefit.containsKey("max_cnt") ? (Long) benefit.get("max_cnt") : 0L;
+					Long max_use = benefit.containsKey("max_use") ? (Long) benefit.get("max_use") : 0L;
+
+					if (cur_sum > max_sum) {
+						benefit.put("max_sum_card_type", cur_card_type);
+						benefit.put("max_sum_card_name", cur_card_name);
+						benefit.put("max_sum", cur_sum);
+					}
+
+					if (cur_cnt > max_cnt) {
+						benefit.put("max_cnt_card_type", cur_card_type);
+						benefit.put("max_cnt_card_name", cur_card_name);
+						benefit.put("max_cnt", cur_cnt);
+					}
+
+					if (cur_use > max_use) {
+						benefit.put("max_use_card_type", cur_card_type);
+						benefit.put("max_use_card_name", cur_card_name);
+						benefit.put("max_use", cur_use);
+					}
+				}
 			}
 		});
 		
-		//사용처별 혜택리스트 + 혜택과 연관된 카드의 정보
-		LinkedList<LinkedHashMap<String, Object>> benefitDetailAndCardInfo = new LinkedList<>();
-		brep.benefitDetailByCategory(mccCtg).forEach(b -> {
-			LinkedHashMap<String, Object> inData = new LinkedHashMap<>();
-			int benefit_id = (Integer)b.get("benefit_id");
-			String card_type = (String)b.get("card_type");
-			
-			// ㅇ기서부터다시
-			
-			inData.put("benefit_id", benefit_id);
-			inData.put("benefit_detail", (String)b.get("benefit_detail"));
-			inData.put("benefit_pct", (BigDecimal)b.get("benefit_pct"));
-			inData.put("card_type", card_type); // 이거 안넣어도돼 복수야, 밑도
-			inData.put("card_name", (String)b.get("card_name"));
-			
-//			brep.accumulateDataByCard(card_type, benefit_id).forEach(b -> {
-//				LinkedHashMap<String, Object> inData2 = new LinkedHashMap<>();
-//				
-//			});
+		Collections.sort(benefitTotalInfo, new Comparator<Map<String, Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+				Long val1 = (Long)o1.get("total_sum");
+				Long val2 = (Long)o2.get("total_sum");
+				return val2.compareTo(val1);
+			}
 			
 		});
 		
-		
-		
-		return null;
+		return benefitTotalInfo;
 	}
 
 	public Map<String, Object> benefitTopAndBottomByMCC() {

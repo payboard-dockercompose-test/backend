@@ -1,11 +1,11 @@
 package com.project.cardvisor.controller;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,13 +31,9 @@ public class BenefitClusterController {
 		return bser.benefitTopAndBottomByMCC();
 	}
 	
-	@GetMapping("/BenefitDetail")
-	public Map<String, Object> BenefitDetail(@RequestBody String category){
-		return bser.benefitDetailByCategory(category);
+	@PostMapping("/BenefitDetail")
+	public List<Map<String, Object>> BenefitDetail(@RequestBody Map<String, String> data){
+		return bser.benefitDetailByCategory((String)data.get("cateName"));
 	}
 	
-//	@GetMapping("/benefitBottom")
-//	public List<LinkedHashMap<String, Object>> benefitBottom5ByMCC(){
-//		return bser.benefitTopAndBottomByMCC();
-//	}
 }
