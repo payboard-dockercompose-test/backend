@@ -64,7 +64,7 @@ public class PaymentTests {
 	@Autowired
 	CurrencyRepository currrep;
 
-	//@Test
+	// @Test
 	public void readJson() throws Exception {
 
 		// URL path = this.getClass().getResource("src/test/resources/data.json");
@@ -108,8 +108,8 @@ public class PaymentTests {
 		System.out.println(currList.toString());
 	}
 
-	//다국적 payments data insert
-	//@Test
+	// 다국적 payments data insert
+	// @Test
 	public void multinationalPayment() throws Exception {
 
 		// 고객 리스트
@@ -125,13 +125,12 @@ public class PaymentTests {
 		String[] 업종 = { "음식점", "편의점", "교통비", "쇼핑몰", "미용실", "병원", "숙박시설", "오락시설", "교육비", "카페", "주거/통신", "편의점", "레저/테마",
 				"술/유흥", "국세납입", "기타" };
 
-
 		JSONParser parser = new JSONParser();
 		// JSON 파일 읽기
 		Reader reader = new FileReader("src/test/resources/data.json");
 		org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) parser.parse(reader);
 		org.json.simple.JSONArray dateArray = (org.json.simple.JSONArray) jsonObject.get("currencyData");
-		
+
 		Random random = new Random();
 		for (int i = 0; i < 1000; i++) { // 34000
 
@@ -139,15 +138,15 @@ public class PaymentTests {
 			int mccidx = random.nextInt(16); // mcc 16개
 			int regidx = random.nextInt(clist.size()); // 999개
 			int amountidx = random.nextInt(100) == 0 ? 1 : random.nextInt(100); // 곱할 숫자
-			
+
 			int idx = random.nextInt(dateArray.size());
-			
+
 			org.json.simple.JSONObject element = (org.json.simple.JSONObject) dateArray.get(idx);
 			String randomNationCode = (String) element.get("nationCode");
 			String randomCurrencyCode = (String) element.get("currencyCode");
 			Number randomCurrencyNum = (Number) element.get("currency");
 			double randomCurrency = randomCurrencyNum.doubleValue();
-			
+
 			MccVO mvo = mrep.findById(mccCode[mccidx]).orElse(null);
 
 			Date regDate = clist.get(regidx).getRegDate(); // 등록일
@@ -181,44 +180,36 @@ public class PaymentTests {
 				if (currencyList.size() == 0) {
 					continue;
 				}
-				
-				Optional<CurrencyVO> optionalCurrency = currencyList.stream().filter(curr -> curr.getCurrencyCode().equals(randomCurrencyCode)).findFirst();
+
+				Optional<CurrencyVO> optionalCurrency = currencyList.stream()
+						.filter(curr -> curr.getCurrencyCode().equals(randomCurrencyCode)).findFirst();
 
 				CurrencyVO currency;
 				if (optionalCurrency.isPresent()) {
-				    // currencyList에서 찾을 수 있을 때
-				    currency = optionalCurrency.get();
+					// currencyList에서 찾을 수 있을 때
+					currency = optionalCurrency.get();
 				} else {
-				    // currencyList에서 찾을 수 없을 때, JSON 파일에서 선택한 currency 사용
-				    currency = new CurrencyVO();
-				    currency.setCurrencyNation(randomNationCode);
-				    currency.setCurrencyCode(randomCurrencyCode);
-				    currency.setCurrencyRate(randomCurrency);
+					// currencyList에서 찾을 수 없을 때, JSON 파일에서 선택한 currency 사용
+					currency = new CurrencyVO();
+					currency.setCurrencyNation(randomNationCode);
+					currency.setCurrencyCode(randomCurrencyCode);
+					currency.setCurrencyRate(randomCurrency);
 				}
-				
-			    currency.setCurrencyNation(randomNationCode);
-				
+
+				currency.setCurrencyNation(randomNationCode);
+
 				if (currency != null) {
 
-				    String currencyNation = currency.getCurrencyNation(); 
-				    String currCode = currency.getCurrencyCode();
-				    Double currencyRate = currency.getCurrencyRate();
-				    
-					PaymentsVO vo = PaymentsVO.builder()
-							.payId("PA-" + uuid)
-							.regId(clist.get(regidx))
-							
+					String currencyNation = currency.getCurrencyNation();
+					String currCode = currency.getCurrencyCode();
+					Double currencyRate = currency.getCurrencyRate();
 
-				            .nation(currencyNation) 
-				            .currencyCode(currCode)  
-				            .currencyRate(currencyRate) 
-							
-							.payAmount(amountidx * 100)
-							.payDate(timestamp)
-							.payStore(업종[mccidx])
-							.mccCode(mvo)
-							.dataInsertDate(date1)
-							.build();
+					PaymentsVO vo = PaymentsVO.builder().payId("PA-" + uuid).regId(clist.get(regidx))
+
+							.nation(currencyNation).currencyCode(currCode).currencyRate(currencyRate)
+
+							.payAmount(amountidx * 100).payDate(timestamp).payStore(업종[mccidx]).mccCode(mvo)
+							.dataInsertDate(date1).build();
 					prep.save(vo);
 					System.out.println(">>>>>>>>>>>>" + vo);
 				}
@@ -226,8 +217,8 @@ public class PaymentTests {
 		}
 	}
 
-	//환율 데이터에 있는 나라 payments data insert
-	//@Test
+	// 환율 데이터에 있는 나라 payments data insert
+	// @Test
 	public void f1curr() {
 
 		// 고객 리스트
@@ -316,21 +307,13 @@ public class PaymentTests {
 					return curr.getCurrencyCode().equals(currencyCode[curridx]);
 				}).findFirst().get();
 
-
 //		    	System.out.println("currency:" + currency);
 				if (currency != null) {
 					// double currencyRate = currency.getCurrencyRate();
-					PaymentsVO vo = PaymentsVO.builder()
-							.payId("PA-" + uuid)
-							.regId(clist.get(regidx))
-							.nation(nation)
-							.currencyCode(currencyCode[curridx])
-							.currencyRate(currency.getCurrencyRate())
-							.payAmount(amountidx * 100)
-							.payDate(timestamp)
-							.payStore(업종[mccidx]).mccCode(mvo)
-							.dataInsertDate(date1)
-							.build();
+					PaymentsVO vo = PaymentsVO.builder().payId("PA-" + uuid).regId(clist.get(regidx)).nation(nation)
+							.currencyCode(currencyCode[curridx]).currencyRate(currency.getCurrencyRate())
+							.payAmount(amountidx * 100).payDate(timestamp).payStore(업종[mccidx]).mccCode(mvo)
+							.dataInsertDate(date1).build();
 //		    	    System.out.println("vo:" + vo);
 					prep.save(vo);
 				}
@@ -384,24 +367,22 @@ public class PaymentTests {
 		}
 	}
 
-	// @Test
+	// 혜택 입력 테스트
 	public void f2() {
-		prep.findAll().forEach(p -> {
-
-			if (p.getBenefitAmount() > 0) {
-				return;
+		SimpleDateFormat sdf = new SimpleDateFormat("2024-01-22");
+		String str = sdf.format(new java.util.Date());
+		Date date1 = java.sql.Date.valueOf(str);
+		prep.findByDataInsertDateForBenefit(date1).forEach(p -> {
+			String curMcc = p.getMccCode().getMccCode();
+			String curRegId = p.getRegId().getRegId();
+			BenefitVO bInfo = brep.selectBenefitPctAndId(curRegId, curMcc);
+			System.out.println(bInfo);
+			if (bInfo != null) {
+				long curPayAmount = p.getPayAmount();
+				p.setAppliedBenefitId(bInfo.getBenefitId());
+				p.setBenefitAmount((int) Math.floor(curPayAmount * bInfo.getBenefitPct()));
+				prep.save(p);
 			}
-			MccVO curMcc = p.getMccCode();
-
-
-			List<BenefitVO> bvo = brep.findByPay_id(p.getPayId());
-
-			bvo.forEach(b -> {
-				if (b.getMccCode().equals(curMcc.getMccCode())) {
-					p.setBenefitAmount((int) Math.floor(p.getPayAmount() * b.getBenefitPct()));
-					prep.save(p);
-				}
-			});
 		});
 	}
 
