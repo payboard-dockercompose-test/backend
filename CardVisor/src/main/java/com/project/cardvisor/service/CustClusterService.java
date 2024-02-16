@@ -2,10 +2,9 @@
 package com.project.cardvisor.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
-
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -16,16 +15,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.project.cardvisor.dto.CustClusterFilterDTO;
 import com.project.cardvisor.repo.CardRegInfoRepository;
 
 import com.project.cardvisor.repo.CustomerRepository;
 import com.project.cardvisor.repo.PaymentRepository;
 import com.project.cardvisor.vo.CustomerVO;
 import com.project.cardvisor.vo.PaymentsVO;
+
 @Service
 public class CustClusterService {
     @Autowired
@@ -381,6 +383,165 @@ public class CustClusterService {
         return prepo.findTopMccCodes();
     }
     
+    // 직종별 고객 인원수와 전체 고객 인원수
+    public List<Object[]> countByJobTypeAndAll() {
+    	return crepo.countByJobTypeAndAll();
+    }
+    
+    // 직종별 평균 연령과 전체 평균 연령
+    public List<Object[]> getAverageAgeByJobTypeAndAll() {
+        List<Object[]> rawResults = crepo.getAverageAgeByJobTypeAndAll();
+
+        return rawResults.stream()
+                .map(result -> new Object[] {result[0], new BigDecimal((double)result[1]).setScale(1, RoundingMode.FLOOR)})
+                .collect(Collectors.toList());
+    }
+    
+    //직종별 top연봉 카테고리
+    public List<Object[]> MostCommonByJobTypeAndAll() {
+    	return crepo.MostCommonByJobTypeAndAll();
+    }
+    
+    //연봉별 고객 수 조회
+	public List<Object[]> findAllCustSalaryAndAll() {
+		return crepo.findAllCustSalaryAndAll();
+	}
+	
+	//연봉 별 고객 평균 연령
+	public List<Object[]> getAgeSalaryRangeAndAll() {
+        List<Object[]> rawsResults = crepo.getAgeSalaryRangeAndAll();
+
+        return rawsResults.stream()
+                .map(result -> new Object[] {result[0], new BigDecimal((double)result[1]).setScale(1, RoundingMode.FLOOR)})
+                .collect(Collectors.toList());
+	}
+	
+	//직업별 평균 소비금액
+	public List<Map<String, Object>> AveragePaymentByJobTypeAndAll() {
+	    List<Object[]> rawData = prepo.AveragePaymentByJobTypeAndAll();
+	    List<Map<String, Object>> result = new ArrayList<>();
+	    
+	    // 한국 로케일을 사용하여 통화 형식 지정
+	    NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.KOREA);
+	    
+	    for (Object[] data : rawData) {
+	        Map<String, Object> formattedData = new HashMap<>();
+	        formattedData.put("job_type", data[0]);
+	        
+	        // pay_amount 값을 통화 형식으로 변환
+	        double payAmount = ((Number) data[1]).doubleValue();
+	        String formattedPayAmount = formatter.format(payAmount);
+	        
+	        formattedData.put("avg_payment", formattedPayAmount);
+	        result.add(formattedData);
+	    }
+
+	    return result;
+	}
+	
+	//직업별 사용카드 상위 3개
+	public Map<String, Object> getTopCardData() {
+        List<Object[]> topCardsByJobType = crirepo.findTop3CardTypesByJobType();
+        List<String> topCards = crirepo.findTop3CardTypes();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("topCardsByJobType", topCardsByJobType);
+        result.put("all", topCards);
+
+        return result;
+    }
+	
+	//직업별 주 사용처 상위 3개
+	public List<Object[]> getTop3MccCodeByJobType() {
+		return prepo.getTop3MccCodeByJobType();
+	}
+	
+	//연봉별 조회
+	public List<Object[]> findCustSalaryData(){
+		return crepo.findCustSalaryData();
+		
+	}
+	
+	// 연봉별 평균 소비금액
+	public List<Map<String, Object>> paymentBySalaryRangeAndAll() {
+		List<Object[]> rawData = prepo.paymentBySalaryRangeAndAll();
+
+		List<Map<String, Object>> result = new ArrayList<>();
+
+	    // 한국 로케일을 사용하여 통화 형식 지정
+	    NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.KOREA);
+
+	    for (Object[] data : rawData) {
+	        Map<String, Object> formattedData = new HashMap<>();
+	        formattedData.put("cust_salary", data[0]);
+
+	        // pay_amount 값을 통화 형식으로 변환
+	        double payAmount = ((Number) data[1]).doubleValue();
+	        String formattedPayAmount = formatter.format(payAmount);
+
+	        formattedData.put("avg_payment", formattedPayAmount);
+	        result.add(formattedData);
+	    }
+
+	    return result;
+	}
+	
+//	public List<Map<String, Object>> paymentBySalaryRangeAndAll() {
+//	    List<Object[]> rawData = prepo.paymentBySalaryRangeAndAll();
+//
+//	    List<Map<String, Object>> result = new ArrayList<>();
+//
+//	    for (Object[] data : rawData) {
+//	        Map<String, Object> formattedData = new HashMap<>();
+//	        formattedData.put("cust_salary", data[0]);
+//	        formattedData.put("avg_payment", data[1]); // 통화 형식으로 변환하지 않고 원래 데이터 그대로 사용
+//	        result.add(formattedData);
+//	    }
+//
+//	    return result;
+//	}
+	
+	//연봉별 사용카드 상위 3개
+	public Map<String, List> getCardData() {
+        List<String> top3CardTypes = crirepo.findTop3CardTypes();
+        List<Object[]> top3CardTypesByCustSalary = crirepo.findTop3CardTypesByCustSalary();
+
+        Map<String, List> result = new HashMap<>();
+        result.put("all", top3CardTypes);
+        result.put("top3CardTypes", top3CardTypesByCustSalary);
+
+        return result;
+    }
+	
+	public List<Object[]> getTop3MccCodeByCustSalary() {
+		return prepo.getTop3MccCodeByCustSalary();
+	}
+	
+	//filter
+	//고객 수
+	public Long getCustomerCount(CustClusterFilterDTO filter) {
+        return crepo.countDistinctByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
+    }
+	//평균연령
+	public Double getCustomerAge(CustClusterFilterDTO filter) {
+		return crepo.calculateAverageAgeByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
+	}
+	//평균연봉
+	public List<String> getCustomerSalary(CustClusterFilterDTO filter) {
+		return crepo.findDistinctSalaryByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());
+	}
+	//소비금액
+	public Double getCustomerPayment(CustClusterFilterDTO filter) {
+		return prepo.findAveragePaymentByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());		
+	}
+	//사용카드
+	public List<String> getCustomerCardName(CustClusterFilterDTO filter) {
+		return crirepo.findTop5CardNamesByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
+	}
+	//사용처
+	public List<String> getCustomerMcc(CustClusterFilterDTO filter) {
+		return prepo.findTop5CategoriesByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());
+	}
 
 }
 

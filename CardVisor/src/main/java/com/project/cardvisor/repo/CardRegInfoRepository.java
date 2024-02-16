@@ -87,6 +87,7 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 	List<Object[]> findTop3CardTypesByCustSalary();
 
 
+
 	// filter 사용카드
 	@Query(value = "SELECT cl.card_name " + "FROM card_reg_info cri " + "JOIN customer c ON cri.cust_id = c.cust_id "
 			+ "JOIN payments p ON cri.reg_id = p.reg_id " + "JOIN job_list j ON c.job_id = j.job_id "
@@ -106,7 +107,11 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 	
 	
 	
-	@Query(value="select count(*) from card_reg_info",nativeQuery = true)
+
+
+	@Query(value="select count(*) from card_reg_info "
+			+ "where expire_date>now()",nativeQuery = true)
+
 	int totalcardregamount();
 	
 
