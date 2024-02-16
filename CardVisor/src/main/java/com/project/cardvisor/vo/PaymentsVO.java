@@ -33,7 +33,7 @@ import lombok.ToString;
 public class PaymentsVO {
 	
 	@Id
-	private String pay_id;
+	private String payId;
 	
 	@ManyToOne
 	@JoinColumn(name="reg_id")

@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.project.cardvisor.dto.BenefitDTO;
 import com.project.cardvisor.repo.BenefitRepository;
+import com.project.cardvisor.repo.MccCodeRepository;
+import com.project.cardvisor.vo.MccVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +25,113 @@ import lombok.RequiredArgsConstructor;
 public class BenefitClusterService {
 
 	private final BenefitRepository brep;
+	private final MccCodeRepository mrep;
+
+	public List<Map<String, Object>> benefitDetailByCategory(String category) {
+
+		String mccCtg = mrep.findByCtgName(category).getMccCode();
+		// (기간동안)혜택이 이용된 건수, (기간동안) 혜택으로 총 할인 금액
+		List<Map<String, Object>> benefitTotalInfo = new ArrayList<>();
+		brep.benefitInfoAndCalData(mccCtg).forEach(b -> {
+			Map<String, Object> inData = new HashMap<>();
+			inData.put("benefit_id", (Integer) b.get("benefit_id"));
+			inData.put("benefit_detail", (String) b.get("benefit_detail"));
+			inData.put("benefit_pct", (Double) b.get("benefit_pct"));
+			inData.put("total_count", (Long) b.get("count_benefit_used"));
+			BigDecimal bd = (BigDecimal) b.get("sum_benefit_amount");
+			Long total_sum = bd.longValue();
+			Long total_use = (Long) b.get("count_using_people");
+			inData.put("total_sum", total_sum);
+			if (total_sum == 0 || total_use == 0) {
+				inData.put("amount_per_person", 0);
+			} else {
+				inData.put("amount_per_person", total_sum / total_use);
+			}
+			benefitTotalInfo.add(inData);
+		});
+
+		// 특정 혜택의 카드 갯수, 카드 연회비 평균
+		brep.cardCalData(mccCtg).forEach(b -> {
+			Integer benefit_id = (Integer) b.get("benefit_id");
+			Long related_card_cnt = (Long) b.get("related_card_cnt");
+			BigDecimal bd = (BigDecimal) b.get("avg_annual_fee");
+			Long avg_annual_fee = bd.longValue();
+			System.out.println(related_card_cnt + ":" + avg_annual_fee);
+			for (Map<String, Object> data : benefitTotalInfo) {
+				System.out.println((Integer) data.get("benefit_id") == benefit_id);
+				System.out.println((Integer) data.get("benefit_id")+"////"+benefit_id);
+				if (((Integer)data.get("benefit_id")).equals(benefit_id)) {
+					data.put("related_card_cnt", related_card_cnt);
+					data.put("avg_annual_fee", avg_annual_fee);
+				}
+			}
+		});
+
+		// 혜택 연관된 카드의 상세 정보
+		brep.cardDetailRelatedBenefit(mccCtg).forEach(b -> {
+			Integer cur_id = (Integer) b.get("benefit_id");
+			Integer cur_card_type = (Integer) b.get("card_type");
+			String cur_card_name = (String) b.get("card_name");
+
+			// 혜택 별로 카드의 혜택 정보를 조회
+			Map<String, Object> comparison = brep.cardComparison(cur_card_type, cur_id);
+			Long cur_sum = 0L;
+			Long cur_cnt = 0L;
+			Long cur_use = 0L;
+			if (comparison != null) {
+				if (comparison.get("cur_sum") != null) {
+					cur_sum = (Long)((BigDecimal) comparison.get("cur_sum")).longValue();
+				}
+				if (comparison.get("cur_cnt") != null) {
+					cur_cnt = (Long) comparison.get("cur_cnt");
+				}
+				if (comparison.get("cur_use") != null) {
+					cur_use = (Long) comparison.get("cur_use");
+				}
+			}
+
+			// benefitTotalInfo에서 현재 benefit_id와 일치하는 항목을 찾아서 업데이트
+			for (Map<String, Object> benefit : benefitTotalInfo) {
+				if (((Integer) benefit.get("benefit_id")).equals(cur_id)) {
+					// max value 체크
+					Long max_sum = benefit.containsKey("max_sum") ? (Long) benefit.get("max_sum") : 0L;
+					Long max_cnt = benefit.containsKey("max_cnt") ? (Long) benefit.get("max_cnt") : 0L;
+					Long max_use = benefit.containsKey("max_use") ? (Long) benefit.get("max_use") : 0L;
+
+					if (cur_sum > max_sum) {
+						benefit.put("max_sum_card_type", cur_card_type);
+						benefit.put("max_sum_card_name", cur_card_name);
+						benefit.put("max_sum", cur_sum);
+					}
+
+					if (cur_cnt > max_cnt) {
+						benefit.put("max_cnt_card_type", cur_card_type);
+						benefit.put("max_cnt_card_name", cur_card_name);
+						benefit.put("max_cnt", cur_cnt);
+					}
+
+					if (cur_use > max_use) {
+						benefit.put("max_use_card_type", cur_card_type);
+						benefit.put("max_use_card_name", cur_card_name);
+						benefit.put("max_use", cur_use);
+					}
+				}
+			}
+		});
+		
+		Collections.sort(benefitTotalInfo, new Comparator<Map<String, Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+				Long val1 = (Long)o1.get("total_sum");
+				Long val2 = (Long)o2.get("total_sum");
+				return val2.compareTo(val1);
+			}
+			
+		});
+		
+		return benefitTotalInfo;
+	}
 
 	public Map<String, Object> benefitTopAndBottomByMCC() {
 		List<String> mcclist = brep.findDistinctMCC();
@@ -35,7 +144,6 @@ public class BenefitClusterService {
 			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
 			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
 			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setCard_name(tuple.get("card_name", String.class));
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
@@ -151,7 +259,7 @@ public class BenefitClusterService {
 
 			benefitBottom.add(categoryMap);
 		}
-		
+
 		Collections.sort(benefitBottom, new Comparator<LinkedHashMap<String, Object>>() {
 
 			@Override
@@ -185,7 +293,6 @@ public class BenefitClusterService {
 			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
 			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
 			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setCard_name(tuple.get("card_name", String.class));
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
@@ -243,11 +350,10 @@ public class BenefitClusterService {
 			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
 			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
 			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setCard_name(tuple.get("card_name", String.class));
 			dto.setInterest_id(tuple.get("interest_id", Integer.class));
 			return dto;
 		}).collect(Collectors.toList());
-		
+
 		benefitDtos.forEach(b -> {
 			String curCtg = (String) b.getCtg_name();
 			((ArrayList<Object>) root.get("children")).forEach(i -> {

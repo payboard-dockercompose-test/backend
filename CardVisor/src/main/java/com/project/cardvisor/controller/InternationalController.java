@@ -20,7 +20,22 @@ import lombok.extern.slf4j.Slf4j;
 public class InternationalController {
 
 	final InternationalService iservice;
-	
+
+/*
+	private List<Map<String, Object>> nationData;
+
+	@PostMapping("/nation")
+	public List<Map<String, Object>> receiveData(@RequestBody List<Map<String, Object>> nation) {
+		log.info("Received nation data: {}", nation);
+		nationData = nation;
+		return nationData;
+	}
+
+	public List<Map<String, Object>> getNationData() {
+		return nationData;
+	}
+*/
+
 	//올해 해외 토탈 결제 금액
 	@GetMapping("/totalPayment")
 	public Long getTotalpayment() {
@@ -31,7 +46,7 @@ public class InternationalController {
 	@GetMapping("/comparePaymentSamePeriod")
 	public Map<String, Object> getComparePaymentSamePeriod(@RequestParam(name = "month", required = false) Integer month) {
 		//month = 2;
-		System.out.println(">>>>>>>>>>>>>>>>>"+ month);
+		//System.out.println(">>>>>>>>>>>>>>>>>"+ month);
 		return iservice.getComparePaymentSamePeriod(month);
 	}
 	
@@ -40,6 +55,16 @@ public class InternationalController {
 	public List<Map<String, Object>> getHighestOrderPayment() {
 		List<Map<String, Object>> result = iservice.getHighestOrderPayment();
 		//System.out.println(">>>>>>>>>>>>"+ result.size());
+		
+		return result;
+	}
+	
+	//올해 결제 건수가 제일 많은 나라 (순위 리스트업)
+	@GetMapping("/chartDataList")
+	public List<Map<String, Object>> getNationPaymentsDataList() {
+		List<Map<String, Object>> result = iservice.getNationPaymentsDataList();
+		//System.out.println(">>>>>>>>>>>>"+ result.size());
+		
 		return result;
 	}
 }
