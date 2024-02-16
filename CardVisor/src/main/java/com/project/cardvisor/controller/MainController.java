@@ -157,4 +157,24 @@ public class MainController {
     	int amount = cardreginfoservice.totalcardregamount();
     	return amount;
     }
+   @GetMapping("/payAmoutTop5Card")
+   public List<Map<String, Object>> PayAmoutTop5Card() {
+	   List<Map<String, Object>> plist = paymentservice.PayAmountTop5Card();
+	   return plist;
+   }
+   @GetMapping("/abroadPayAmountTop5Card")
+  public List<Map<String, Object>> AbroadPayAmountTop5Card(){
+	   List<Map<String, Object>> plist = paymentservice.AbroadPayAmountTop5Card();
+	   return plist;
+   }
+   @GetMapping("benefitTop5Card")
+   public List<Map<String, Object>> BenefitTop5Card(){
+	   List<Map<String, Object>> blist = paymentservice.benefitTop5Card();
+	   return blist;
+   }
+   @GetMapping("benefitTotalAmount")
+   public int benefitTotalAmount() {
+	   int count = paymentservice.benefitTotalAmount();
+	   return count;
+   }
 }

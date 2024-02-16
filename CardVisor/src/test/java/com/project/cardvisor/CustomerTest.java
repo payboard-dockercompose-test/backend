@@ -55,7 +55,7 @@ public class CustomerTest {
 		return ThreadLocalRandom.current().nextLong(startMillis, endMillis);
 	}
 
-	@Test
+	//@Test
 	void f1() throws IOException {
 
 		// 1. 이름 리스트업

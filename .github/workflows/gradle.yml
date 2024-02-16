@@ -47,7 +47,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CardVisor/FrontEnd
-        ref: 'hwasoo'
+        ref: 'main'
         path: ./frontend
         token: ${{ secrets.REPO_PAT }}
 
