@@ -58,11 +58,60 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 			+ "JOIN card_reg_info r ON r.cust_id = c.cust_id JOIN card_list t ON r.card_type = t.card_type "
 			+ "GROUP BY c.age_range, t.card_name) as subquery1 WHERE rn <= 3) as subquery2", nativeQuery = true)
 	List<Object[]> findTop3CardTypesByAgeRange();
+	
+	// 직업별 사용카드 상위 3개
+	@Query(value = "SELECT " + "  job_type,"
+			+ " SUBSTRING_INDEX(SUBSTRING_INDEX(grouped_card_names, ',', 1), ':', 1) AS top1_card,"
+			+ " SUBSTRING_INDEX(SUBSTRING_INDEX(grouped_card_names, ',', 2), ',', -1) AS top2_card,"
+			+ " SUBSTRING_INDEX(SUBSTRING_INDEX(grouped_card_names, ',', -1), ':', 1) AS top3_card" + " FROM ("
+			+ " SELECT " + " job_type,"
+			+ " GROUP_CONCAT(card_name ORDER BY count DESC SEPARATOR ',') as grouped_card_names" + " FROM ("
+			+ " SELECT " + " j.job_type, " + " t.card_name, " + " COUNT(*) as count" + " FROM "
+			+ " customer c" + " JOIN " + " card_reg_info r ON c.cust_id = r.cust_id" + " JOIN "
+			+ " job_list j ON c.job_id = j.job_id" + " JOIN " + " card_list t ON r.card_type = t.card_type"
+			+ " GROUP BY " + " j.job_type, t.card_name" + " ) AS subquery" + " GROUP BY job_type"
+			+ ") AS final_query", nativeQuery = true)
+	List<Object[]> findTop3CardTypesByJobType();
+	
+	// 연봉별 사용카드 상위 3개
+	@Query(value = "SELECT " + "cust_salary,"
+			+ "SUBSTRING_INDEX(SUBSTRING_INDEX(grouped_card_names, ',', 1), ':', 1) AS top1_card,"
+			+ "SUBSTRING_INDEX(SUBSTRING_INDEX(grouped_card_names, ',', 2), ',', -1) AS top2_card,"
+			+ "SUBSTRING_INDEX(SUBSTRING_INDEX(grouped_card_names, ',', -1), ':', 1) AS top3_card " + "FROM ("
+			+ "SELECT " + "cust_salary,"
+			+ "GROUP_CONCAT(card_name ORDER BY count DESC SEPARATOR ',') as grouped_card_names " + "FROM (" + "SELECT "
+			+ "c.cust_salary, " + "t.card_name, " + "COUNT(*) as count " + "FROM " + "customer c " + "JOIN "
+			+ "card_reg_info r ON c.cust_id = r.cust_id " + "JOIN " + "card_list t ON r.card_type = t.card_type "
+			+ "GROUP BY " + "c.cust_salary, t.card_name " + ") AS subquery " + "GROUP BY cust_salary "
+			+ ") AS final_query", nativeQuery = true)
+	List<Object[]> findTop3CardTypesByCustSalary();
 
+
+
+	// filter 사용카드
+	@Query(value = "SELECT cl.card_name " + "FROM card_reg_info cri " + "JOIN customer c ON cri.cust_id = c.cust_id "
+			+ "JOIN payments p ON cri.reg_id = p.reg_id " + "JOIN job_list j ON c.job_id = j.job_id "
+			+ "JOIN card_list cl ON cl.card_type = cri.card_type " + "WHERE c.cust_gender = :gender "
+			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
+			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
+			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
+			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
+			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
+			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
+			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + // 매우 큰 값으로 설정하여 모든 연령대를 포함
+			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange " + "GROUP BY cl.card_name "
+			+ "ORDER BY COUNT(cl.card_name) DESC " + "LIMIT 5", nativeQuery = true)
+	List<String> findTop5CardNamesByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
+			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+	
+	
+	
+	
 
 
 	@Query(value="select count(*) from card_reg_info "
 			+ "where expire_date>now()",nativeQuery = true)
+
 	int totalcardregamount();
 	
 
