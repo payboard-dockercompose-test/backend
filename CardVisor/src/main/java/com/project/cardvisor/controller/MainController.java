@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.cardvisor.service.CardClusterService;
 import com.project.cardvisor.service.CardReginfoService;
 import com.project.cardvisor.service.CurrencyService;
 import com.project.cardvisor.service.CustClusterService;
@@ -21,6 +22,8 @@ public class MainController {
 	@Autowired
 	 CustClusterService genderRatioService;
 
+	@Autowired
+	CardClusterService cardservice;
 	@Autowired
 	CardReginfoService cardreginfoservice;
 	@Autowired
@@ -144,4 +147,34 @@ public class MainController {
     	int amount = paymentservice.selectWeektransaction();
     	return amount;
     }
+    @GetMapping("/selectTop5CardList")
+    public List<Map<String, Object>> SelectTop5CardList() {
+   	 List<Map<String, Object>> clist = cardservice.SelectTop5CardList();
+   	return clist;
+   }
+    @GetMapping("/totalCardRegAmount")
+	public int TotalCardRegAmount() {
+    	int amount = cardreginfoservice.totalcardregamount();
+    	return amount;
+    }
+   @GetMapping("/payAmoutTop5Card")
+   public List<Map<String, Object>> PayAmoutTop5Card() {
+	   List<Map<String, Object>> plist = paymentservice.PayAmountTop5Card();
+	   return plist;
+   }
+   @GetMapping("/abroadPayAmountTop5Card")
+  public List<Map<String, Object>> AbroadPayAmountTop5Card(){
+	   List<Map<String, Object>> plist = paymentservice.AbroadPayAmountTop5Card();
+	   return plist;
+   }
+   @GetMapping("benefitTop5Card")
+   public List<Map<String, Object>> BenefitTop5Card(){
+	   List<Map<String, Object>> blist = paymentservice.benefitTop5Card();
+	   return blist;
+   }
+   @GetMapping("benefitTotalAmount")
+   public int benefitTotalAmount() {
+	   int count = paymentservice.benefitTotalAmount();
+	   return count;
+   }
 }
