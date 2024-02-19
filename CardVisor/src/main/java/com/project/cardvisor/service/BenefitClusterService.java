@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -27,12 +29,12 @@ public class BenefitClusterService {
 	private final BenefitRepository brep;
 	private final MccCodeRepository mrep;
 
-	public List<Map<String, Object>> benefitDetailByCategory(String category) {
-
+	public List<Map<String, Object>> benefitDetailByCategory(String category, String date) {
+		
 		String mccCtg = mrep.findByCtgName(category).getMccCode();
 		// (기간동안)혜택이 이용된 건수, (기간동안) 혜택으로 총 할인 금액
 		List<Map<String, Object>> benefitTotalInfo = new ArrayList<>();
-		brep.benefitInfoAndCalData(mccCtg).forEach(b -> {
+		brep.benefitInfoAndCalData(mccCtg, date).forEach(b -> {
 			Map<String, Object> inData = new HashMap<>();
 			inData.put("benefit_id", (Integer) b.get("benefit_id"));
 			inData.put("benefit_detail", (String) b.get("benefit_detail"));
@@ -56,11 +58,8 @@ public class BenefitClusterService {
 			Long related_card_cnt = (Long) b.get("related_card_cnt");
 			BigDecimal bd = (BigDecimal) b.get("avg_annual_fee");
 			Long avg_annual_fee = bd.longValue();
-			System.out.println(related_card_cnt + ":" + avg_annual_fee);
 			for (Map<String, Object> data : benefitTotalInfo) {
-				System.out.println((Integer) data.get("benefit_id") == benefit_id);
-				System.out.println((Integer) data.get("benefit_id")+"////"+benefit_id);
-				if (((Integer)data.get("benefit_id")).equals(benefit_id)) {
+				if (((Integer) data.get("benefit_id")).equals(benefit_id)) {
 					data.put("related_card_cnt", related_card_cnt);
 					data.put("avg_annual_fee", avg_annual_fee);
 				}
@@ -74,13 +73,13 @@ public class BenefitClusterService {
 			String cur_card_name = (String) b.get("card_name");
 
 			// 혜택 별로 카드의 혜택 정보를 조회
-			Map<String, Object> comparison = brep.cardComparison(cur_card_type, cur_id);
+			Map<String, Object> comparison = brep.cardComparison(cur_card_type, cur_id, date);
 			Long cur_sum = 0L;
 			Long cur_cnt = 0L;
 			Long cur_use = 0L;
 			if (comparison != null) {
 				if (comparison.get("cur_sum") != null) {
-					cur_sum = (Long)((BigDecimal) comparison.get("cur_sum")).longValue();
+					cur_sum = (Long) ((BigDecimal) comparison.get("cur_sum")).longValue();
 				}
 				if (comparison.get("cur_cnt") != null) {
 					cur_cnt = (Long) comparison.get("cur_cnt");
@@ -118,165 +117,173 @@ public class BenefitClusterService {
 				}
 			}
 		});
-		
+
 		Collections.sort(benefitTotalInfo, new Comparator<Map<String, Object>>() {
 
 			@Override
 			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-				Long val1 = (Long)o1.get("total_sum");
-				Long val2 = (Long)o2.get("total_sum");
+				Long val1 = (Long) o1.get("total_sum");
+				Long val2 = (Long) o2.get("total_sum");
 				return val2.compareTo(val1);
 			}
-			
+
 		});
 		
 		return benefitTotalInfo;
 	}
 
-	public Map<String, Object> benefitTopAndBottomByMCC() {
+	public Map<String, Object> benefitTopAndBottomByMCC(String selectOption, String date) {
 		List<String> mcclist = brep.findDistinctMCC();
-
-		List<BenefitDTO> benefitDtos = brep.findByMCC().stream().map(tuple -> {
-			BenefitDTO dto = new BenefitDTO();
-			dto.setCtg_name(tuple.get("ctg_name", String.class));
-			dto.setMcc_code(tuple.get("mcc_code", String.class));
-			dto.setBenefit_amount_sum(tuple.get("benefit_amount_sum", BigDecimal.class).intValue());
-			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
-			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
-			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setInterest_id(tuple.get("interest_id", Integer.class));
-			return dto;
-		}).collect(Collectors.toList());
-
-		// top 5
-		List<LinkedHashMap<String, Object>> benefitTop = new ArrayList<>();
-		for (String name : mcclist) {
-			LinkedHashMap<String, Object> categoryMap = new LinkedHashMap<>();
-			categoryMap.put("category", name);
-			categoryMap.put("subData", new ArrayList<>());
-
-			int totalValue = 0;
-			int otherValue = 0;
-			int benefitCount = 0;
-			for (BenefitDTO dto : benefitDtos) {
-				if (dto.getCtg_name().equals(name)) {
-					benefitCount++;
-					if (benefitCount <= 5) {
-						LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
-						subDataMap.put("category", dto.getBenefit_detail());
-						subDataMap.put("value", dto.getBenefit_amount_sum());
-						((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
-					} else {
-						otherValue += dto.getBenefit_amount_sum();
-					}
-					totalValue += dto.getBenefit_amount_sum();
-				}
-			}
-
-			if (benefitCount > 5) {
-				LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
-				subDataMap.put("category", "기타");
-				subDataMap.put("value", otherValue);
-				((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
-			}
-
-			categoryMap.put("value", totalValue);
-			((ArrayList<LinkedHashMap<String, Object>>) (categoryMap.get("subData"))).sort((d1, d2) -> {
-				int val1 = (Integer) d1.get("value");
-				int val2 = (Integer) d2.get("value");
-				return val2 - val1;
-			});
-
-			benefitTop.add(categoryMap);
-		}
-
-		Collections.sort(benefitTop, new Comparator<LinkedHashMap<String, Object>>() {
-
-			@Override
-			public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
-
-				int compare = ((Integer) o2.get("value")).compareTo((Integer) o1.get("value"));
-				if (compare != 0) {
-					return compare;
-				}
-
-				return 0;
-			}
-		});
-
-		// bottom 5
-		List<LinkedHashMap<String, Object>> benefitBottom = new ArrayList<>();
-		Collections.sort(benefitDtos, new Comparator<BenefitDTO>() {
-
-			@Override
-			public int compare(BenefitDTO o1, BenefitDTO o2) {
-				int mccComparison = o1.getMcc_code().compareTo(o2.getMcc_code());
-				if (mccComparison != 0) {
-					return mccComparison;
-				} else {
-					return Integer.compare(o1.getBenefit_amount_sum(), o2.getBenefit_amount_sum());
-				}
-
-			}
-
-		});
-		for (String name : mcclist) {
-			LinkedHashMap<String, Object> categoryMap = new LinkedHashMap<>();
-			categoryMap.put("category", name);
-			categoryMap.put("subData", new ArrayList<>());
-
-			int totalValue = 0;
-			int otherValue = 0;
-			int benefitCount = 0;
-			for (BenefitDTO dto : benefitDtos) {
-				if (dto.getCtg_name().equals(name)) {
-					benefitCount++;
-					if (benefitCount <= 5) {
-						LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
-						subDataMap.put("category", dto.getBenefit_detail());
-						subDataMap.put("value", dto.getBenefit_amount_sum());
-						((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
-					} else {
-						otherValue += dto.getBenefit_amount_sum();
-					}
-					totalValue += dto.getBenefit_amount_sum();
-				}
-			}
-
-//			if (benefitCount > 5) {
-//				LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
-//				subDataMap.put("category", "other");
-//				subDataMap.put("value", otherValue);
-//				((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
-//			}
-
-			categoryMap.put("value", totalValue);
-			((ArrayList<LinkedHashMap<String, Object>>) (categoryMap.get("subData"))).sort((d1, d2) -> {
-				int val1 = (Integer) d1.get("value");
-				int val2 = (Integer) d2.get("value");
-				return val2 - val1;
-			});
-
-			benefitBottom.add(categoryMap);
-		}
-
-		Collections.sort(benefitBottom, new Comparator<LinkedHashMap<String, Object>>() {
-
-			@Override
-			public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
-
-				int compare = ((Integer) o2.get("value")).compareTo((Integer) o1.get("value"));
-				if (compare != 0) {
-					return compare;
-				}
-
-				return 0;
-			}
-		});
-
 		Map<String, Object> result = new HashMap<>();
-		result.put("top", benefitTop);
-		result.put("bottom", benefitBottom);
+		List<BenefitDTO> benefitDtos = null;
+		if (date == null) {
+			benefitDtos = brep.findByMCC().stream().map(tuple -> {
+				BenefitDTO dto = new BenefitDTO();
+				dto.setCtg_name(tuple.get("ctg_name", String.class));
+				dto.setMcc_code(tuple.get("mcc_code", String.class));
+				dto.setBenefit_amount_sum(tuple.get("benefit_amount_sum", BigDecimal.class).intValue());
+				dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
+				dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
+				dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
+				dto.setInterest_id(tuple.get("interest_id", Integer.class));
+				return dto;
+			}).collect(Collectors.toList());
+		} else {
+			benefitDtos = brep.findByMCCWithDate(date).stream().map(tuple -> {
+				BenefitDTO dto = new BenefitDTO();
+				dto.setCtg_name(tuple.get("ctg_name", String.class));
+				dto.setMcc_code(tuple.get("mcc_code", String.class));
+				dto.setBenefit_amount_sum(tuple.get("benefit_amount_sum", BigDecimal.class).intValue());
+				dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
+				dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
+				dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
+				dto.setInterest_id(tuple.get("interest_id", Integer.class));
+				return dto;
+			}).collect(Collectors.toList());
+		}
+
+		List<LinkedHashMap<String, Object>> benefitList = new ArrayList<>();
+		// top or bottom 분기
+		if (selectOption.equals("high")) {
+			for (String name : mcclist) {
+				LinkedHashMap<String, Object> categoryMap = new LinkedHashMap<>();
+				categoryMap.put("category", name);
+				categoryMap.put("subData", new ArrayList<>());
+
+				int totalValue = 0;
+				int otherValue = 0;
+				int benefitCount = 0;
+				for (BenefitDTO dto : benefitDtos) {
+					if (dto.getCtg_name().equals(name)) {
+						benefitCount++;
+						if (benefitCount <= 5) {
+							LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
+							subDataMap.put("category", dto.getBenefit_detail());
+							subDataMap.put("value", dto.getBenefit_amount_sum());
+							((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
+						} else {
+							otherValue += dto.getBenefit_amount_sum();
+						}
+						totalValue += dto.getBenefit_amount_sum();
+					}
+				}
+
+				if (benefitCount > 5) {
+					LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
+					subDataMap.put("category", "기타");
+					subDataMap.put("value", otherValue);
+					((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
+				}
+
+				categoryMap.put("value", totalValue);
+				((ArrayList<LinkedHashMap<String, Object>>) (categoryMap.get("subData"))).sort((d1, d2) -> {
+					int val1 = (Integer) d1.get("value");
+					int val2 = (Integer) d2.get("value");
+					return val2 - val1;
+				});
+
+				benefitList.add(categoryMap);
+			}
+			Collections.sort(benefitList, new Comparator<LinkedHashMap<String, Object>>() {
+
+				@Override
+				public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
+
+					int compare = ((Integer) o2.get("value")).compareTo((Integer) o1.get("value"));
+					if (compare != 0) {
+						return compare;
+					}
+
+					return 0;
+				}
+			});
+			result.put("title", "Top 5");
+		} else {
+			// bottom 5
+			Collections.sort(benefitDtos, new Comparator<BenefitDTO>() {
+
+				@Override
+				public int compare(BenefitDTO o1, BenefitDTO o2) {
+					int mccComparison = o1.getMcc_code().compareTo(o2.getMcc_code());
+					if (mccComparison != 0) {
+						return mccComparison;
+					} else {
+						return Integer.compare(o1.getBenefit_amount_sum(), o2.getBenefit_amount_sum());
+					}
+
+				}
+
+			});
+			for (String name : mcclist) {
+				LinkedHashMap<String, Object> categoryMap = new LinkedHashMap<>();
+				categoryMap.put("category", name);
+				categoryMap.put("subData", new ArrayList<>());
+
+				int totalValue = 0;
+				int otherValue = 0;
+				int benefitCount = 0;
+				for (BenefitDTO dto : benefitDtos) {
+					if (dto.getCtg_name().equals(name)) {
+						benefitCount++;
+						if (benefitCount <= 5) {
+							LinkedHashMap<String, Object> subDataMap = new LinkedHashMap<>();
+							subDataMap.put("category", dto.getBenefit_detail());
+							subDataMap.put("value", dto.getBenefit_amount_sum());
+							((ArrayList<Object>) categoryMap.get("subData")).add(subDataMap);
+						} else {
+							otherValue += dto.getBenefit_amount_sum();
+						}
+						totalValue += dto.getBenefit_amount_sum();
+					}
+				}
+
+				categoryMap.put("value", totalValue);
+				((ArrayList<LinkedHashMap<String, Object>>) (categoryMap.get("subData"))).sort((d1, d2) -> {
+					int val1 = (Integer) d1.get("value");
+					int val2 = (Integer) d2.get("value");
+					return val2 - val1;
+				});
+
+				benefitList.add(categoryMap);
+			}
+			Collections.sort(benefitList, new Comparator<LinkedHashMap<String, Object>>() {
+
+				@Override
+				public int compare(LinkedHashMap<String, Object> o1, LinkedHashMap<String, Object> o2) {
+
+					int compare = ((Integer) o2.get("value")).compareTo((Integer) o1.get("value"));
+					if (compare != 0) {
+						return compare;
+					}
+
+					return 0;
+				}
+			});
+			result.put("title", "Bottom 5");
+		}
+		
+		result.put("list",benefitList);
+
 		return result;
 	}
 
@@ -327,10 +334,11 @@ public class BenefitClusterService {
 		return benefitList;
 	}
 
-	public LinkedList<Object> benefitTreeMapByMCC() {
+	// treemap 가져오기
+	public LinkedList<Object> benefitTreeMapByMCC(String date) {
 
 		List<String> mcclist = brep.findDistinctMCC();
-
+		
 		LinkedList<Object> benfitList = new LinkedList<>();
 		Map<String, Object> root = new LinkedHashMap<>();
 		root.put("name", "Benfit By MCC");
@@ -342,17 +350,33 @@ public class BenefitClusterService {
 			cur.put("children", new ArrayList<Object>());
 			((ArrayList<Object>) root.get("children")).add(cur);
 		}
-		List<BenefitDTO> benefitDtos = brep.findByMCC().stream().map(tuple -> {
-			BenefitDTO dto = new BenefitDTO();
-			dto.setCtg_name(tuple.get("ctg_name", String.class));
-			dto.setMcc_code(tuple.get("mcc_code", String.class));
-			dto.setBenefit_amount_sum(tuple.get("benefit_amount_sum", BigDecimal.class).intValue());
-			dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
-			dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
-			dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
-			dto.setInterest_id(tuple.get("interest_id", Integer.class));
-			return dto;
-		}).collect(Collectors.toList());
+		List<BenefitDTO> benefitDtos = null;
+		if (date == null) {
+			benefitDtos = brep.findByMCC().stream().map(tuple -> {
+				BenefitDTO dto = new BenefitDTO();
+				dto.setCtg_name(tuple.get("ctg_name", String.class));
+				dto.setMcc_code(tuple.get("mcc_code", String.class));
+				dto.setBenefit_amount_sum(tuple.get("benefit_amount_sum", BigDecimal.class).intValue());
+				dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
+				dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
+				dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
+				dto.setInterest_id(tuple.get("interest_id", Integer.class));
+				return dto;
+			}).collect(Collectors.toList());
+		} else {
+			benefitDtos = brep.findByMCCWithDate(date).stream().map(tuple -> {
+				BenefitDTO dto = new BenefitDTO();
+				dto.setCtg_name(tuple.get("ctg_name", String.class));
+				dto.setMcc_code(tuple.get("mcc_code", String.class));
+				dto.setBenefit_amount_sum(tuple.get("benefit_amount_sum", BigDecimal.class).intValue());
+				dto.setBenefit_id(tuple.get("benefit_id", Integer.class));
+				dto.setBenefit_detail(tuple.get("benefit_detail", String.class));
+				dto.setBenefit_pct(tuple.get("benefit_pct", Double.class));
+				dto.setInterest_id(tuple.get("interest_id", Integer.class));
+				return dto;
+			}).collect(Collectors.toList());
+		}
+		
 
 		benefitDtos.forEach(b -> {
 			String curCtg = (String) b.getCtg_name();
@@ -365,7 +389,13 @@ public class BenefitClusterService {
 				}
 			});
 		});
+		Collections.sort(benefitDtos, new Comparator<BenefitDTO>() {
 
+			public int compare(BenefitDTO o1, BenefitDTO o2) {
+		        return o2.getBenefit_amount_sum() - o1.getBenefit_amount_sum();
+		    }
+		});
+		
 		return benfitList;
 	}
 }
