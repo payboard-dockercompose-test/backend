@@ -367,4 +367,6 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 
 	@Query(value = "select sum(benefit_amount) from payments p", nativeQuery = true)
 	int benefitTotalAmount();
+	@Query(value = "select p.data_insert_date from payments p order by p.data_insert_date desc limit 1", nativeQuery = true)
+	Date findLatestDataInsertDate();
 }
