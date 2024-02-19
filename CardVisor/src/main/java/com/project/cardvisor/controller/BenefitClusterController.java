@@ -1,7 +1,5 @@
 package com.project.cardvisor.controller;
 
-import java.text.ParseException;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +33,14 @@ public class BenefitClusterController {
 		return bser.benefitTopAndBottomByMCC(selectOption, dateStr);
 	}
 	
-	@PostMapping("/BenefitDetail")
+	@PostMapping("/benefitDetail")
 	public List<Map<String, Object>> BenefitDetail(@RequestBody Map<String, String> data){
-		return bser.benefitDetailByCategory((String)data.get("cateName"), (String)data.get("date"));
+		return bser.benefitDetailByCategory((String)data.get("cateName"), (String)data.get("date"), (String)data.get("selectOption"));
+	}
+	
+	@PostMapping("/benefitRecommend")
+	public Map<String, Object> BenefitRecommend(@RequestBody Map<String, Object> data){
+		return bser.benefitRecommendByFilter(data);
 	}
 	
 }

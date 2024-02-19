@@ -1,9 +1,5 @@
 package com.project.cardvisor.repo;
 
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,16 +57,22 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 	List<String> findDistinctMCC();
 	
 	@Query(value = "SELECT b.benefit_id AS benefit_id, b.benefit_detail AS benefit_detail, b.benefit_pct AS benefit_pct, "
-			+ "IFNULL(SUM(p.benefit_amount),0) AS sum_benefit_amount, "
-			+ "COUNT(p.benefit_amount) AS count_benefit_used, "
-			+ "COUNT(DISTINCT p.reg_id) AS count_using_people "
+			+ "IFNULL(p.sum_benefit_amount,0) AS sum_benefit_amount, "
+			+ "IFNULL(p.count_benefit_used,0) AS count_benefit_used, "
+			+ "IFNULL(p.count_using_people,0) AS count_using_people "
 			+ "FROM benefit b "
-			+ "LEFT JOIN payments p "
+			+ "LEFT JOIN "
+			+ "(SELECT "
+			+ "applied_benefit_id, "
+			+ "SUM(benefit_amount) AS sum_benefit_amount, "
+			+ "COUNT(benefit_amount) AS count_benefit_used, "
+			+ "COUNT(DISTINCT reg_id) AS count_using_people "
+			+ "FROM payments "
+			+ "WHERE :date is null or DATE_FORMAT(pay_date, '%Y-%m') LIKE :date "
+			+ "GROUP BY applied_benefit_id) p "
 			+ "ON b.benefit_id = p.applied_benefit_id "
 			+ "WHERE b.mcc_code = :mcc_code "
-			+ "AND (:date is null or DATE_FORMAT(p.pay_date, '%Y-%m') LIKE :date) "
-			+ "GROUP BY b.benefit_id "
-			+ "ORDER BY benefit_id ASC", nativeQuery = true)
+			+ "ORDER BY b.benefit_id ASC", nativeQuery = true)
 	List<Map<String, Object>> benefitInfoAndCalData(@Param("mcc_code") String mcc_code, @Param("date") String date);
 	
 	@Query(value = "select b.benefit_id, count(cb.card_type) related_card_cnt, AVG(cl.card_annual_fee) avg_annual_fee "
