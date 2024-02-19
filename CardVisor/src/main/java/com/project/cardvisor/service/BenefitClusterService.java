@@ -1,12 +1,11 @@
 package com.project.cardvisor.service;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Service;
 import com.project.cardvisor.dto.BenefitDTO;
 import com.project.cardvisor.repo.BenefitRepository;
 import com.project.cardvisor.repo.MccCodeRepository;
-import com.project.cardvisor.vo.JobListVO;
-import com.project.cardvisor.vo.MccVO;
 import com.project.cardvisor.vo.QCardRegInfoVO;
 import com.project.cardvisor.vo.QCustomerVO;
 import com.project.cardvisor.vo.QMccVO;
@@ -40,27 +37,45 @@ public class BenefitClusterService {
 
 	private final BenefitRepository brep;
 	private final MccCodeRepository mrep;
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public Map<String, Object> benefitRecommendByFilter(Map<String, Object> data) {
+	public List<Map<String, Object>> benefitRecommendByFilter(Map<String, Object> data) {
 
 		// db에서 넘어온 컬럼 정리
-		boolean[] genArr = (boolean[]) data.get("성별");
-		boolean[] jobArr = (boolean[]) data.get("직업");
-		boolean[] payArr = (boolean[]) data.get("연소득");
-		boolean[] ageArr = (boolean[]) data.get("연령");
+		boolean[] genArr = null;
+		boolean[] jobArr = null;
+		boolean[] payArr = null;
+		boolean[] ageArr = null;
+
+		for (Map.Entry<String, Object> entry : data.entrySet()) {
+			List<Boolean> boolList = (List<Boolean>) entry.getValue();
+			boolean[] arr = new boolean[boolList.size()];
+			for (int i = 0; i < boolList.size(); i++) {
+				arr[i] = boolList.get(i);
+			}
+
+			if (entry.getKey().equals("성별")) {
+				genArr = arr;
+			} else if (entry.getKey().equals("직업")) {
+				jobArr = arr;
+			} else if (entry.getKey().equals("연소득")) {
+				payArr = arr;
+			} else if (entry.getKey().equals("연령")) {
+				ageArr = arr;
+			}
+		}
 
 		// 성별, 직업, 연소득, 연령
 		// db에서 넘어오는 배열의 index로 값 매핑
-		String[] genValList = new String[] { "남", "여" };
-		String[] jobValList = new String[] { "직장인", "공무원", "전문직", "프리랜서", "개인사업자", "법인사업자", "대학생", "전업주부" };
+		char[] genValList = new char[] { '남', '여' };
+		int[] jobValList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 		String[] payValList = new String[] { "3000만원 미만", "3000만원 이상 5000만원 미만", "5000만원 이상 7000만원 미만",
 				"7000만원 이상 1억 미만", "1억 이상" };
 
-		List<String> genList = new LinkedList<>();
-		List<JobListVO> jobList = new LinkedList<>();
+		List<Character> genList = new LinkedList<>();
+		List<Integer> jobList = new LinkedList<>();
 		List<String> payList = new LinkedList<>();
 
 		for (int i = 0; i < genArr.length; i++) {
@@ -70,7 +85,7 @@ public class BenefitClusterService {
 
 		for (int i = 0; i < jobArr.length; i++) {
 			if (jobArr[i])
-				jobList.add(JobListVO.builder().jobType(jobValList[i]).build());
+				jobList.add(jobValList[i]);
 		}
 
 		for (int i = 0; i < payArr.length; i++) {
@@ -90,8 +105,6 @@ public class BenefitClusterService {
 				case "20":
 					ageRange.put("start", now.minusYears(29));
 					ageRange.put("end", now.minusYears(20));
-					System.out.println(now.minusYears(29));
-					System.out.println(now.minusYears(20));
 					break;
 				case "30":
 					ageRange.put("start", now.minusYears(39));
@@ -117,36 +130,49 @@ public class BenefitClusterService {
 				ageRangeList.add(ageRange);
 			}
 		}
-		
+
 		QPaymentsVO pvo = QPaymentsVO.paymentsVO;
 		QMccVO mccvo = QMccVO.mccVO;
 		QCardRegInfoVO cardvo = QCardRegInfoVO.cardRegInfoVO;
-		QCustomerVO cusvo = QCustomerVO.customerVO;
-//		
-//		JPAQuery<?> query = new JPAQuery<Void>(entityManager);
-//		List<Tuple> result = query.select(pvo.appliedBenefitId, pvo.benefitAmount.sum(), mccvo.ctgName)
-//				.from(pvo)
-//			    .join(mccvo).on(pvo.mccCode.mccCode.eq(mccvo.mccCode))
-//			    .where(
-//			    		pvo.regId.in(
-//			            JPAExpressions.select(cardvo.regId)
-//			                .from(cardvo)
-//			                .where(
-//			                		cardvo.custId.in(
-//			                        JPAExpressions.select(cusvo.custId)
-//			                            .from(cusvo)
-//			                            .where(cusvo.jobId.in(jobList))
-//			                            .where(cusvo.custSalary.in(payList))
-//			                    )
-//			                )
-//			        ),
-//			    		pvo.benefitAmount.gt(0)
-//			    )
-//			    .groupBy(pvo.appliedBenefitId)
-//			    .orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.sum().desc())
-//			    .fetch();
-		
-		return null;
+		QCustomerVO custvo = QCustomerVO.customerVO;
+
+		// booleanBuidler age 조건 생성
+		BooleanBuilder ageCondition = new BooleanBuilder();
+		for (Map<String, LocalDate> ageRange : ageRangeList) {
+		    Date start = java.sql.Date.valueOf(ageRange.get("start"));
+		    Date end = java.sql.Date.valueOf(ageRange.get("end"));
+		    ageCondition.or(custvo.custBirth.between(start, end));
+		}
+
+		JPAQuery<?> query = new JPAQuery<Void>(entityManager);
+		List<Tuple> queryResult = query.select(pvo.appliedBenefitId, pvo.benefitAmount.sum(), mccvo.ctgName).from(pvo)
+				.join(mccvo).on(mccvo.mccCode.eq(pvo.mccCode.mccCode)).where(
+						pvo.regId.regId.in(JPAExpressions.select(cardvo.regId).from(cardvo)
+								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
+										custvo.jobId.jobId.in(jobList), ageCondition,
+										custvo.custGender.in(genList), custvo.custSalary.in(payList))))),
+						pvo.benefitAmount.gt(0))
+				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.sum().desc()).fetch();
+
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (Tuple tuple : queryResult) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("appliedBenefitId", tuple.get(pvo.appliedBenefitId));
+			map.put("sumBenefitAmount", tuple.get(pvo.benefitAmount.sum()));
+			map.put("ctgName", tuple.get(mccvo.ctgName));
+			result.add(map);
+		}
+		Collections.sort(result, new Comparator<Map<String, Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+				Integer val1 = (Integer) o1.get("sumBenefitAmount");
+				Integer val2 = (Integer) o2.get("sumBenefitAmount");
+				return val2.compareTo(val1);
+			}
+		});
+
+		return result;
 	}
 
 	public List<Map<String, Object>> benefitDetailByCategory(String category, String date, String selectOption) {
