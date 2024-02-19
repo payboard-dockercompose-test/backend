@@ -58,15 +58,23 @@ public class InternationalController {
 		
 		return result;
 	}
-	
-	//올해 결제 건수가 제일 많은 나라 (순위 리스트업)
+
+	// (차트 데이터) 월별 데이터 추출
 	@GetMapping("/chartDataList")
-	public List<Map<String, Object>> getNationPaymentsDataList() {
-		List<Map<String, Object>> result = iservice.getNationPaymentsDataList();
-		//System.out.println(">>>>>>>>>>>>"+ result.size());
-		
+	public List<Map<String, Object>> getNationPaymentsDataList(
+			@RequestParam("startMonth") String startMonth
+			, @RequestParam("endMonth") String endMonth) 
+	{
+		log.info("!!!!!!!end"+endMonth);
+		log.info(startMonth);
+		List<Map<String, Object>> result = iservice.getNationPaymentsDataList(startMonth, endMonth);
+		//List<Map<String, Object>> result = iservice.getNationPaymentsDataList();
+		System.out.println(">>>>>>>>>>>>" + result.size());
+
 		return result;
 	}
+
+	
 }
 
 
