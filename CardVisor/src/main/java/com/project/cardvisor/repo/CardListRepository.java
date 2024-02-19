@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import com.project.cardvisor.vo.CardListVO;
 
 import lombok.Value;
 
-public interface CardListRepository extends CrudRepository<CardListVO, Integer> {
+public interface CardListRepository extends CrudRepository<CardListVO, Integer>,JpaRepository<CardListVO, Integer> {
 
 	// bohyeon start
 
@@ -90,19 +91,16 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer> 
 
 	// bohyeon end
 
-	@Query(value="select * from card_list cl,\r\n"
-			+ "(\r\n"
-			+ "select  card_type,\r\n"
-			+ "count(*) as col\r\n"
-			+ "from card_reg_info\r\n"
-			+ "WHERE  expire_date > NOW() \r\n"
-			+ "group by card_type\r\n"
-			+ "order by col desc \r\n"
-			+ "limit 5\r\n"
-			+ ") ci \r\n"
-			+ "where cl.card_type = ci.card_type\r\n"
-			+ "order by ci.col desc", nativeQuery = true)
-
+	@Query(value="SELECT cl.card_annual_fee, cl.card_name, ci.col "
+			+ "FROM card_list cl "
+			+ "JOIN ( "
+			+ "    SELECT card_type, COUNT(*) AS col "
+			+ "    FROM card_reg_info "
+			+ "    WHERE expire_date > NOW()"
+			+ "    GROUP BY card_type "
+			+ ") ci ON cl.card_type = ci.card_type "
+			+ "ORDER BY ci.col DESC "
+			+ "LIMIT 5", nativeQuery = true)
 	List<Map<String, Object>> selectTop5CardList();
 
 
