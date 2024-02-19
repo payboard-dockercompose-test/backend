@@ -68,30 +68,9 @@ public class InternationalController {
 		log.info("!!!!!!!end"+endMonth);
 		log.info(startMonth);
 		List<Map<String, Object>> result = iservice.getNationPaymentsDataList(startMonth, endMonth);
-		//List<Map<String, Object>> result = iservice.getNationPaymentsDataList();
 		System.out.println(">>>>>>>>>>>>" + result.size());
 
 		return result;
 	}
 
-	
 }
-
-
-/*
-해야 할 일
-- 해외 토탈 결제 금액  --> 올해로 수정해야함
-- 전년 월 대비 올해 월 증감 (+/-)
-- 올해 건수가 제일 많은 나라 (순위 리스트업)
-
----------------------------------------------------------------
-
-- 세계지도 chart 사용하여 해외 결제 시각화 정보 제공
-- 색상 → 결제 건수
-- 월별로 선택가능하도록 → 22년 23년 24년도 필터
-- 월 **슬라이드**
-- 디테일 정보 (월단위)
-    - 건수
-    - 총금액
-    - 제일 많은 연령대
-*/
