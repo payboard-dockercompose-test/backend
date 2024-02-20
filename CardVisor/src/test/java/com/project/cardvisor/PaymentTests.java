@@ -338,7 +338,7 @@ public class PaymentTests {
 		// Calendar 인스턴스 생성
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(latestDate);
-//		    
+		    
 		// 고객 리스트
 		LinkedList<CardRegInfoVO> clist = new LinkedList<>();
 		crep.findAll().forEach(c -> {
@@ -367,7 +367,7 @@ public class PaymentTests {
 			MccVO mvo = mrep.findById(mccCode[mccidx]).orElse(null);
 
 			Date regDate = clist.get(regidx).getRegDate(); // 등록일
-
+			
 			Date expDate = clist.get(regidx).getExpireDate(); // 만기일
 			java.util.Date randomDate = getRandomDate(regDate, expDate);
 			if (randomDate != null) { // randomDate가 null이 아닌 경우에만 save

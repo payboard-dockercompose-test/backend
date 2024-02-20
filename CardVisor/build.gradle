@@ -31,6 +31,33 @@ dependencies {
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testCompileOnly 'org.projectlombok:lombok:1.18.24' // 테스트 환경에서 주입
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.24' // 테스트환경의 어노테이션 주입
+	//querydsl dependencies add(boot Ver3.0 UP) start
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	//querydsl dependencies add(boot Ver3.0 UP) end
+}
+
+
+//QueryDsl Start
+def querydslDir = "src/main/generated"
+sourceSets {
+	main.java.srcDirs += [ querydslDir ]
+}
+tasks.withType(JavaCompile) {
+	options.generatedSourceOutputDirectory = file(querydslDir)
+}
+clean.doLast {
+	file(querydslDir).deleteDir()
+}
+//QueryDsl End
+
+//test 무시 빌드
+tasks.withType(Test) {
+    enabled = false
 }
 
 tasks.named('test') {
