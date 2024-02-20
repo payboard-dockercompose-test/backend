@@ -46,6 +46,11 @@ public class CardClusterController {
 		return ccserv.getMccChart(month, type);
 	}
 	
+	@GetMapping("/MccChartsAll")
+	public Map<String, Object> getCardMccAllChart(@RequestParam("month") String month, @RequestParam("type") String type){
+		return ccserv.getMccAllChart(month, type);
+	}
+	
 	
 	
 	
