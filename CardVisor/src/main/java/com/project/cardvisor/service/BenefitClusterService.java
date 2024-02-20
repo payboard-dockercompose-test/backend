@@ -267,6 +267,10 @@ public class BenefitClusterService {
 		    if (!groupedResult.containsKey(ctg_name)) {
 		        groupedResult.put(ctg_name, new ArrayList<>());
 		    }
+		    // 현재 그룹에 아이템이 이미 3개 이상이라면 아이템을 추가하지 않음.
+		    if (groupedResult.get(ctg_name).size() >= 3) {
+		        continue;
+		    }
 		    groupedResult.get(ctg_name).add(map);
 		}
 		return groupedResult;
