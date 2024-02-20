@@ -102,4 +102,13 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "AND (:date is null or DATE_FORMAT(p.pay_date, '%Y-%m') LIKE :date) "
 			+ "and p.applied_benefit_id =:applied_benefit_id", nativeQuery = true)
 	Map<String, Object> cardComparison(@Param("card_type") int card_type, @Param("applied_benefit_id") int applied_benefit_id, @Param("date") String date);
+	
+	@Query(value = "select b.benefit_id, cl.card_type, cl.card_name, cl.card_annual_fee "
+			+ "from card_benefit cb "
+			+ "join benefit b on cb.benefit_id = b.benefit_id "
+			+ "join card_list cl on cl.card_type = cb.card_type "
+			+ "where b.benefit_id in :benefit_list "
+			+ "order BY benefit_id", nativeQuery = true)
+	List<Map<String, Object>> cardDetailRelatedBenefitForFilteredAction(@Param("benefit_list") List<Integer> benefit_list);
+
 }
