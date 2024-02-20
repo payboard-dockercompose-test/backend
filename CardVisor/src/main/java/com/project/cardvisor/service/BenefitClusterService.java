@@ -248,8 +248,6 @@ public class BenefitClusterService {
 		});
 		
 		// map에 mcc 별로 구분 지어 넣기.
-		
-
 		return result;
 	}
 
