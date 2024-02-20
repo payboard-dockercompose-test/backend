@@ -1,6 +1,7 @@
 package com.project.cardvisor.service;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -60,21 +61,34 @@ public class CardClusterService {
 
 		// 총 이용고객
 		int custNum = clrepo.getCustNum(typeNum, dateFlag);
-		map.put("custNum", custNum);
+
+		NumberFormat formatter = NumberFormat.getInstance();
+		String formattedCustNum = formatter.format(custNum);
+
+		map.put("custNum", formattedCustNum);
 
 		// 전월 대비 이용고객 수 증감
-
 		int before = clrepo.getCustNum(typeNum, beforeDate);
+		String formattedBeforeCustNum = formatter.format(before);
+
+		map.put("beforeCustNum", formattedBeforeCustNum);
+
 		int compCustNum = custNum - before;
 		map.put("compCustNum", compCustNum);
 
 		// 총 결제금액
 		Long totalPayNum = prepo.getTotalPayNum(typeNum, dateFlag, endDate);
-		map.put("payTotal", totalPayNum);
+
+		String formattedTotalPayNum = formatter.format(totalPayNum);
+
+		map.put("payTotal", formattedTotalPayNum);
 
 		// 전월 총 결제금액 비교하기
 		Long compTotalPay;
 		Long beforeTotalPay = prepo.getTotalPayNum(typeNum, beforeDate, beforeEndDate);
+		String formatteBeforeTotalPay = formatter.format(beforeTotalPay);
+
+		map.put("beforeTotalPay", formatteBeforeTotalPay);
 
 		compTotalPay = totalPayNum - beforeTotalPay;
 		map.put("compTotalPay", compTotalPay);
@@ -102,6 +116,14 @@ public class CardClusterService {
 			map.put(gender, percentage);
 		}
 
+		Long maleCnt = clrepo.getMaleCnt(typeNum, dateFlag);
+		String formattedMaleCnt = formatter.format(maleCnt);
+		map.put("maleCnt", formattedMaleCnt);
+
+		Long femaleCnt = clrepo.getFemaleCnt(typeNum, dateFlag);
+		String formattedFemaleCnt = formatter.format(femaleCnt);
+		map.put("femaleCnt", formattedFemaleCnt);
+
 		List<String> Benefits = clrepo.getBenefitList(typeNum);
 		map.put("benefits", Benefits);
 
@@ -119,6 +141,27 @@ public class CardClusterService {
 		List<Map<String, Object>> mccTopList = clrepo.getMccTopList(typeNum, dateFlag, endDate);
 
 		return mccTopList;
+	}
+
+	public Map<String, Object> getMccAllChart(String month, String type) {
+
+		YearMonth yearMonth = YearMonth.parse(month);
+		LocalDate dateFlag = yearMonth.atDay(1);
+		LocalDate endDate = yearMonth.atEndOfMonth();
+
+		int typeNum = Integer.parseInt(type);
+
+		List<Map<String, Object>> mccAllList = clrepo.getMccAllList(typeNum, dateFlag, endDate);
+
+		Map<String, Object> newMap = new HashMap<>();
+
+		for (Map<String, Object> map : mccAllList) {
+			String mccCode = (String) map.get("ctg_name"); // mcc_code를 가져옴
+			BigDecimal amount = (BigDecimal) map.get("total"); // 금액을 가져옴
+			newMap.put(mccCode, amount); // 새로운 맵에 저장
+		}
+
+		return newMap;
 	}
 
 	// bohyeon end

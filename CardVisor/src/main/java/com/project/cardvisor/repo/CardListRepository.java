@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import com.project.cardvisor.vo.CardListVO;
 
 import lombok.Value;
 
-public interface CardListRepository extends CrudRepository<CardListVO, Integer> {
+public interface CardListRepository extends CrudRepository<CardListVO, Integer>,JpaRepository<CardListVO, Integer> {
 
 	// bohyeon start
 
@@ -68,6 +69,21 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer> 
 	List<Map<Character, Object>> getGenderPercentage(int typeNum, LocalDate dateFlag);
 	
 	
+	@Query(value = "SELECT \n"
+			+ "count(*) \n"
+			+ "FROM card_reg_info cr\n"
+			+ "JOIN customer c ON cr.cust_id = c.cust_id\n"
+			+ "WHERE cr.card_type = ?1 and cr.expire_date  > ?2\n and c.cust_gender='남'", nativeQuery=true)
+	Long getMaleCnt(int typeNum, LocalDate dateFlag);
+	
+	@Query(value = "SELECT \n"
+			+ "count(*) \n"
+			+ "FROM card_reg_info cr\n"
+			+ "JOIN customer c ON cr.cust_id = c.cust_id\n"
+			+ "WHERE cr.card_type = ?1 and cr.expire_date  > ?2\n and c.cust_gender='여'", nativeQuery=true)
+	Long getFemaleCnt(int typeNum, LocalDate dateFlag);
+	
+	
 	@Query(value="select benefit_detail\n"
 			+ "from benefit\n"
 			+ "where benefit_id in (select benefit_id\n"
@@ -86,23 +102,31 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer> 
 			+ "ORDER BY total DESC\n"
 			+ "LIMIT 6;", nativeQuery=true)
 	List<Map<String, Object>> getMccTopList(int typeNum, LocalDate dateFlag, LocalDate endDate);
+	
+	
+	@Query(value="SELECT SUM(p.pay_amount) as total, m.ctg_name\n"
+			+ "FROM payments p\n"
+			+ "JOIN card_reg_info c ON p.reg_id = c.reg_id\n"
+			+ "JOIN mcc m ON p.mcc_code = m.mcc_code\n"
+			+ "WHERE c.card_type = ?1 \n"
+			+ "AND p.pay_date BETWEEN ?2 AND ?3 \n"
+			+ "GROUP BY p.mcc_code, m.ctg_name;",nativeQuery=true)
+	List<Map<String, Object>> getMccAllList(int typeNum, LocalDate dateFlag, LocalDate endDate);
+
 
 
 	// bohyeon end
 
-	@Query(value="select * from card_list cl,\r\n"
-			+ "(\r\n"
-			+ "select  card_type,\r\n"
-			+ "count(*) as col\r\n"
-			+ "from card_reg_info\r\n"
-			+ "WHERE  expire_date > NOW() \r\n"
-			+ "group by card_type\r\n"
-			+ "order by col desc \r\n"
-			+ "limit 5\r\n"
-			+ ") ci \r\n"
-			+ "where cl.card_type = ci.card_type\r\n"
-			+ "order by ci.col desc", nativeQuery = true)
-
+	@Query(value="SELECT cl.card_annual_fee, cl.card_name, ci.col "
+			+ "FROM card_list cl "
+			+ "JOIN ( "
+			+ "    SELECT card_type, COUNT(*) AS col "
+			+ "    FROM card_reg_info "
+			+ "    WHERE expire_date > NOW()"
+			+ "    GROUP BY card_type "
+			+ ") ci ON cl.card_type = ci.card_type "
+			+ "ORDER BY ci.col DESC "
+			+ "LIMIT 5", nativeQuery = true)
 	List<Map<String, Object>> selectTop5CardList();
 
 

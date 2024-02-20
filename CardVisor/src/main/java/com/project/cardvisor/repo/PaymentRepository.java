@@ -73,62 +73,43 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	List<Map<String, Object>> selectHighestOrderPayment();
 
 	//(차트 데이터) 월별 데이터 추출
-	@Query(value="SELECT"
-			+ "    payment_month"
-			+ "    , nation"
-			+ "    , age_range"
-			+ "    , total_payment_count"
-			+ "    , total_amount"
-			+ " FROM"
-			+ "    ("
-			+ "        SELECT"
-			+ "            payment_month"
-			+ "            , nation"
-			+ "            , age_range"
-			+ "            , payment_count"
-			+ "            , SUM(total_payment_count) OVER (PARTITION BY payment_month, nation) as total_payment_count"
-			+ "            , SUM(total_amount) OVER (PARTITION BY payment_month, nation) as total_amount"
-			+ "            , RANK() OVER (PARTITION BY payment_month, nation ORDER BY payment_count DESC) as rank"
-			+ "        FROM"
-			+ "            ("
-			+ "                SELECT"
-			+ "                    DATE_FORMAT(p.pay_date, '%Y-%m') as payment_month"
-			+ "                    , p.nation"
-			+ "                    , CASE"
-			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20대'"
-			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30대'"
-			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40대'"
-			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50대'"
-			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60대'"
-			+ "                        ELSE '70대 이상'"
-			+ "                    , END as age_range"
-			+ "                    , COUNT(*) as payment_count"
-			+ "                    , COUNT(*) OVER (PARTITION BY DATE_FORMAT(p.pay_date, '%Y-%m'), p.nation) as total_payment_count"
-			+ "                    , SUM(p.PAY_AMOUNT * p.CURRENCY_RATE) OVER (PARTITION BY DATE_FORMAT(p.pay_date, '%Y-%m'), p.nation) as total_amount"
-			+ "                FROM"
-			+ "                    customer c"
-			+ "                JOIN"
-			+ "                    card_reg_info cri on c.cust_id = cri.cust_id"
-			+ "                JOIN"
-			+ "                    payments p on cri.reg_id = p.reg_id"
-			+ "                WHERE"
-			+ "                    p.pay_date >= STR_TO_DATE(CONCAT('2023-01', '-01'), '%Y-%m-%d')"
-			+ "                AND"
-			+ "                    p.pay_date <= STR_TO_DATE(CONCAT('2023-06', '-01'), '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
-			+ "                AND"
-			+ "                    p.CURRENCY_CODE != 'KRW'"
-			+ "                GROUP BY"
-			+ "                    payment_month, p.nation, age_range"
-			+ "            ) AS subquery1"
-			+ "    ) AS subquery2"
-			+ " WHERE"
-			+ "    rank = 1"
-			+ " ORDER BY"
-			+ "    payment_month DESC", nativeQuery = true)
-	List<Map<String, Object>> selectNationPaymentsDataList();
-
-	
-	
+		@Query(value=" SELECT "
+				+ "    CASE"
+				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20대'"
+				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30대'"
+				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40대'"
+				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50대'"
+				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60대'"
+				+ "        ELSE '70대 이상'"
+				+ "    END AS age_range, "
+				+ "    p.nation, "
+				+ "    DATE_FORMAT(p.pay_date, '%Y-%m') AS payment_month,"
+				+ "    COUNT(p.pay_amount) AS total_payment_count,"
+				+ "    SUM(p.pay_amount * p.currency_rate) AS total_amount,"
+				+ "    cust.cust_gender AS gender_range"
+				+ " FROM  "
+				+ "    ("
+				+ "        SELECT "
+				+ "            cri.reg_id, "
+				+ "            c.cust_gender, "
+				+ "            c.cust_birth "
+				+ "        FROM "
+				+ "            customer c "
+				+ "            JOIN card_reg_info cri "
+				+ "            ON c.cust_id = cri.cust_id"
+				+ "    ) AS cust"
+				+ " LEFT JOIN payments p "
+				+ "    ON cust.reg_id = p.reg_id"
+				+ " WHERE "
+				+ "    p.pay_date >= STR_TO_DATE(:start, '%Y-%m-%d')"
+				+ "    AND p.pay_date <= STR_TO_DATE(:end, '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
+				+ "    AND p.nation != 'KOR'"
+				+ " GROUP BY "
+				+ "    p.nation,"
+				+ "    cust.cust_gender"
+				+ " ORDER BY"
+				+ "    p.pay_date DESC", nativeQuery = true)
+		List<Map<String, Object>> selectNationPaymentsDataList(@Param("start") LocalDate start, @Param("end") LocalDate end);
 	
 	
 
@@ -327,14 +308,14 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	int selectMonthtransaction();
 
 	// 필요한가?..
-	@Query(value = "SELECT \r\n" + "  DATE_FORMAT(pay_date, '%Y-%m') AS month, " + "  count(*) As transaction "
+	@Query(value = "SELECT " + "  DATE_FORMAT(pay_date, '%Y-%m') AS month, " + "  count(*) As transaction "
 			+ "FROM payments " + "WHERE pay_date >= DATE_SUB(CURRENT_DATE,INTERVAL 17 MONTH) AND "
 			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR) " + "GROUP BY month "
 			+ "ORDER BY month", nativeQuery = true)
 	List<Map<String, Object>> selectLastYearMonthtransaction();
 
 	// 주간
-	@Query(value = "SELECT\r\n" + "  WEEK(pay_date) AS week, " + "    count(*) As transaction " + "FROM payments "
+	@Query(value = "SELECT" + "  WEEK(pay_date) AS week, " + "    count(*) As transaction " + "FROM payments "
 			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK) " + "GROUP BY week "
 			+ "ORDER BY week", nativeQuery = true)
 	List<Map<String, Object>> selectPerWeeklytransaction();
@@ -366,7 +347,7 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 
 	@Query(value = "select sum(benefit_amount) from payments p", nativeQuery = true)
 	int benefitTotalAmount();
-	
+
 	@Query(value = "select p.data_insert_date from payments p order by p.data_insert_date desc limit 1", nativeQuery = true)
 	Date findLatestDataInsertDate();
 }
