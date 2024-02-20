@@ -69,6 +69,21 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer>,
 	List<Map<Character, Object>> getGenderPercentage(int typeNum, LocalDate dateFlag);
 	
 	
+	@Query(value = "SELECT \n"
+			+ "count(*) \n"
+			+ "FROM card_reg_info cr\n"
+			+ "JOIN customer c ON cr.cust_id = c.cust_id\n"
+			+ "WHERE cr.card_type = ?1 and cr.expire_date  > ?2\n and c.cust_gender='남'", nativeQuery=true)
+	Long getMaleCnt(int typeNum, LocalDate dateFlag);
+	
+	@Query(value = "SELECT \n"
+			+ "count(*) \n"
+			+ "FROM card_reg_info cr\n"
+			+ "JOIN customer c ON cr.cust_id = c.cust_id\n"
+			+ "WHERE cr.card_type = ?1 and cr.expire_date  > ?2\n and c.cust_gender='여'", nativeQuery=true)
+	Long getFemaleCnt(int typeNum, LocalDate dateFlag);
+	
+	
 	@Query(value="select benefit_detail\n"
 			+ "from benefit\n"
 			+ "where benefit_id in (select benefit_id\n"
@@ -87,6 +102,17 @@ public interface CardListRepository extends CrudRepository<CardListVO, Integer>,
 			+ "ORDER BY total DESC\n"
 			+ "LIMIT 6;", nativeQuery=true)
 	List<Map<String, Object>> getMccTopList(int typeNum, LocalDate dateFlag, LocalDate endDate);
+	
+	
+	@Query(value="SELECT SUM(p.pay_amount) as total, m.ctg_name\n"
+			+ "FROM payments p\n"
+			+ "JOIN card_reg_info c ON p.reg_id = c.reg_id\n"
+			+ "JOIN mcc m ON p.mcc_code = m.mcc_code\n"
+			+ "WHERE c.card_type = ?1 \n"
+			+ "AND p.pay_date BETWEEN ?2 AND ?3 \n"
+			+ "GROUP BY p.mcc_code, m.ctg_name;",nativeQuery=true)
+	List<Map<String, Object>> getMccAllList(int typeNum, LocalDate dateFlag, LocalDate endDate);
+
 
 
 	// bohyeon end
