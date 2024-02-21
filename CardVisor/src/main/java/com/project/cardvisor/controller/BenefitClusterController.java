@@ -39,7 +39,7 @@ public class BenefitClusterController {
 	}
 	
 	@PostMapping("/benefitRecommend")
-	public List<Map<String, Object>> BenefitRecommend(@RequestBody Map<String, Object> data){
+	public Map<String, List<Map<String, Object>>> BenefitRecommend(@RequestBody Map<String, Object> data){
 		return bser.benefitRecommendByFilter(data);
 	}
 	

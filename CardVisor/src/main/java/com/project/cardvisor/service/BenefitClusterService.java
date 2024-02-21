@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -41,8 +43,8 @@ public class BenefitClusterService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
-
-	public List<Map<String, Object>> benefitRecommendByFilter(Map<String, Object> data) {
+	
+	public Map<String, List<Map<String, Object>>> benefitRecommendByFilter(Map<String, Object> data) {
 
 		// db에서 넘어온 컬럼 정리
 		boolean[] genArr = null;
@@ -163,6 +165,7 @@ public class BenefitClusterService {
 		
 		List<Map<String, Object>> result = new ArrayList<>();
 		List<Integer> beneList = new ArrayList<>();
+		Set<String> ctgList = new HashSet<>();
 		for (Tuple tuple : queryResult) {
 			Map<String, Object> map = new HashMap<>();
 			
@@ -171,7 +174,9 @@ public class BenefitClusterService {
 			map.put("benefit_id", benefit_id);
 			map.put("sum_benefit", tuple.get(pvo.benefitAmount.sum()));
 			map.put("cnt_benefit", tuple.get(pvo.benefitAmount.count()));
-			map.put("ctg_name", tuple.get(mccvo.ctgName));
+			String ctg_name = tuple.get(mccvo.ctgName);
+			map.put("ctg_name", ctg_name);
+			ctgList.add(ctg_name);
 			BenefitVO vo = brep.findById(benefit_id).orElse(null);
 			Double cur_pct = vo.getBenefitPct();
 			String cur_detail = vo.getBenefitDetail();
@@ -186,7 +191,14 @@ public class BenefitClusterService {
 			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
 				Long val1 = (Long) o1.get("cnt_benefit");
 				Long val2 = (Long) o2.get("cnt_benefit");
-				return val2.compareTo(val1);
+				int compareCnt =  val2.compareTo(val1);
+				if(compareCnt != 0) {
+					return val2.compareTo(val1);
+				} else {
+					Integer val_sum1 = (Integer) o1.get("sum_benefit");
+					Integer val_sum2 = (Integer) o2.get("sum_benefit");
+					return val_sum2.compareTo(val_sum1);
+				}
 			}
 		});
 		
@@ -248,7 +260,20 @@ public class BenefitClusterService {
 		});
 		
 		// map에 mcc 별로 구분 지어 넣기.
-		return result;
+		
+		Map<String, List<Map<String, Object>>> groupedResult = new HashMap<>();
+		for (Map<String, Object> map : result) {
+		    String ctg_name = (String) map.get("ctg_name");
+		    if (!groupedResult.containsKey(ctg_name)) {
+		        groupedResult.put(ctg_name, new ArrayList<>());
+		    }
+		    // 현재 그룹에 아이템이 이미 3개 이상이라면 아이템을 추가하지 않음.
+		    if (groupedResult.get(ctg_name).size() >= 3) {
+		        continue;
+		    }
+		    groupedResult.get(ctg_name).add(map);
+		}
+		return groupedResult;
 	}
 
 	public List<Map<String, Object>> benefitDetailByCategory(String category, String date, String selectOption) {

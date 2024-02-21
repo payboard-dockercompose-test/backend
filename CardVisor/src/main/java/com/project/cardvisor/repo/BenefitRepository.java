@@ -61,7 +61,7 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "IFNULL(p.count_benefit_used,0) AS count_benefit_used, "
 			+ "IFNULL(p.count_using_people,0) AS count_using_people "
 			+ "FROM benefit b "
-			+ "LEFT JOIN "
+			+ "JOIN "
 			+ "(SELECT "
 			+ "applied_benefit_id, "
 			+ "SUM(benefit_amount) AS sum_benefit_amount, "
