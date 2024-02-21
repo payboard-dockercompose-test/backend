@@ -520,11 +520,12 @@ public class CustClusterService {
 	//filter
 	//고객 수
 	public Long getCustomerCount(CustClusterFilterDTO filter) {
-        return crepo.countDistinctByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
+        return crepo.countDistinctByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());
     }
 	//평균연령
 	public Double getCustomerAge(CustClusterFilterDTO filter) {
-		return crepo.calculateAverageAgeByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
+		 Double averageAge = crepo.averageAgeByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());
+		 return Math.round(averageAge * 10.0) / 10.0;
 	}
 	//평균연봉
 	public List<String> getCustomerSalary(CustClusterFilterDTO filter) {
@@ -535,12 +536,12 @@ public class CustClusterService {
 		return prepo.findAveragePaymentByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());		
 	}
 	//사용카드
-	public List<String> getCustomerCardName(CustClusterFilterDTO filter) {
-		return crirepo.findTop5CardNamesByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
+	public List<Object[]> getCustomerCardName(CustClusterFilterDTO filter) {
+		return crirepo.findTop5CardByFilters(filter.getGender(), filter.getAgeRange(), filter.getJobType(), filter.getSalaryRange());
 	}
 	//사용처
-	public List<String> getCustomerMcc(CustClusterFilterDTO filter) {
-		return prepo.findTop5CategoriesByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());
+	public List<Object[]> getCustomerMcc(CustClusterFilterDTO filter) {
+		return prepo.findTop5CategoryByFilters(filter.getGender(), filter.getAgeRange(),  filter.getJobType(), filter.getSalaryRange());
 	}
 
 }
