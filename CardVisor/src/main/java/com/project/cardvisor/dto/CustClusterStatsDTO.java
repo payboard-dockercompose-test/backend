@@ -19,7 +19,7 @@ public class CustClusterStatsDTO {
     private Double averageAge;
     private List<String> distinctSalaries;
     private Double averagePayment;
-    private List<String> cardName;
-    private List<String> cardMcc;
+    private List<Object[]> cardName;
+    private List<Object[]> cardMcc;
 
 }

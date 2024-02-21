@@ -23,7 +23,7 @@ public interface CustomerRepository extends CrudRepository<CustomerVO, String> {
 	// 전체 고객 수
 	@Query("SELECT COUNT(c) FROM CustomerVO c")
 	long getTotalCustomers();
-
+ 
 	// 남성 고객 수
 	@Query("SELECT COUNT(c) FROM CustomerVO c WHERE c.custGender = '남'")
 	long getMaleCustomers();
@@ -125,46 +125,30 @@ public interface CustomerRepository extends CrudRepository<CustomerVO, String> {
 	// filter 고객 수
 	@Query(value = "SELECT COUNT(DISTINCT c.cust_id) " + "FROM customer c "
 			+ "JOIN card_reg_info cri ON c.cust_id = cri.cust_id " + "JOIN payments p ON cri.reg_id = p.reg_id "
-			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender = :gender "
-			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
-			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
-			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
-			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
-			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + 
-			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange", nativeQuery = true)
-	Long countDistinctByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
+			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender IN (:gender) "
+			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
+			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType", nativeQuery = true)
+	Long countDistinctByFilters(@Param("gender") List<String> gender, @Param("ageRange") List<Integer> ageRange,
 			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
 	
 	// filter 평균 연령
 	@Query(value = "SELECT AVG(YEAR(CURRENT_DATE) - YEAR(c.cust_birth)) " + "FROM customer c "
 			+ "JOIN card_reg_info cri ON c.cust_id = cri.cust_id " + "JOIN payments p ON cri.reg_id = p.reg_id "
-			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender = :gender "
-			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
-			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
-			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
-			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
-			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 999 " +
-			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange", nativeQuery = true)
-	Double calculateAverageAgeByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
+			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender IN (:gender) "
+			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
+			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType", nativeQuery = true)
+	Double averageAgeByFilters(@Param("gender") List<String> gender, @Param("ageRange") List<Integer> ageRange,
 			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+
 	
-	//filter 평균 연봉
+	// filter 평균 연봉
 	@Query(value = "SELECT DISTINCT c.cust_salary " + "FROM customer c "
 			+ "JOIN card_reg_info cri ON c.cust_id = cri.cust_id " + "JOIN payments p ON cri.reg_id = p.reg_id "
-			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender = :gender "
-			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
-			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
-			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
-			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
-			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 999 " +
-			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange", nativeQuery = true)
-	List<String> findDistinctSalaryByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
-			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender IN (:gender) "
+			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
+			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType", nativeQuery = true)
+	List<String> findDistinctSalaryByFilters(@Param("gender") List<String> gender,
+			@Param("ageRange") List<Integer> ageRange, @Param("jobType") String jobType,
+			@Param("salaryRange") String salaryRange);
 }
 

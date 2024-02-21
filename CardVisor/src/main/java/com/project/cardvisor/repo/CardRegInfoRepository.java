@@ -89,20 +89,18 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 
 
 	// filter 사용카드
-	@Query(value = "SELECT cl.card_name " + "FROM card_reg_info cri " + "JOIN customer c ON cri.cust_id = c.cust_id "
-			+ "JOIN payments p ON cri.reg_id = p.reg_id " + "JOIN job_list j ON c.job_id = j.job_id "
-			+ "JOIN card_list cl ON cl.card_type = cri.card_type " + "WHERE c.cust_gender = :gender "
-			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
-			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
-			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
-			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
-			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + // 매우 큰 값으로 설정하여 모든 연령대를 포함
-			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange " + "GROUP BY cl.card_name "
-			+ "ORDER BY COUNT(cl.card_name) DESC " + "LIMIT 5", nativeQuery = true)
-	List<String> findTop5CardNamesByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
-			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+	@Query(value = "SELECT cl.card_name, COUNT(cl.card_name) " + "FROM card_reg_info cri "
+			+ "JOIN customer c ON cri.cust_id = c.cust_id " + "JOIN payments p ON cri.reg_id = p.reg_id "
+			+ "JOIN job_list j ON c.job_id = j.job_id " + "JOIN card_list cl ON cl.card_type = cri.card_type "
+			+ "WHERE c.cust_gender IN (:gender) "
+			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
+			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType " + "GROUP BY cl.card_name "
+			+ "ORDER BY COUNT(cl.card_name) DESC "
+			+ "LIMIT 5", nativeQuery = true)
+	List<Object[]> findTop5CardByFilters(@Param("gender") List<String> gender,
+			@Param("ageRange") List<Integer> ageRange, @Param("jobType") String jobType,
+			@Param("salaryRange") String salaryRange);
+
 	
 	
 	
