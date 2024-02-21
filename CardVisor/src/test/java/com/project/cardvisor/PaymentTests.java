@@ -218,7 +218,7 @@ public class PaymentTests {
 	}
 
 	// 환율 데이터에 있는 나라 payments data insert
-	// @Test
+	@Test
 	public void f1curr() {
 
 		// 고객 리스트
@@ -271,7 +271,7 @@ public class PaymentTests {
 			Date expDate = clist.get(regidx).getExpireDate(); // 만기일
 			java.util.Date randomDate = getRandomDate(regDate, expDate);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("2024-01-22");
+			SimpleDateFormat sdf = new SimpleDateFormat("2024-02-22");
 			String str = sdf.format(new java.util.Date());
 
 			Date date1 = java.sql.Date.valueOf(str);
@@ -328,8 +328,17 @@ public class PaymentTests {
 		return dateFormat.format(date);
 	}
 
+	// 페이먼츠 입력 코드 + 혜택 입력까지 진행
+	// @Test
 	public void f1() {
 
+		// 기존의 최근 dataInsertDate 가져오기
+		Date latestDate = prep.findLatestDataInsertDate();
+
+		// Calendar 인스턴스 생성
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(latestDate);
+		    
 		// 고객 리스트
 		LinkedList<CardRegInfoVO> clist = new LinkedList<>();
 		crep.findAll().forEach(c -> {
@@ -344,43 +353,64 @@ public class PaymentTests {
 
 		Random random = new Random();
 
-		for (int i = 0; i < 40000; i++) { // 34000
+		for (int i = 0; i < 20000; i++) { // 2000개 단위로 넣는걸 추천
+
+			// 2000개마다 날짜를 하루씩 늘림
+			if (i % 2000 == 0) {
+				calendar.add(Calendar.DATE, 1);
+			}
+
 			UUID uuid = UUID.randomUUID();
 			int mccidx = random.nextInt(16); // mcc 16개
 			int regidx = random.nextInt(clist.size()); // 999개
-			int amountidx = random.nextInt(100); // 곱할 숫자
+			int amountidx = random.nextInt(1000) + 1; // 곱할 숫자
 			MccVO mvo = mrep.findById(mccCode[mccidx]).orElse(null);
 
 			Date regDate = clist.get(regidx).getRegDate(); // 등록일
-
+			
 			Date expDate = clist.get(regidx).getExpireDate(); // 만기일
 			java.util.Date randomDate = getRandomDate(regDate, expDate);
 			if (randomDate != null) { // randomDate가 null이 아닌 경우에만 save
 				Timestamp timestamp = new Timestamp(randomDate.getTime());
 
+				// 새로운 dataInsertDate 사용
+				Date newDataInsertDate = new java.sql.Date(calendar.getTimeInMillis());
+
 				PaymentsVO vo = PaymentsVO.builder().payId("PA-" + uuid).regId(clist.get(regidx)).nation("KOR")
 						.currencyCode("KRW").currencyRate(1).payAmount(amountidx * 1000).payDate(timestamp)
-						.payStore(업종[mccidx]).mccCode(mvo).build();
+						.payStore(업종[mccidx]).mccCode(mvo).dataInsertDate(newDataInsertDate).build();
 
 				prep.save(vo);
+
+				// 값 저장하자마자 혜택 바로 적용
+				String curMcc = vo.getMccCode().getMccCode();
+				String curRegId = vo.getRegId().getRegId();
+				BenefitVO bInfo = brep.selectBenefitPctAndId(curRegId, curMcc);
+				if (bInfo != null) {
+					long curPayAmount = vo.getPayAmount();
+					double currencyRate = vo.getCurrencyRate();
+					vo.setAppliedBenefitId(bInfo.getBenefitId());
+					vo.setBenefitAmount((int) Math.floor(curPayAmount * bInfo.getBenefitPct() * currencyRate));
+					prep.save(vo);
+				}
 			}
 		}
 	}
 
-	// 혜택 입력 테스트
+	// 혜택 입력 테스트, 2024-01-22 년도 포함 이전부터 다시 해야함.
 	public void f2() {
-		SimpleDateFormat sdf = new SimpleDateFormat("2024-01-22");
+		SimpleDateFormat sdf = new SimpleDateFormat("2024-01-23");
 		String str = sdf.format(new java.util.Date());
 		Date date1 = java.sql.Date.valueOf(str);
 		prep.findByDataInsertDateForBenefit(date1).forEach(p -> {
 			String curMcc = p.getMccCode().getMccCode();
 			String curRegId = p.getRegId().getRegId();
 			BenefitVO bInfo = brep.selectBenefitPctAndId(curRegId, curMcc);
-			System.out.println(bInfo);
 			if (bInfo != null) {
 				long curPayAmount = p.getPayAmount();
+				double currencyRate = p.getCurrencyRate();
 				p.setAppliedBenefitId(bInfo.getBenefitId());
-				p.setBenefitAmount((int) Math.floor(curPayAmount * bInfo.getBenefitPct()));
+				p.setBenefitAmount((int) Math.floor(curPayAmount * bInfo.getBenefitPct() * currencyRate));
 				prep.save(p);
 			}
 		});

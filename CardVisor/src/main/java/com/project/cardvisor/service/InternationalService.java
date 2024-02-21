@@ -1,13 +1,20 @@
 package com.project.cardvisor.service;
 
+import java.lang.ProcessHandle.Info;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.project.cardvisor.controller.InternationalController;
 import com.project.cardvisor.repo.PaymentRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class InternationalService {
 	
@@ -30,9 +37,12 @@ public class InternationalService {
 		return payrep.selectHighestOrderPayment();
 	}
 
-	//월별 국가 결제 상세 정보 리스트
-	public List<Map<String, Object>> getNationPaymentsDataList() {
-		//return payrep.selectNationPaymentsDataList();
-		return payrep.selectHighestOrderPayment();
+	// (차트 데이터) 월별 데이터 추출
+	public List<Map<String, Object>> getNationPaymentsDataList(String startMonth, String endMonth) {
+	    LocalDate start = YearMonth.parse(startMonth).atDay(1);
+	    LocalDate end = YearMonth.parse(endMonth).atDay(1);
+	    
+	    return payrep.selectNationPaymentsDataList(start, end);
 	}
+
 }
