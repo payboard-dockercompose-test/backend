@@ -157,6 +157,7 @@ public class CardClusterService {
 
 		for (Map<String, Object> map : mccAllList) {
 			String mccCode = (String) map.get("ctg_name"); // mcc_code를 가져옴
+			mccCode = mccCode.replace("/", "");
 			BigDecimal amount = (BigDecimal) map.get("total"); // 금액을 가져옴
 			newMap.put(mccCode, amount); // 새로운 맵에 저장
 		}
