@@ -21,6 +21,7 @@ import com.project.cardvisor.dto.BenefitDTO;
 import com.project.cardvisor.repo.BenefitRepository;
 import com.project.cardvisor.repo.MccCodeRepository;
 import com.project.cardvisor.vo.BenefitVO;
+import com.project.cardvisor.vo.QCardBenefitVO;
 import com.project.cardvisor.vo.QCardRegInfoVO;
 import com.project.cardvisor.vo.QCustomerVO;
 import com.project.cardvisor.vo.QMccVO;
@@ -43,7 +44,222 @@ public class BenefitClusterService {
 
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	public Map<String, List<Map<String, Object>>> benefitRecommendForValueEstimation(Map<String, Object> data) {
+
+		// db에서 넘어온 컬럼 정리
+		boolean[] genArr = null;
+		boolean[] jobArr = null;
+		boolean[] payArr = null;
+		boolean[] ageArr = null;
+
+		for (Map.Entry<String, Object> entry : data.entrySet()) {
+			List<Boolean> boolList = (List<Boolean>) entry.getValue();
+			boolean[] arr = new boolean[boolList.size()];
+			for (int i = 0; i < boolList.size(); i++) {
+				arr[i] = boolList.get(i);
+			}
+
+			if (entry.getKey().equals("성별")) {
+				genArr = arr;
+			} else if (entry.getKey().equals("직업")) {
+				jobArr = arr;
+			} else if (entry.getKey().equals("연소득")) {
+				payArr = arr;
+			} else if (entry.getKey().equals("연령")) {
+				ageArr = arr;
+			}
+		}
+
+		// 성별, 직업, 연소득, 연령
+		// db에서 넘어오는 배열의 index로 값 매핑
+		char[] genValList = new char[] { '남', '여' };
+		int[] jobValList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+		String[] payValList = new String[] { "3000만원 미만", "3000만원 이상 5000만원 미만", "5000만원 이상 7000만원 미만",
+				"7000만원 이상 1억 미만", "1억 이상" };
+
+		List<Character> genList = new LinkedList<>();
+		List<Integer> jobList = new LinkedList<>();
+		List<String> payList = new LinkedList<>();
+
+		for (int i = 0; i < genArr.length; i++) {
+			if (genArr[i])
+				genList.add(genValList[i]);
+		}
+
+		for (int i = 0; i < jobArr.length; i++) {
+			if (jobArr[i])
+				jobList.add(jobValList[i]);
+		}
+
+		for (int i = 0; i < payArr.length; i++) {
+			if (payArr[i])
+				payList.add(payValList[i]);
+		}
+
+		// 나이 변환
+		LocalDate now = LocalDate.now();
+		String[] ageValList = new String[] { "20", "30", "40", "50", "60", "70대 이상" };
+		List<Map<String, LocalDate>> ageRangeList = new LinkedList<>();
+		for (int i = 0; i < ageArr.length; i++) {
+			if (ageArr[i]) {
+				String curAge = ageValList[i];
+				Map<String, LocalDate> ageRange = new HashMap<>();
+				switch (curAge) {
+				case "20":
+					ageRange.put("start", now.minusYears(28).withMonth(1).withDayOfMonth(1));
+					ageRange.put("end", now.minusYears(19).withMonth(12).withDayOfMonth(31));
+					break;
+				case "30":
+					ageRange.put("start", now.minusYears(38).withMonth(1).withDayOfMonth(1));
+					ageRange.put("end", now.minusYears(29).withMonth(12).withDayOfMonth(31));
+					break;
+				case "40":
+					ageRange.put("start", now.minusYears(48).withMonth(1).withDayOfMonth(1));
+					ageRange.put("end", now.minusYears(39).withMonth(12).withDayOfMonth(31));
+					break;
+				case "50":
+					ageRange.put("start", now.minusYears(58).withMonth(1).withDayOfMonth(1));
+					ageRange.put("end", now.minusYears(49).withMonth(12).withDayOfMonth(31));
+					break;
+				case "60":
+					ageRange.put("start", now.minusYears(68).withMonth(1).withDayOfMonth(1));
+					ageRange.put("end", now.minusYears(59).withMonth(12).withDayOfMonth(31));
+					break;
+				case "70대 이상":
+					ageRange.put("start", now.minusYears(69).withMonth(12).withDayOfMonth(31));
+					break;
+				}
+				ageRangeList.add(ageRange);
+			}
+		}
+
+		QPaymentsVO pvo = QPaymentsVO.paymentsVO;
+		QMccVO mccvo = QMccVO.mccVO;
+		QCardRegInfoVO cardvo = QCardRegInfoVO.cardRegInfoVO;
+		QCustomerVO custvo = QCustomerVO.customerVO;
+		QCardBenefitVO cbvo = QCardBenefitVO.cardBenefitVO;
+
+		// booleanBuidler age 조건 생성
+		BooleanBuilder ageCondition = new BooleanBuilder();
+		for (Map<String, LocalDate> ageRange : ageRangeList) {
+			Date start = java.sql.Date.valueOf(ageRange.get("start"));
+			if (ageRange.containsKey("end")) {
+				Date end = java.sql.Date.valueOf(ageRange.get("end"));
+				ageCondition.or(custvo.custBirth.between(start, end));
+			} else {
+				ageCondition.or(custvo.custBirth.lt(start));
+			}
+		}
+
+		JPAQuery<?> query = new JPAQuery<Void>(entityManager);
+		List<Tuple> queryResult = query
+				.select(pvo.appliedBenefitId, pvo.benefitAmount.sum(), pvo.benefitAmount.count(), mccvo.ctgName)
+				.from(pvo).join(mccvo).on(mccvo.mccCode.eq(pvo.mccCode.mccCode))
+				.where(pvo.regId.regId
+						.in(JPAExpressions.select(cardvo.regId).from(cardvo)
+								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
+										custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
+										custvo.custSalary.in(payList))))),
+						pvo.benefitAmount.gt(0))
+				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.sum().desc()).fetch();
+
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+		for (Tuple tuple : queryResult) {
+			Map<String, Object> map = new HashMap<>();
+
+			Integer benefit_id = tuple.get(pvo.appliedBenefitId);
+			map.put("benefit_id", benefit_id);
+			map.put("sum_benefit", tuple.get(pvo.benefitAmount.sum()));
+			map.put("cnt_benefit", tuple.get(pvo.benefitAmount.count()));
+			String ctg_name = tuple.get(mccvo.ctgName);
+			map.put("ctg_name", ctg_name);
+			
+			BenefitVO vo = brep.findById(benefit_id).orElse(null);
+			Double cur_pct = vo.getBenefitPct();
+			String cur_detail = vo.getBenefitDetail();
+			map.put("benefit_pct", cur_pct);
+			map.put("benefit_detail", cur_detail);
+			
+			result.add(map);
+		}
+
+		Collections.sort(result, new Comparator<Map<String, Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+				Long val1 = (Long) o1.get("cnt_benefit");
+				Long val2 = (Long) o2.get("cnt_benefit");
+				int compareCnt = val2.compareTo(val1);
+				if (compareCnt != 0) {
+					return val2.compareTo(val1);
+				} else {
+					Integer val_sum1 = (Integer) o1.get("sum_benefit");
+					Integer val_sum2 = (Integer) o2.get("sum_benefit");
+					return val_sum2.compareTo(val_sum1);
+				}
+			}
+		});
+
+		for (int i = 0; i < result.size(); i++) {
+			Map<String, Object> item = result.get(i);
+			item.put("rank", i + 1); // 순위 추가
+		}
+		
+		// 각 혜택의 예상 가치를 계산
+		for (Map<String, Object> benefit : result) {
+		  // 각 카드별로 각 혜택의 사용 건수, 적립 금액, 카드 자체의 총 결제 금액을 계산
+		  List<Map<String, Object>> cardBenefitForValueEstimation = query
+		    .select(cardvo.cardType, pvo.appliedBenefitId, pvo.benefitAmount.sum(),
+		      pvo.benefitAmount.count(),
+		      pvo.payAmount.multiply(pvo.currencyRate).sum())
+		    .from(pvo).join(cardvo).on(cardvo.regId.eq(pvo.regId.regId))
+		    .where(cardvo.cardType.cardType.in(JPAExpressions.select(cbvo.id.cardType.cardType).from(cbvo).where(cbvo.id.benefitId.benefitId.eq((Integer)benefit.get("benefit_id")))),
+		      pvo.payDate.year().eq(2023)) // pay_date는 2023년만 포함
+		    .groupBy(cardvo.cardType)
+		    .fetch()
+		    .stream()
+		    .map(innertuple -> {
+		      Map<String, Object> innermap = new HashMap<>();
+		      innermap.put("card_type", innertuple.get(cardvo.cardType));
+		      innermap.put("benefit_id", innertuple.get(pvo.appliedBenefitId));
+		      innermap.put("sum_benefit", innertuple.get(pvo.benefitAmount.sum()));
+		      innermap.put("cnt_benefit", innertuple.get(pvo.benefitAmount.count()));
+		      innermap.put("total_pay_amount", innertuple.get(pvo.payAmount.multiply(pvo.currencyRate).sum()));
+		      return innermap;
+		    }).collect(Collectors.toList());
+
+		  // 각 혜택의 예상 가치를 계산 및 카드 연회비 추가
+		  for (Map<String, Object> cardBenefit : cardBenefitForValueEstimation) {
+		    double benefitValue = ((Integer) cardBenefit.get("sum_benefit")).doubleValue() / ((Integer) cardBenefit.get("total_pay_amount")).doubleValue();
+		    double expectedBenefitValue = benefitValue * (Long) cardBenefit.get("cnt_benefit");
+		    cardBenefit.put("expected_benefit_value", expectedBenefitValue);
+		    benefit.put("card_benefit_info", cardBenefit);
+		  }
+ 
+		}
+
+		// map에 mcc 별로 구분 지어 넣기.
+		// max_cnt 관련 쿼리 수행
+		Map<String, List<Map<String, Object>>> groupedResult = new HashMap<>();
+		for (Map<String, Object> map : result) {
+			String ctg_name = (String) map.get("ctg_name");
+			if (!groupedResult.containsKey(ctg_name)) {
+				groupedResult.put(ctg_name, new ArrayList<>());
+			}
+			// 현재 그룹에 아이템이 이미 3개 이상이라면 아이템을 추가하지 않음.
+			if (groupedResult.get(ctg_name).size() >= 3) {
+				continue;
+			} else {
+				String max_cnt_card_type = (String) map.get("max_cnt_card_type");
+			}
+			groupedResult.get(ctg_name).add(map);
+		}
+		return groupedResult;
+	}
 	
+	//미사용 예정
 	public Map<String, List<Map<String, Object>>> benefitRecommendByFilter(Map<String, Object> data) {
 
 		// db에서 넘어온 컬럼 정리
@@ -148,7 +364,6 @@ public class BenefitClusterService {
 			} else {
 				ageCondition.or(custvo.custBirth.lt(start));
 			}
-
 		}
 
 		JPAQuery<?> query = new JPAQuery<Void>(entityManager);
@@ -162,13 +377,13 @@ public class BenefitClusterService {
 										custvo.custSalary.in(payList))))),
 						pvo.benefitAmount.gt(0))
 				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.sum().desc()).fetch();
-		
+
 		List<Map<String, Object>> result = new ArrayList<>();
 		List<Integer> beneList = new ArrayList<>();
 		Set<String> ctgList = new HashSet<>();
 		for (Tuple tuple : queryResult) {
 			Map<String, Object> map = new HashMap<>();
-			
+
 			Integer benefit_id = tuple.get(pvo.appliedBenefitId);
 			beneList.add(benefit_id);
 			map.put("benefit_id", benefit_id);
@@ -184,15 +399,15 @@ public class BenefitClusterService {
 			map.put("benefit_detail", cur_detail);
 			result.add(map);
 		}
-		
+
 		Collections.sort(result, new Comparator<Map<String, Object>>() {
 
 			@Override
 			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
 				Long val1 = (Long) o1.get("cnt_benefit");
 				Long val2 = (Long) o2.get("cnt_benefit");
-				int compareCnt =  val2.compareTo(val1);
-				if(compareCnt != 0) {
+				int compareCnt = val2.compareTo(val1);
+				if (compareCnt != 0) {
 					return val2.compareTo(val1);
 				} else {
 					Integer val_sum1 = (Integer) o1.get("sum_benefit");
@@ -201,13 +416,19 @@ public class BenefitClusterService {
 				}
 			}
 		});
-		
+
+		for (int i = 0; i < result.size(); i++) {
+			Map<String, Object> item = result.get(i);
+			item.put("rank", i + 1); // 순위 추가
+		}
+
 		// 혜택 연관된 카드의 상세 정보
+		// max_cnt 관련 항목 외, max_sum, max_use는 기능에서 미사용
 		brep.cardDetailRelatedBenefitForFilteredAction(beneList).forEach(b -> {
 			Integer cur_id = (Integer) b.get("benefit_id");
 			Integer cur_card_type = (Integer) b.get("card_type");
 			String cur_card_name = (String) b.get("card_name");
-			Integer cur_card_annual_fee = (Integer)b.get("card_annual_fee");
+			Integer cur_card_annual_fee = (Integer) b.get("card_annual_fee");
 
 			// 혜택 별로 카드의 혜택 정보를 조회
 			String date = null;
@@ -258,20 +479,22 @@ public class BenefitClusterService {
 				}
 			}
 		});
-		
+
 		// map에 mcc 별로 구분 지어 넣기.
-		
+		// max_cnt 관련 쿼리 수행
 		Map<String, List<Map<String, Object>>> groupedResult = new HashMap<>();
 		for (Map<String, Object> map : result) {
-		    String ctg_name = (String) map.get("ctg_name");
-		    if (!groupedResult.containsKey(ctg_name)) {
-		        groupedResult.put(ctg_name, new ArrayList<>());
-		    }
-		    // 현재 그룹에 아이템이 이미 3개 이상이라면 아이템을 추가하지 않음.
-		    if (groupedResult.get(ctg_name).size() >= 3) {
-		        continue;
-		    }
-		    groupedResult.get(ctg_name).add(map);
+			String ctg_name = (String) map.get("ctg_name");
+			if (!groupedResult.containsKey(ctg_name)) {
+				groupedResult.put(ctg_name, new ArrayList<>());
+			}
+			// 현재 그룹에 아이템이 이미 3개 이상이라면 아이템을 추가하지 않음.
+			if (groupedResult.get(ctg_name).size() >= 3) {
+				continue;
+			} else {
+				String max_cnt_card_type = (String) map.get("max_cnt_card_type");
+			}
+			groupedResult.get(ctg_name).add(map);
 		}
 		return groupedResult;
 	}
