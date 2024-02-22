@@ -5,9 +5,13 @@ import java.io.Reader;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -64,6 +68,80 @@ public class PaymentTests {
 	@Autowired
 	CurrencyRepository currrep;
 
+	static Map<String,Integer> CntMap = new HashMap<>();
+	
+	//@Test
+	public void internationalTestQuery() {
+		List<Map<String, Object>> payList = prep.selectInternationalFilterListTest();
+		Map<String, Map<String,Map<String,Object>> > result = new HashMap<>();
+		String oldMonth = "";
+		String oldNation = "";
+		for(Map<String, Object> pay : payList) {
+			String nation = (String) pay.get("nation");
+			String month = (String) pay.get("Month");
+			if(result.get(nation)==null) {
+				result.put(nation, new HashMap<>());
+			}
+			if(result.get(nation).get(month)==null) {
+//				System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaa");
+				result.get(nation).put(month,new HashMap());
+				if(!oldMonth.equals("")) {
+					int maxValue=-1;
+					String argmax="";
+					for(String key : CntMap.keySet()) {
+						if(maxValue<CntMap.get(key)) {
+							argmax=key;
+							maxValue=CntMap.get(key);
+						}
+					}
+//					System.out.println(nation+month+CntMap.keySet());
+					result.get(oldNation).get(oldMonth).put("age", argmax.split(" ")[0]);
+					result.get(oldNation).get(oldMonth).put("gender", argmax.split(" ")[1]);
+				}
+				CntMap = new HashMap<>();
+			}
+			
+			if(result.get(nation).get(month).get("count")==null) {
+				result.get(nation).get(month).put("count", 0);
+			}
+			if(result.get(nation).get(month).get("amount")==null) {
+				result.get(nation).get(month).put("amount", 0.0);
+			}
+//			System.out.println(pay.keySet());
+//			System.out.println(pay.get("cnt").toString());
+			int count = Integer.parseInt(pay.get("cnt").toString());
+			int oldCount = (int)result.get(nation).get(month).get("count");
+			result.get(nation).get(month).put("count",count + oldCount);
+			if(nation.equals("ABW"))
+			System.out.println(nation+"    "+month+"   "+result.get(nation).get(month).get("count"));
+			
+//			System.out.println(pay.get("sum").toString());
+			double amount = Double.parseDouble(pay.get("sum").toString());
+			
+//			System.out.println(result.get(nation).get("month").toString());
+			double oldAmount = (double)result.get(nation).get(month).get("amount");
+			result.get(nation).get(month).put("amount",amount + oldAmount);
+
+//			System.out.println(pay.get("age_range").toString());
+//			System.out.println("asdsa:"+pay.get("age_range"));
+			String KeyValue = pay.get("age_range").toString()+"대 "+pay.get("cust_gender").toString();
+			CntMap.put(KeyValue, count);
+			
+//			CntMap.put(pay.get("cust_gender").toString(), count);
+			
+			
+			
+			// pay.get("cust_gender").toString()
+			
+		
+			
+			oldMonth = month;
+			oldNation = nation;
+		}
+		System.out.println(result.toString());
+	} 
+	
+	//readJsonTest
 	// @Test
 	public void readJson() throws Exception {
 
@@ -109,7 +187,7 @@ public class PaymentTests {
 	}
 
 	// 다국적 payments data insert
-	// @Test
+//	@Test
 	public void multinationalPayment() throws Exception {
 
 		// 고객 리스트
@@ -132,12 +210,12 @@ public class PaymentTests {
 		org.json.simple.JSONArray dateArray = (org.json.simple.JSONArray) jsonObject.get("currencyData");
 
 		Random random = new Random();
-		for (int i = 0; i < 1000; i++) { // 34000
+		for (int i = 0; i < 5000; i++) { // 34000
 
 			UUID uuid = UUID.randomUUID();
 			int mccidx = random.nextInt(16); // mcc 16개
 			int regidx = random.nextInt(clist.size()); // 999개
-			int amountidx = random.nextInt(100) == 0 ? 1 : random.nextInt(100); // 곱할 숫자
+			int amountidx = random.nextInt(99) + 1; // 곱할 숫자
 
 			int idx = random.nextInt(dateArray.size());
 
@@ -153,7 +231,7 @@ public class PaymentTests {
 			Date expDate = clist.get(regidx).getExpireDate(); // 만기일
 			java.util.Date randomDate = getRandomDate(regDate, expDate);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("2024-01-22");
+			SimpleDateFormat sdf = new SimpleDateFormat("2024-02-26");
 			String str = sdf.format(new java.util.Date());
 
 			Date date1 = java.sql.Date.valueOf(str);
@@ -211,14 +289,14 @@ public class PaymentTests {
 							.payAmount(amountidx * 100).payDate(timestamp).payStore(업종[mccidx]).mccCode(mvo)
 							.dataInsertDate(date1).build();
 					prep.save(vo);
-					System.out.println(">>>>>>>>>>>>" + vo);
+					//System.out.println(">>>>>>>>>>>>" + vo);
 				}
 			}
 		}
 	}
 
 	// 환율 데이터에 있는 나라 payments data insert
-	@Test
+	// @Test
 	public void f1curr() {
 
 		// 고객 리스트
@@ -248,12 +326,12 @@ public class PaymentTests {
 
 		Random random = new Random();
 
-		for (int i = 0; i < 10000; i++) { // 34000
+		for (int i = 0; i < 5000; i++) { // 34000
 
 			UUID uuid = UUID.randomUUID();
 			int mccidx = random.nextInt(16); // mcc 16개
 			int regidx = random.nextInt(clist.size()); // 999개
-			int amountidx = random.nextInt(100) == 0 ? 1 : random.nextInt(100); // 곱할 숫자
+			int amountidx = random.nextInt(99) + 1;; // 곱할 숫자
 
 			String nation = "";
 
@@ -271,7 +349,7 @@ public class PaymentTests {
 			Date expDate = clist.get(regidx).getExpireDate(); // 만기일
 			java.util.Date randomDate = getRandomDate(regDate, expDate);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("2024-02-22");
+			SimpleDateFormat sdf = new SimpleDateFormat("2024-02-25");
 			String str = sdf.format(new java.util.Date());
 
 			Date date1 = java.sql.Date.valueOf(str);
@@ -446,7 +524,9 @@ public class PaymentTests {
 		// 생성된 랜덤 날짜가 현재로부터 4년 이내인지 확인
 		cal = Calendar.getInstance();
 		cal.setTime(now);
-		cal.add(Calendar.YEAR, -4); // 4년 전
+		//cal.add(Calendar.YEAR, -4); // 4년 전
+		cal.add(Calendar.YEAR, -1); // 1년 전
+		//cal.add(Calendar.MONTH, -6); // 6개월 전
 		java.util.Date fourYearsAgo = cal.getTime(); // 현재로부터 4년 전
 		if (randomDate.before(fourYearsAgo)) {
 			return null; // 생성된 랜덤 날짜가 현재로부터 4년 이전이면, null 반환

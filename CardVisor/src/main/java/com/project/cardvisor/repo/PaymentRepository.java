@@ -73,44 +73,64 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	List<Map<String, Object>> selectHighestOrderPayment();
 
 	//(차트 데이터) 월별 데이터 추출
-		@Query(value=" SELECT "
-				+ "    CASE"
-				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20대'"
-				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30대'"
-				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40대'"
-				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50대'"
-				+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60대'"
-				+ "        ELSE '70대 이상'"
-				+ "    END AS age_range, "
-				+ "    p.nation, "
-				+ "    DATE_FORMAT(p.pay_date, '%Y-%m') AS payment_month,"
-				+ "    COUNT(p.pay_amount) AS total_payment_count,"
-				+ "    SUM(p.pay_amount * p.currency_rate) AS total_amount,"
-				+ "    cust.cust_gender AS gender_range"
-				+ " FROM  "
-				+ "    ("
-				+ "        SELECT "
-				+ "            cri.reg_id, "
-				+ "            c.cust_gender, "
-				+ "            c.cust_birth "
-				+ "        FROM "
-				+ "            customer c "
-				+ "            JOIN card_reg_info cri "
-				+ "            ON c.cust_id = cri.cust_id"
-				+ "    ) AS cust"
-				+ " LEFT JOIN payments p "
-				+ "    ON cust.reg_id = p.reg_id"
-				+ " WHERE " 
-				+ "    p.pay_date >= STR_TO_DATE(:start, '%Y-%m-%d')"
-				+ "    AND p.pay_date <= STR_TO_DATE(:end, '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
-				+ "    AND p.nation != ' '"
-				+ " GROUP BY "
-				+ "    p.nation,"
-				+ "    cust.cust_gender"
-				+ " ORDER BY"
-				+ "    p.pay_date DESC", nativeQuery = true)
-		List<Map<String, Object>> selectNationPaymentsDataList(@Param("start") LocalDate start, @Param("end") LocalDate end);
+	@Query(value="  select  p.nation,DATE_FORMAT(p.pay_date, '%Y-%m') AS Month"
+			+ "  ,CASE "
+			+ "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR,c.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60' "
+			+ "                        ELSE '70'"
+			+ "                    END as age_range"
+			+ "  ,c.cust_gender ,count(p.pay_id) as cnt ,round( sum(p.pay_amount * p.currency_rate),0) as sum"
+			+ "  from payments p left join card_reg_info cri  using(reg_id)  "
+			+ "  left join customer c using(cust_id)"
+			+ " WHERE "
+			+ "    p.pay_date >= STR_TO_DATE(:start, '%Y-%m-%d')"
+			+ "    AND p.pay_date <= STR_TO_DATE(:end, '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
+			+ "    AND p.nation != 'KOR'"
+			+ "  group by p.nation , Month, age_range,cust_gender"
+			+ "  ORDER by nation asc , Month DESC", nativeQuery = true)
+	List<Map<String, Object>> selectNationPaymentsDataList(@Param("start") LocalDate start, @Param("end") LocalDate end); //map
 	
+	//차트 Filter Query
+	@Query(value="  select  p.nation,DATE_FORMAT(p.pay_date, '%Y-%m') AS Month"
+	        + "  ,CASE "
+	        + "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20' "
+	        + "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30' "
+	        + "     WHEN TIMESTAMPDIFF(YEAR,c.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40' "
+	        + "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50' "
+	        + "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60' "
+	        + "     ELSE '70'"
+	        + "     END as age_range"
+	        + "  ,c.cust_gender ,count(p.pay_id) as cnt ,round( sum(p.pay_amount * p.currency_rate),0) as sum"
+	        + "  from payments p left join card_reg_info cri  using(reg_id)  "
+	        + "  left join customer c using(cust_id)"
+	        + " WHERE "
+	        + "    p.pay_date >= STR_TO_DATE(:start, '%Y-%m-%d')"
+	        + "    AND p.pay_date <= STR_TO_DATE(:end, '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
+	        + "    AND p.nation != 'KOR'"
+	        + "    AND p.nation IN :countries"
+	        + "  group by p.nation , Month, age_range,cust_gender"
+	        + "  ORDER by nation asc , Month DESC", nativeQuery = true)
+	List<Map<String, Object>> selectInternationalFilterList(@Param("start") LocalDate start, @Param("end") LocalDate end, @Param("countries") List<String> countries); //filter
+	
+	//차트 Filter Query Test - NO Param
+	@Query(value="  select  p.nation,DATE_FORMAT(p.pay_date, '%Y-%m') AS Month"
+			+ "  ,CASE "
+			+ "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR,c.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50' "
+			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60' "
+			+ "                        ELSE '70'"
+			+ "                    END as age_range"
+			+ "  ,c.cust_gender ,count(p.pay_id) as cnt ,round( sum(p.pay_amount * p.currency_rate),0) as sum"
+			+ "  from payments p left join card_reg_info cri  using(reg_id)  "
+			+ "  left join customer c using(cust_id)"
+			+ "  group by p.nation , Month, age_range,cust_gender"
+			+ "  ORDER by nation asc , Month DESC", nativeQuery = true)
+	List<Map<String, Object>> selectInternationalFilterListTest();
 	
 
 	//// 지현
@@ -219,35 +239,30 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	
 	
 	// filter 평균 소비금액
-	@Query(value = "SELECT SUM(p.pay_amount) / COUNT(DISTINCT cri.cust_id) " + "FROM payments p "
+	@Query(value = "SELECT sum(p.pay_amount) / count(distinct cri.cust_id) " + "FROM payments p "
 			+ "JOIN card_reg_info cri ON p.reg_id = cri.reg_id " + "JOIN customer c ON cri.cust_id = c.cust_id "
-			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender = :gender "
-			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
-			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
-			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
-			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
-			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + // 매우 큰 값으로 설정하여 모든 연령대를 포함
-			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange ", nativeQuery = true)
-	Double findAveragePaymentByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
+			+ "JOIN job_list j ON c.job_id = j.job_id " + "WHERE c.cust_gender IN (:gender) "
+			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
+			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType", nativeQuery = true)
+	Double findAveragePaymentByFilters(@Param("gender") List<String> gender, @Param("ageRange") List<Integer> ageRange,
 			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
 	
 	// filter 사용처
-	@Query(value = "SELECT m.ctg_name " + "FROM payments p " + "JOIN card_reg_info cri ON p.reg_id = cri.reg_id "
+	@Query(value = "SELECT m.ctg_name, COUNT(DISTINCT concat(c.cust_id, '_', m.mcc_code)) " + "FROM mcc m "
+			+ "JOIN payments p ON p.mcc_code = m.mcc_code " + "JOIN card_reg_info cri ON p.reg_id = cri.reg_id "
 			+ "JOIN customer c ON cri.cust_id = c.cust_id " + "JOIN job_list j ON c.job_id = j.job_id "
-			+ "JOIN mcc m ON p.mcc_code = m.mcc_code " + "WHERE c.cust_gender = :gender "
-			+ "AND YEAR(CURRENT_DATE) - YEAR(c.cust_birth) BETWEEN " + "CASE WHEN :ageRange = '20대' THEN 20 "
-			+ "     WHEN :ageRange = '30대' THEN 30 " + "     WHEN :ageRange = '40대' THEN 40 "
-			+ "     WHEN :ageRange = '50대' THEN 50 " + "     WHEN :ageRange = '60대' THEN 60 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 70 " + "END " + "AND " + "CASE WHEN :ageRange = '20대' THEN 29 "
-			+ "     WHEN :ageRange = '30대' THEN 39 " + "     WHEN :ageRange = '40대' THEN 49 "
-			+ "     WHEN :ageRange = '50대' THEN 59 " + "     WHEN :ageRange = '60대' THEN 69 "
-			+ "     WHEN :ageRange = '70대 이상' THEN 999 " + // 매우 큰 값으로 설정하여 모든 연령대를 포함
-			"END " + "AND j.job_type = :jobType " + "AND c.cust_salary = :salaryRange " + "GROUP BY m.ctg_name "
-			+ "ORDER BY COUNT(m.ctg_name) DESC " + "LIMIT 5", nativeQuery = true)
-	List<String> findTop5CategoriesByFilters(@Param("gender") String gender, @Param("ageRange") String ageRange,
-			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
+			+ "WHERE c.cust_gender IN (:gender) "
+			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
+			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType " + "GROUP BY m.ctg_name "
+			+ "ORDER BY COUNT(DISTINCT concat(c.cust_id, '_', m.mcc_code)) DESC "   
+			+ "LIMIT 5", nativeQuery = true)
+	List<Object[]> findTop5CategoryByFilters(@Param("gender") List<String> gender,
+			@Param("ageRange") List<Integer> ageRange, @Param("jobType") String jobType,
+			@Param("salaryRange") String salaryRange);
+	
+	
+
+
 	
 	
 	//WorldMap

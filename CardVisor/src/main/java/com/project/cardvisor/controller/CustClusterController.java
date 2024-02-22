@@ -172,28 +172,30 @@ public class CustClusterController {
     public List<Object[]> getTop3MccCodeByCustSalary() {
     	return cService.getTop3MccCodeByCustSalary();
     }
+   
+    
     
     //filter
-    @PostMapping("/stats")
-    public ResponseEntity<CustClusterStatsDTO> getCustomerStats(@RequestBody CustClusterFilterDTO filter) {
-    	System.out.println(filter);
-        Long count = cService.getCustomerCount(filter);
-        Double averageAge = cService.getCustomerAge(filter);
-        List<String> distinctSalaries = cService.getCustomerSalary(filter);
-        Double averagePayment = cService.getCustomerPayment(filter); 
-        List<String> cardName = cService.getCustomerCardName(filter);
-        List<String> cardMcc = cService.getCustomerMcc(filter);
-        
-        CustClusterStatsDTO response = new CustClusterStatsDTO();
-        response.setCount(count);
-        response.setAverageAge(averageAge);
-        response.setDistinctSalaries(distinctSalaries);
-        response.setAveragePayment(averagePayment);
-        response.setCardName(cardName);
-        response.setCardMcc(cardMcc);
-        System.out.println(response);
-        System.out.println(count);
-        return ResponseEntity.ok(response);
+    @PostMapping("/filterstats")
+    public CustClusterStatsDTO  getCustomerStats(@RequestBody Map<String,Object> filter) {
+    	
+        List<String> gender = (List<String>) filter.get("gender");
+        List<Integer> ageRange = (List<Integer>) filter.get("ageRange");
+        String jobType = (String) filter.get("jobType");
+        String salaryRange = (String) filter.get("salaryRange");
+
+        CustClusterFilterDTO filterDTO = new CustClusterFilterDTO(gender, ageRange, jobType, salaryRange);
+
+        CustClusterStatsDTO stats = new CustClusterStatsDTO();
+        stats.setCount(cService.getCustomerCount(filterDTO));
+        stats.setAverageAge(cService.getCustomerAge(filterDTO));
+        stats.setDistinctSalaries(cService.getCustomerSalary(filterDTO));
+        stats.setAveragePayment(cService.getCustomerPayment(filterDTO));
+        stats.setCardName(cService.getCustomerCardName(filterDTO));
+        stats.setCardMcc(cService.getCustomerMcc(filterDTO));
+
+        return stats;
+
     }
     
 }
