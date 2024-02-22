@@ -1,6 +1,7 @@
 package com.project.cardvisor.service;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,17 @@ public Long AbroadLastMonthTotalAmountPayments() {
 public List<Map<String, Object>> selectPerMonthamount() {
     List<Map<String, Object>> pList = payrepo.selectPerMonthamount();
     return pList;
+}
+public List<List<Map<String,Object>>>SelectLastYearAndPerMonthamount() {
+	List<Map<String, Object>> LastYearpList = payrepo.selectLastYearPerMonthamount();
+	List<Map<String, Object>> yearp1ist = payrepo.selectPerMonthamount();
+	
+	List<List<Map<String,Object>>> pList = new ArrayList<>();
+	pList.add(LastYearpList);
+	pList.add(yearp1ist);
+	
+	
+	return pList;
 }
 public int perMonthTotalAmount() {
 	Long totalamount = payrepo.perMonthTotalAmount();
