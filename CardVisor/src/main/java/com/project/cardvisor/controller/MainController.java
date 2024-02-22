@@ -92,6 +92,11 @@ public class MainController {
     	 List<Map<String, Object>> plist = paymentservice.SelectLastYearPerMonthamount();
     	return plist;
     }
+    @GetMapping("/selectLastYearAndPerMonthamount")
+    public List<List<Map<String,Object>>>SelectLastYearAndPerMonthamount() {
+    	 List<List<Map<String,Object>>> plist = paymentservice.SelectLastYearAndPerMonthamount();
+    	 return plist;
+    }
     @GetMapping("/perMonthTotalAmount")
     public int PerMonthTotalAmount() {
     	int totalamount = paymentservice.perMonthTotalAmount();

@@ -289,9 +289,9 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 			+ "      pay_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)", nativeQuery = true)
 	Long lastYearPerMonthTotalAmount();
 
-	@Query(value = "SELECT " + "  WEEK(pay_date) AS week, " + "  SUM(pay_amount) AS total_amount " + "FROM payments "
-			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK) " + "GROUP BY week "
-			+ "ORDER BY week", nativeQuery = true)
+	@Query(value = "SELECT WEEK(pay_date) AS week,  SUM(pay_amount) AS total_amount FROM payments \r\n"
+			+ "	WHERE pay_date > DATE_SUB(CURRENT_DATE, INTERVAL 5 WEEK) GROUP BY week \r\n"
+			+ "	ORDER BY week", nativeQuery = true)
 	List<Map<String, Object>> selectPerWeeklyamount();
 
 	@Query(value = "SELECT " + "  WEEK(pay_date) AS week, " + "  SUM(pay_amount) AS total_amount " + "FROM payments"
@@ -301,7 +301,7 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	List<Map<String, Object>> selectLastYearPerWeeklyamount();
 
 	@Query(value = "SELECT " + "  SUM(pay_amount) AS total_amount " + "FROM payments "
-			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 WEEK)", nativeQuery = true)
+			+ "WHERE pay_date >= DATE_SUB(CURRENT_DATE, INTERVAL 5 WEEK)", nativeQuery = true)
 	Long perWeekTotalAmount();
 
 	@Query(value = "SELECT " + "  SUM(pay_amount) AS total_amount " + "FROM payments "
