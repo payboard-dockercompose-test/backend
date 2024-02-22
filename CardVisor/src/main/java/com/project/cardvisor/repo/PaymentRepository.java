@@ -73,61 +73,6 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	List<Map<String, Object>> selectHighestOrderPayment();
 
 	//(차트 데이터) 월별 데이터 추출
-//	@Query(value=" SELECT "
-//			+ "    CASE"
-//			+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20대'"
-//			+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30대'"
-//			+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40대'"
-//			+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50대'"
-//			+ "        WHEN TIMESTAMPDIFF(YEAR, cust.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60대'"
-//			+ "        ELSE '70대 이상'"
-//			+ "    END AS age_range, "
-//			+ "    p.nation, "
-//			+ "    DATE_FORMAT(p.pay_date, '%Y-%m') AS payment_month,"
-//			+ "    COUNT(p.pay_amount) AS total_payment_count,"
-//			+ "    SUM(p.pay_amount * p.currency_rate) AS total_amount,"
-//			+ "    cust.cust_gender AS gender_range"
-//			+ " FROM  "
-//			+ "    ("
-//			+ "        SELECT "
-//			+ "            cri.reg_id, "
-//			+ "            c.cust_gender, "
-//			+ "            c.cust_birth "
-//			+ "        FROM "
-//			+ "            customer c "
-//			+ "            JOIN card_reg_info cri "
-//			+ "            ON c.cust_id = cri.cust_id"
-//			+ "    ) AS cust"
-//			+ " LEFT JOIN payments p "
-//			+ "    ON cust.reg_id = p.reg_id"
-//			+ " WHERE "
-//			+ "    p.pay_date >= STR_TO_DATE(:start, '%Y-%m-%d')"
-//			+ "    AND p.pay_date <= STR_TO_DATE(:end, '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
-//			+ "    AND p.nation != 'KOR'"
-//			+ " GROUP BY "
-//			+ "    p.nation, payment_month"
-//			+ " ORDER BY"
-//			+ "    p.pay_date DESC", nativeQuery = true)
-//	List<Map<String, Object>> selectNationPaymentsDataList(@Param("start") LocalDate start, @Param("end") LocalDate end);
-//	@Query(value="  select  p.nation,DATE_FORMAT(p.pay_date, '%Y-%m') AS Month"
-//			+ "  ,CASE "
-//			+ "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20' "
-//			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 30 AND 39 THEN '30' "
-//			+ "                        WHEN TIMESTAMPDIFF(YEAR,c.cust_birth, CURRENT_DATE) BETWEEN 40 AND 49 THEN '40' "
-//			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 50 AND 59 THEN '50' "
-//			+ "                        WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 60 AND 69 THEN '60' "
-//			+ "                        ELSE '70'"
-//			+ "                    END as age_range"
-//			+ "  ,c.cust_gender ,count(p.pay_id) as cnt ,round( sum(p.pay_amount * p.currency_rate),0) as sum"
-//			+ "  from payments p left join card_reg_info cri  using(reg_id)  "
-//			+ "  left join customer c using(cust_id)"
-//			+ " WHERE "
-//			+ "    p.pay_date >= STR_TO_DATE(:start, '%Y-%m-%d')"
-//			+ "    AND p.pay_date <= STR_TO_DATE(:end, '%Y-%m-%d') + INTERVAL 1 MONTH - INTERVAL 1 DAY"
-//			+ "    AND p.nation != 'KOR'"
-//			+ "  group by p.nation , Month, age_range,cust_gender"
-//			+ "  ORDER by nation asc , Month DESC", nativeQuery = true)
-//	List<Map<String, Object>> selectNationPaymentsDataList(@Param("start") LocalDate start, @Param("end") LocalDate end);
 	@Query(value="  select  p.nation,DATE_FORMAT(p.pay_date, '%Y-%m') AS Month"
 			+ "  ,CASE "
 			+ "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20' "
@@ -169,10 +114,8 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 	        + "  group by p.nation , Month, age_range,cust_gender"
 	        + "  ORDER by nation asc , Month DESC", nativeQuery = true)
 	List<Map<String, Object>> selectInternationalFilterList(@Param("start") LocalDate start, @Param("end") LocalDate end, @Param("countries") List<String> countries); //filter
-
-
 	
-//	차트 Filter Query Test
+	//차트 Filter Query Test - NO Param
 	@Query(value="  select  p.nation,DATE_FORMAT(p.pay_date, '%Y-%m') AS Month"
 			+ "  ,CASE "
 			+ "     WHEN TIMESTAMPDIFF(YEAR, c.cust_birth, CURRENT_DATE) BETWEEN 20 AND 29 THEN '20' "
