@@ -71,9 +71,9 @@ public class PaymentTests {
 	static Map<String,Integer> CntMap = new HashMap<>();
 	
 	//@Test
-	public void dongsun() {
+	public void internationalTestQuery() {
 		List<Map<String, Object>> payList = prep.selectInternationalFilterListTest();
-		Map<String, Map<String,Map<String,Object>> > result = new HashMap();
+		Map<String, Map<String,Map<String,Object>> > result = new HashMap<>();
 		String oldMonth = "";
 		String oldNation = "";
 		for(Map<String, Object> pay : payList) {
@@ -141,6 +141,7 @@ public class PaymentTests {
 		System.out.println(result.toString());
 	} 
 	
+	//readJsonTest
 	// @Test
 	public void readJson() throws Exception {
 
