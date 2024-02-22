@@ -89,18 +89,18 @@ public interface CardRegInfoRepository extends CrudRepository<CardRegInfoVO, Str
 
 
 	// filter 사용카드
-	@Query(value = "SELECT cl.card_name, COUNT(cl.card_name) " + "FROM card_reg_info cri "
-			+ "JOIN customer c ON cri.cust_id = c.cust_id " + "JOIN payments p ON cri.reg_id = p.reg_id "
+	@Query(value = "SELECT cl.card_name, COUNT(cl.card_type) " + "FROM card_reg_info cri "
+			+ "JOIN customer c ON cri.cust_id = c.cust_id "
 			+ "JOIN job_list j ON c.job_id = j.job_id " + "JOIN card_list cl ON cl.card_type = cri.card_type "
 			+ "WHERE c.cust_gender IN (:gender) "
 			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
 			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType " + "GROUP BY cl.card_name "
-			+ "ORDER BY COUNT(cl.card_name) DESC "
+			+ "ORDER BY COUNT(cri.card_type) DESC "
 			+ "LIMIT 5", nativeQuery = true)
 	List<Object[]> findTop5CardByFilters(@Param("gender") List<String> gender,
 			@Param("ageRange") List<Integer> ageRange, @Param("jobType") String jobType,
 			@Param("salaryRange") String salaryRange);
-
+	
 	
 	
 	
