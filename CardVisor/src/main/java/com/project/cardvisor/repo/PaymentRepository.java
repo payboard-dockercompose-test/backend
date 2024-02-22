@@ -248,17 +248,20 @@ public interface PaymentRepository extends CrudRepository<PaymentsVO, String> {
 			@Param("jobType") String jobType, @Param("salaryRange") String salaryRange);
 	
 	// filter 사용처
-	@Query(value = "SELECT m.ctg_name, COUNT(m.ctg_name) " + "FROM payments p "
-			+ "JOIN card_reg_info cri ON p.reg_id = cri.reg_id " + "JOIN customer c ON cri.cust_id = c.cust_id "
-			+ "JOIN job_list j ON c.job_id = j.job_id " + "JOIN mcc m ON p.mcc_code = m.mcc_code "
+	@Query(value = "SELECT m.ctg_name, COUNT(DISTINCT concat(c.cust_id, '_', m.mcc_code)) " + "FROM mcc m "
+			+ "JOIN payments p ON p.mcc_code = m.mcc_code " + "JOIN card_reg_info cri ON p.reg_id = cri.reg_id "
+			+ "JOIN customer c ON cri.cust_id = c.cust_id " + "JOIN job_list j ON c.job_id = j.job_id "
 			+ "WHERE c.cust_gender IN (:gender) "
 			+ "AND FLOOR((YEAR(CURRENT_DATE) - YEAR(c.cust_birth))/10) IN (:ageRange) "
 			+ "AND c.cust_salary = :salaryRange " + "AND j.job_type = :jobType " + "GROUP BY m.ctg_name "
-			+ "ORDER BY COUNT(m.ctg_name) DESC "   
+			+ "ORDER BY COUNT(DISTINCT concat(c.cust_id, '_', m.mcc_code)) DESC "   
 			+ "LIMIT 5", nativeQuery = true)
 	List<Object[]> findTop5CategoryByFilters(@Param("gender") List<String> gender,
 			@Param("ageRange") List<Integer> ageRange, @Param("jobType") String jobType,
 			@Param("salaryRange") String salaryRange);
+	
+	
+
 
 	
 	

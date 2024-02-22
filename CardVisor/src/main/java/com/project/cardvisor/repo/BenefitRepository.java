@@ -111,4 +111,54 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "order BY benefit_id", nativeQuery = true)
 	List<Map<String, Object>> cardDetailRelatedBenefitForFilteredAction(@Param("benefit_list") List<Integer> benefit_list);
 
+	@Query(value = "select cri.card_type, cl.card_annual_fee, cl.card_name, cl.card_img_url, p.applied_benefit_id benefit_id, count(p.applied_benefit_id) cnt_benefit, sum(p.applied_benefit_id) sum_benefit "
+			+ "from payments p "
+			+ "join card_reg_info cri on p.reg_id = cri.reg_id "
+			+ "join card_list cl on cri.card_type = cl.card_type "
+			+ "where cri.card_type in "
+			+ "("
+			+ "select cb.card_type "
+			+ "from card_benefit cb "
+			+ "where cb.benefit_id = :benefit_id "
+			+ ") "
+			+ "and p.benefit_amount > 0 "
+			+ "and p.applied_benefit_id = :benefit_id "
+			+ "and DATE_FORMAT(p.pay_date,'%Y') = '2023' "
+			+ "GROUP BY cri.card_type", nativeQuery = true)
+	List<Tuple> currentBenefitQueryForRecommend(@Param("benefit_id") Integer benefit_id);
+
+	@Query(value = "select count(p.pay_amount) pay_cnt, sum(p.pay_amount) pay_sum "
+			+ "from payments p "
+			+ "join card_reg_info cri on p.reg_id = cri.reg_id  "
+			+ "where DATE_FORMAT(p.pay_date,'%Y') = '2023' "
+			+ "and cri.card_type = :card_type", nativeQuery = true)
+	Map<String, Object> totalPaybyCurCard(@Param("card_type") Integer card_type);
+	
+	@Query(value="SELECT "
+			+ "cl.card_type, "
+			+ "p.applied_benefit_id, "
+			+ "b.benefit_pct, "
+			+ "COUNT(p.applied_benefit_id) benefit_usage " 
+			+ "FROM "
+			+ "    payments p "
+			+ "JOIN "
+			+ "    card_reg_info cri ON p.reg_id = cri.reg_id "
+			+ "JOIN "
+			+ "    card_list cl ON cl.card_type = cri.card_type "
+			+ "JOIN "
+			+ "    benefit b ON p.applied_benefit_id = b.benefit_id "
+			+ "WHERE "
+			+ "    p.benefit_amount > 0 "
+			+ "GROUP BY "
+			+ "cl.card_type, p.applied_benefit_id, b.benefit_pct "
+			+ "order by cl.card_type asc", nativeQuery = true)
+	List<Map<String, Object>> benefit_usage_count();
+
+	@Query(value="select cl.card_type, cl.card_name, cl.card_annual_fee, COUNT(cl.card_name) card_usage "
+			+ "from payments p "
+			+ "join card_reg_info cri on p.reg_id = cri.reg_id "
+			+ "join card_list cl on cl.card_type = cri.card_type "
+			+ "GROUP BY cl.card_name "
+			+ "ORDER BY cl.card_type asc", nativeQuery = true)
+	List<Map<String, Object>> total_pay_count();
 }

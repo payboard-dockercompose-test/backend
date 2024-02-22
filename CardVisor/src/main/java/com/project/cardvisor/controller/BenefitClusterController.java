@@ -1,5 +1,6 @@
 package com.project.cardvisor.controller;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,12 @@ public class BenefitClusterController {
 	
 	@PostMapping("/benefitRecommend")
 	public Map<String, List<Map<String, Object>>> BenefitRecommend(@RequestBody Map<String, Object> data){
-		return bser.benefitRecommendByFilter(data);
+		return bser.benefitRecommendForValueEstimation(data);
+	}
+	
+	@PostMapping("/benefitCombination")
+	public List<Map<String, Object>> benefitCombinationResult(@RequestBody Map<String, Object> data){
+		return bser.benefitCombinationResult(data);
 	}
 	
 }
