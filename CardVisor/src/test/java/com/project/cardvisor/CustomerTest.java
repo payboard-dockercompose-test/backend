@@ -45,7 +45,7 @@ public class CustomerTest {
 
 	// 급여 정보 배열
 	String[] salaryList = { "3000만원 미만", "3000만원 이상 5000만원 미만", "5000만원 이상 7000만원 미만", "7000만원 이상 1억 미만", "1억 이상" };
-	String [] salaryList1 = {"5000만원 이상 7000만원 미만", "7000만원 이상 1억 미만", "1억 이상"};
+	String [] salaryList1 = { "3000만원 미만", "3000만원 이상 5000만원 미만"  };
 	// 랜덤 생년월일 생성 조정 함수
 	static Date getRandomDate(Date start, Date end) {
 		return new Date(getRandomTime(start.getTime(), end.getTime()));
@@ -59,11 +59,15 @@ public class CustomerTest {
 	void f2() {
 Random random = new Random();
 
-String[] lastNameOptions = {"방","김", "이", "박", "최", "정", "강", "조", "윤", "장", "임","한","신","류","문","송","배","고","남","손"};
+String[] lastNameOptions = {"방","김", "이", "박", "최", "정", "강", "조", "윤", "장", "임","한","신","류","문","송","배","고","남","손","남궁","황보"};
 String[] firstMameOptions = {"민", "영", "희", "성", "덕", "은", "기","원", "용", "종","환","호" ,"신", "철","옥","우","정","석","준","현",
-		"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학"};
+		"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학",
+		"지","민", "서", "진", "영", "재", "수", "현", "상", "경", "래","동", "기","승", "원","훈", "수", "상", "형", "은", "미", "기", "혜", "승", "경"
+		, "수", "환", "진","화", "애"};
 String[] firstMameOptions1 = {"민", "영", "희", "성", "덕", "은", "기","원", "용", "종","환","호" ,"신", "철","옥","우","정","석","준","현",
-		"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현 ", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학"};
+		"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학",
+		"지","민", "서", "진", "영", "재", "수", "현", "상", "경", "래","동", "기","승", "원","훈", "수", "상", "형", "은", "미", "기", "혜", "승", "경"
+		, "수", "환", "진","화", "애"};
 for (int i = 0; i < 100; i++) {
 String lastName = getRandomElement(lastNameOptions);
 String firstName = getRandomElement(firstMameOptions);
@@ -102,28 +106,31 @@ System.out.println(randomNumber1);
 		Random random = new Random();
 		// 1. 이름 리스트업
 		BufferedReader reader = new BufferedReader(new FileReader("c:\\nameList.txt"));
-		 String[] lastNameOptions = {"방","김", "이", "박", "최", "정", "강", "조", "윤", "장", "임","한","신","류","문","송","배","고","남","손"};
-	        String[] firstMameOptions = {"민", "영", "희", "성", "덕", "은", "기","원", "용", "종","환","호" ,"신", "철","옥","우","정","석","준","현",
-	        		"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학"};
-	        String[] firstMameOptions1 = {"민", "영", "희", "성", "덕", "은", "기","원", "용", "종","환","호" ,"신", "철","옥","우","정","석","준","현",
-	        		"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학"};
-		
+		 String[] lastNameOptions = {"방","김", "이", "박", "최", "정", "강", "조", "윤", "장", "임","한","신","류","문","송","배","고","남","손","남궁","황보","황우","제갈","서"};
+		 String[] firstMameOptions = {"민", "영", "희", "성", "덕", "은", "기","원", "용", "종","환","호" ,"신", "철","옥","우","정","석","준","현",
+					"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학",
+					"지","민", "서", "진", "영", "재", "수", "현", "상", "경", "래","동", "기","승", "원","훈", "수", "상", "형", "은", "미", "기", "혜", "승", "경"
+					, "수", "환", "진","화", "애"};
+			String[] firstMameOptions1 = {"민", "영", "희", "성", "덕", "은", "기","원", "용", "종","환","호" ,"신", "철","옥","우","정","석","준","현",
+					"선", "온", "남", "형", "두", "태", "혜", "순", "규", "준", "현", "태", "무", "실", "홍", "혁", "훈", "운", "휘", "찬", "은", "진", "석", "덕", "구", "봉", "효", "세", "웅","학",
+					"지","민", "서", "진", "영", "재", "수", "현", "상", "경", "래","동", "기","승", "원","훈", "수", "상", "형", "은", "미", "기", "혜", "승", "경"
+					, "수", "환", "진","화", "애"};
 	        
-	        String name;
-		/*
-		 * while ((name = reader.readLine()) != null) { nameList.add(""); }
-		 */
-
-		// 2. 번호 리스트업
-		BufferedReader reader2 = new BufferedReader(new FileReader("c:\\phoneList.txt"));
-		String phone;
-		/*
-		 * while ((phone = reader2.readLine()) != null) { phoneList.add(phone); }
-		 */
-
-		// 3. 이메일 리스트업
-		BufferedReader reader3 = new BufferedReader(new FileReader("c:\\emailList.txt"));
-		String email;
+//	        String name;
+//		/*
+//		 * while ((name = reader.readLine()) != null) { nameList.add(""); }
+//		 */
+//
+//		// 2. 번호 리스트업
+//		BufferedReader reader2 = new BufferedReader(new FileReader("c:\\phoneList.txt"));
+//		String phone;
+//		/*
+//		 * while ((phone = reader2.readLine()) != null) { phoneList.add(phone); }
+//		 */
+//
+//		// 3. 이메일 리스트업
+//		BufferedReader reader3 = new BufferedReader(new FileReader("c:\\emailList.txt"));
+//		String email;
 		/*
 		 * while ((email = reader3.readLine()) != null) { emailList.add(email); }
 		 */
@@ -135,24 +142,23 @@ System.out.println(randomNumber1);
 
 		// 20대 ~ 50대 설정 (1965년생 ~ 2004년생)
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(1960, Calendar.JANUARY, 1);
+		calendar.set(1946, Calendar.JANUARY, 1);
 		Date start = calendar.getTime();
 
 		Calendar calendar2 = Calendar.getInstance();
-		calendar2.set(1995, Calendar.DECEMBER, 31);
+		calendar2.set(2003, Calendar.DECEMBER, 31);
 		Date end = calendar2.getTime();
 
 		JobListVO j;
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 15000; i++) {
 			 int randomNumber1 = random.nextInt(90000000) + 10000000;
 			uuid = UUID.randomUUID();
 			char gen;
-			if (i % 2 == 0) {
-				gen = gender[0];
-			} else {
-				gen = gender[1];
-			}
+			
+			  if (i % 2 == 0) { gen = gender[0]; } else { gen = gender[1]; }
+			 
+		
 			 String lastName = getRandomElement(lastNameOptions);
 		        String firstName = getRandomElement(firstMameOptions);
 		        String secondNmae = getRandomElement(firstMameOptions1);
@@ -171,16 +177,17 @@ System.out.println(randomNumber1);
 	        }
 			int randomNumber = random.nextInt(9) + 1;
 			int randomEmailDomain = random.nextInt(4);
-			int randomSalary = random.nextInt(3);
+			int randomSalary = random.nextInt(5);
 			 String finalString = randomString.toString();
-			j = jrepo.findById(3).orElse(null);
+			j = jrepo.findById(randomNumber).orElse(null);
 
 			CustomerVO c1 = CustomerVO.builder().custId("US-" + uuid).custName(koreanName).custGender(gen)
 					.custBirth(sqlDate).custEmail(finalString + emailDomain[randomEmailDomain])
-					.custPhone("010" +randomNumber1).custSalary(salaryList1[randomSalary]).jobId(j).build();
-			System.out.println(c1);
-			crepo.save(c1);
-		}
+					.custPhone("010" +randomNumber1).custSalary(salaryList[randomSalary]).jobId(j).build();
+			//System.out.println(c1); 
+			System.out.println(i);
+			crepo.save(c1)
+;		}
 
 		//(1940 ~ 1964년생 설정)
 		/*
