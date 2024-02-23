@@ -152,6 +152,74 @@ public class MainController {
     	int amount = paymentservice.selectWeektransaction();
     	return amount;
     }
+    
+    //Detail
+    @GetMapping("/detailselectPerMonthamount")
+    public List<Map<String, Object>> DetailSelectPerMonthamount() {
+    	 List<Map<String, Object>> plist = paymentservice.DetailselectPerMonthamount();
+    	return plist;
+    }
+    @GetMapping("/detailselectLastYearPerMonthamount")
+    public List<Map<String, Object>> DetailSelectLastYearPerMonthamount() {
+    	 List<Map<String, Object>> plist = paymentservice.DetailSelectLastYearPerMonthamount();
+    	return plist;
+    }
+
+    @GetMapping("/detailperMonthTotalAmount")
+    public int DetailPerMonthTotalAmount() {
+    	int totalamount = paymentservice.DetailperMonthTotalAmount();
+    	return totalamount;
+    }
+    @GetMapping("/detailtotalIncrese")
+    public Double DetailTotalIncrese() {
+    	double totalIncrese = paymentservice.DetailTotalIncrese();
+    	return totalIncrese;
+    }
+    //주별..
+    @GetMapping("/detailselectPerWeeklyamount")
+    public List<Map<String, Object>> DetailSelectPerWeeklyamount() {
+   	 List<Map<String, Object>> plist = paymentservice.DetailselectPerWeeklyamount();
+   	return plist;
+   }
+    
+    @GetMapping("/detailselectLastYearPerWeeklyamount")
+    public List<Map<String, Object>> DetailSelectLastYearPerWeeklyamount() {
+   	 List<Map<String, Object>> plist = paymentservice.DetailSelectLastYearPerWeeklyamount();
+   	return plist;
+   }
+    @GetMapping("/detailperWeekTotalAmount")
+    public int DetailperWeekTotalAmount() {
+    	int totalamount = paymentservice.DetailperWeekTotalAmount();
+    	return totalamount;
+    }
+    @GetMapping("/detailweektotalIncrese")
+    public Double DetailWeekTotalIncrese() {
+    	double totalIncrese = paymentservice.DetailWeekTotalIncrese();
+    	return totalIncrese;
+    }
+    
+    //월별 거래건수
+    @GetMapping("/detailselectPerMonthtransaction")
+    public List<Map<String, Object>> DetailSelectPerMonthtransaction() {
+   	 List<Map<String, Object>> plist = paymentservice.DetailselectPerMonthtransaction();
+   	return plist;
+   }
+    @GetMapping("/detailselectMonthtransaction")
+    public int DetailSelectMonthtransaction() {
+    	int amount = paymentservice.DetailselectMonthtransaction();
+    	return amount;
+    }
+    //주간 거래건수
+    @GetMapping("/detailselectPerWeeklytransaction")
+    public List<Map<String, Object>> DetailSelectPerWeeklytransaction() {
+   	 List<Map<String, Object>> plist = paymentservice.DetailselectPerWeeklytransaction();
+   	return plist;
+   }
+    @GetMapping("/detailselectWeektransaction")
+    public int DetailselectWeektransaction() {
+    	int amount = paymentservice.DetailselectWeektransaction();
+    	return amount;
+    }
     @GetMapping("/selectTop5CardList")
     public List<Map<String, Object>> SelectTop5CardList() {
    	 List<Map<String, Object>> clist = cardservice.SelectTop5CardList();
