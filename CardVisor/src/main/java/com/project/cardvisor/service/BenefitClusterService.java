@@ -25,6 +25,7 @@ import com.project.cardvisor.repo.MccCodeRepository;
 import com.project.cardvisor.vo.BenefitVO;
 import com.project.cardvisor.vo.CardListVO;
 import com.project.cardvisor.vo.QCardBenefitVO;
+import com.project.cardvisor.vo.QCardListVO;
 import com.project.cardvisor.vo.QCardRegInfoVO;
 import com.project.cardvisor.vo.QCustomerVO;
 import com.project.cardvisor.vo.QMccVO;
@@ -145,6 +146,7 @@ public class BenefitClusterService {
 		QCardRegInfoVO cardvo = QCardRegInfoVO.cardRegInfoVO;
 		QCustomerVO custvo = QCustomerVO.customerVO;
 		QCardBenefitVO cbvo = QCardBenefitVO.cardBenefitVO;
+		QCardListVO clvo = QCardListVO.cardListVO;
 
 		// booleanBuidler age 조건 생성
 		BooleanBuilder ageCondition = new BooleanBuilder();
@@ -157,7 +159,8 @@ public class BenefitClusterService {
 				ageCondition.or(custvo.custBirth.lt(start));
 			}
 		}
-
+		
+		//필터 조합에 따른, 적용 혜택 기준 groupby, 적용 혜택id와 적용금액,횟수
 		JPAQuery<?> query = new JPAQuery<Void>(entityManager);
 		List<Tuple> queryResult = query
 				.select(pvo.appliedBenefitId, pvo.benefitAmount.sum(), pvo.benefitAmount.count(), mccvo.ctgName)
@@ -167,9 +170,10 @@ public class BenefitClusterService {
 								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
 										custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
 										custvo.custSalary.in(payList))))),
-						pvo.benefitAmount.gt(0))
-				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.sum().desc()).fetch();
-
+						pvo.benefitAmount.gt(0), pvo.payDate.year().eq(2023))
+				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.count().desc()).fetch();
+		
+		
 		List<Map<String, Object>> result = new ArrayList<>();
 
 		for (Tuple tuple : queryResult) {
@@ -212,14 +216,26 @@ public class BenefitClusterService {
 			Map<String, Object> item = result.get(i);
 			item.put("rank", i + 1); // 순위 추가
 		}
-
+		
+		
+		// 필터가 사용한 카드의 횟수 계산
+		List<Tuple> queryResultForFilteredBenefitCNT = query
+				.select(clvo.cardType, pvo.payId.count(), pvo.payAmount.sum())
+				.from(pvo)
+				.join(cardvo).on(cardvo.regId.eq(pvo.regId.regId))
+				.join(clvo).on(cardvo.cardType.cardType.eq(clvo.cardType))
+				.where(pvo.regId.regId
+						.in(JPAExpressions.select(cardvo.regId).from(cardvo)
+								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
+										custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
+										custvo.custSalary.in(payList))))),
+						pvo.payDate.year().eq(2023))
+				.groupBy(clvo.cardType).fetch();
 		// 각 혜택의 예상 가치를 계산
 		for (Map<String, Object> benefit : result) {
 			// 각 카드별로 각 혜택의 사용 건수, 적립금액
-			log.info(benefit.get("benefit_id") + "현재 BENEFIT");
 			List<jakarta.persistence.Tuple> currentBenefitQueryForRecommend = brep
 					.currentBenefitQueryForRecommend((Integer) benefit.get("benefit_id"));
-			log.info(currentBenefitQueryForRecommend.toString());
 
 			for (jakarta.persistence.Tuple tuple : currentBenefitQueryForRecommend) {
 
@@ -233,12 +249,23 @@ public class BenefitClusterService {
 				Long cnt_benefit = (Long) tuple.get("cnt_benefit");
 				BigDecimal sum_benefit = (BigDecimal) tuple.get("sum_benefit");
 				
-				// 카드 자체의 총 결제 건수
-				Map<String, Object> cur_pay_result = brep.totalPaybyCurCard(card_type);
-			
+				// 카드 자체의 총 결제 건수, 23년 기준
+				//Map<String, Object> cur_pay_result = brep.totalPaybyCurCard(card_type);
+				Long curPayCNTbyFilteredCustomer = 0L;
+				Long curPaySUMbyFilteredCusomer = 0L;
+				
+				for(Tuple paytuple : queryResultForFilteredBenefitCNT) {
+					log.info(paytuple.toString());
+					if(paytuple.get(cardvo.cardType.cardType) == card_type) {
+						curPayCNTbyFilteredCustomer = paytuple.get(pvo.payId.count());
+						curPaySUMbyFilteredCusomer = paytuple.get(pvo.payAmount.sum());
+						log.info(curPayCNTbyFilteredCustomer+"fffffffff");
+						break;
+					}
+				}
 				// 각 혜택별 각 카드에 해당하는 혜택 예상 가치 산출
 				double cntBenefit = (Long) tuple.get("cnt_benefit");
-				double curPayCnt = (Long) cur_pay_result.get("pay_cnt");
+				double curPayCnt = curPayCNTbyFilteredCustomer;
 				double benefitPct = (Double)benefit.get("benefit_pct");
 				
 				//1억 기준 혜택 예상 가치 산출
@@ -249,8 +276,8 @@ public class BenefitClusterService {
 				innermap.put("cur_benefit_id", cur_benefit_id);
 				innermap.put("card_annual_fee", card_annual_fee);
 				innermap.put("expectedBenefitValue", expectedBenefitValue);
-				innermap.put("total_pay_cnt_2023", cur_pay_result.get("pay_cnt"));
-				innermap.put("total_pay_sum_2023", cur_pay_result.get("pay_sum"));
+				innermap.put("total_pay_cnt_2023", curPayCNTbyFilteredCustomer);
+				innermap.put("total_pay_sum_2023", curPaySUMbyFilteredCusomer);
 				innermap.put("cnt_benefit", cnt_benefit);
 				innermap.put("sum_benefit", sum_benefit);
 				((List<Map<String, Object>>) benefit.get("card_benefit_info")).add(innermap);

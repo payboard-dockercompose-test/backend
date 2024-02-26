@@ -111,7 +111,7 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "order BY benefit_id", nativeQuery = true)
 	List<Map<String, Object>> cardDetailRelatedBenefitForFilteredAction(@Param("benefit_list") List<Integer> benefit_list);
 
-	@Query(value = "select cri.card_type, cl.card_annual_fee, cl.card_name, cl.card_img_url, p.applied_benefit_id benefit_id, count(p.applied_benefit_id) cnt_benefit, sum(p.applied_benefit_id) sum_benefit "
+	@Query(value = "select cri.card_type, cl.card_annual_fee, cl.card_name, cl.card_img_url, p.applied_benefit_id benefit_id, count(p.applied_benefit_id) cnt_benefit, sum(p.benefit_amount) sum_benefit "
 			+ "from payments p "
 			+ "join card_reg_info cri on p.reg_id = cri.reg_id "
 			+ "join card_list cl on cri.card_type = cl.card_type "
