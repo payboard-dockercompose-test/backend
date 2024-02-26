@@ -51,7 +51,11 @@ public class BenefitClusterService {
 	private EntityManager entityManager;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
-
+	
+	
+	//타겟 필터 입력
+	//타겟 필터 다회 이용 상위 혜택 나열
+	//상위 혜택의 
 	public Map<String, List<Map<String, Object>>> benefitRecommendForValueEstimation(Map<String, Object> data) {
 
 		// db에서 넘어온 컬럼 정리
@@ -144,8 +148,8 @@ public class BenefitClusterService {
 		QPaymentsVO pvo = QPaymentsVO.paymentsVO;
 		QMccVO mccvo = QMccVO.mccVO;
 		QCardRegInfoVO cardvo = QCardRegInfoVO.cardRegInfoVO;
+		//QCardRegInfoVO cardvo2 = QCardRegInfoVO.cardRegInfoVO;
 		QCustomerVO custvo = QCustomerVO.customerVO;
-		QCardBenefitVO cbvo = QCardBenefitVO.cardBenefitVO;
 		QCardListVO clvo = QCardListVO.cardListVO;
 
 		// booleanBuidler age 조건 생성
@@ -173,7 +177,7 @@ public class BenefitClusterService {
 						pvo.benefitAmount.gt(0), pvo.payDate.year().eq(2023))
 				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.count().desc()).fetch();
 		
-		
+
 		List<Map<String, Object>> result = new ArrayList<>();
 
 		for (Tuple tuple : queryResult) {
@@ -219,27 +223,43 @@ public class BenefitClusterService {
 		
 		
 		// 필터가 사용한 카드의 횟수 계산
-		List<Tuple> queryResultForFilteredBenefitCNT = query
-				.select(clvo.cardType, pvo.payId.count(), pvo.payAmount.sum())
+		//JPAQuery 객체 재사용하면, 이전 조건절이 다시 적용됨.
+		JPAQuery<?> query2 = new JPAQuery<Void>(entityManager);
+		List<Tuple> queryResultForFilteredBenefitCNT = query2
+				.select(clvo.cardType, pvo.payAmount.count(), pvo.payAmount.sum())
 				.from(pvo)
 				.join(cardvo).on(cardvo.regId.eq(pvo.regId.regId))
-				.join(clvo).on(cardvo.cardType.cardType.eq(clvo.cardType))
+				.join(clvo).on(clvo.cardType.eq(cardvo.cardType.cardType))
 				.where(pvo.regId.regId
 						.in(JPAExpressions.select(cardvo.regId).from(cardvo)
 								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
 										custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
 										custvo.custSalary.in(payList))))),
 						pvo.payDate.year().eq(2023))
-				.groupBy(clvo.cardType).fetch();
+				.groupBy(clvo.cardType).orderBy(pvo.payAmount.count().desc()).fetch();
+		for(Tuple tuple : queryResultForFilteredBenefitCNT) {
+			log.info(tuple.toString());
+		}
+		//고객 필터
+		JPAQuery<?> subQuery  = new JPAQuery<Void>(entityManager);
+		List<String> regIds = subQuery.select(cardvo.regId).from(cardvo)
+				.where(cardvo.custId.custId.in(
+						JPAExpressions.select(custvo.custId)
+										.from(custvo)
+										.where(
+						custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
+						custvo.custSalary.in(payList)))).fetch();
+		
 		// 각 혜택의 예상 가치를 계산
 		for (Map<String, Object> benefit : result) {
 			// 각 카드별로 각 혜택의 사용 건수, 적립금액
+			
 			List<jakarta.persistence.Tuple> currentBenefitQueryForRecommend = brep
-					.currentBenefitQueryForRecommend((Integer) benefit.get("benefit_id"));
+					.currentBenefitQueryForRecommend((Integer) benefit.get("benefit_id"), regIds);
 
 			for (jakarta.persistence.Tuple tuple : currentBenefitQueryForRecommend) {
 
-				log.info(tuple.toString());
+				
 				Map<String, Object> innermap = new HashMap<>();
 				Integer card_type = (Integer) tuple.get("card_type");
 				String card_name = (String) tuple.get("card_name");
@@ -255,11 +275,9 @@ public class BenefitClusterService {
 				Long curPaySUMbyFilteredCusomer = 0L;
 				
 				for(Tuple paytuple : queryResultForFilteredBenefitCNT) {
-					log.info(paytuple.toString());
-					if(paytuple.get(cardvo.cardType.cardType) == card_type) {
-						curPayCNTbyFilteredCustomer = paytuple.get(pvo.payId.count());
-						curPaySUMbyFilteredCusomer = paytuple.get(pvo.payAmount.sum());
-						log.info(curPayCNTbyFilteredCustomer+"fffffffff");
+					if(((Integer)paytuple.get(clvo.cardType)) == card_type) {
+						curPayCNTbyFilteredCustomer = (Long)paytuple.get(pvo.payAmount.count());
+						curPaySUMbyFilteredCusomer = (Long)paytuple.get(pvo.payAmount.sum());
 						break;
 					}
 				}

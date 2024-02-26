@@ -121,11 +121,12 @@ public interface BenefitRepository extends CrudRepository<BenefitVO, Integer>{
 			+ "from card_benefit cb "
 			+ "where cb.benefit_id = :benefit_id "
 			+ ") "
+			+ "and p.reg_id in :regIds "
 			+ "and p.benefit_amount > 0 "
 			+ "and p.applied_benefit_id = :benefit_id "
 			+ "and DATE_FORMAT(p.pay_date,'%Y') = '2023' "
 			+ "GROUP BY cri.card_type", nativeQuery = true)
-	List<Tuple> currentBenefitQueryForRecommend(@Param("benefit_id") Integer benefit_id);
+	List<Tuple> currentBenefitQueryForRecommend(@Param("benefit_id") Integer benefit_id,@Param("regIds") List<String> regIds);
 
 	@Query(value = "select count(p.pay_amount) pay_cnt, sum(p.pay_amount) pay_sum "
 			+ "from payments p "
