@@ -55,6 +55,8 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '14'
+    - run: touch ./.env
+    - run: echo "${{ secrets.REACT_ENV }}" > ./.env    
 
     - name: 'Install frontend dependencies and build'
       run: |
