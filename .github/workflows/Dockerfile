@@ -6,7 +6,7 @@ COPY frontend/build/ ./
 # Stage 2: Copy the Spring Boot application
 FROM alpine as backend-build
 WORKDIR /app
-COPY ../../backend/CardVisor/build/libs/ ./
+COPY ../../backend/CardVisor/build/libs/CardVisor-0.0.1-SNAPSHOT.jar ./
 
 # Stage 3: Set up the Apache server
 FROM ubuntu:20.04 as server-setup
@@ -30,7 +30,7 @@ ENV LANG ko_KR.UTF-8
 ENV LANGUAGE ko_KR:ko  
 ENV LC_ALL ko_KR.UTF-8
 
-COPY --from=backend-build /app/*.jar /app/
+COPY --from=backend-build /app/CardVisor-0.0.1-SNAPSHOT.jar /app/
 COPY --from=frontend-build /app /var/www/html
 COPY ../../backend/.github/workflows/000-default.conf /etc/apache2/sites-available/
 COPY ../../backend/.github/workflows/start.sh /start.sh
