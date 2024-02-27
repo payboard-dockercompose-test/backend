@@ -36,11 +36,6 @@ jobs:
       env:
           CI: "false"
       working-directory: ./backend/CardVisor
-        
-    # - name: 'Gradle build'
-    #   run: ./backend/CardVisor/gradlew clean build
-    #   env:
-    #     CI: "false"
     
     # React build NODE
     - name: 'Checkout frontend repository'
@@ -71,8 +66,7 @@ jobs:
       with:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    - run: pwd    
+        password: ${{ secrets.REGISTRY_PASSWORD }}  
     - run: |
         docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f ./backend/.github/workflows/Dockerfile .
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest
