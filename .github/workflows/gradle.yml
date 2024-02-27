@@ -2,9 +2,9 @@ name: 'Azure Login And Build Project And Make-Push Docker IMG'
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "hwasoo" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "hwasoo" ]
 
 jobs:
   build:
@@ -47,7 +47,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: CardVisor/FrontEnd
-        ref: 'main'
+        ref: "hwasoo"
         path: ./frontend
         token: ${{ secrets.REPO_PAT }}
 
