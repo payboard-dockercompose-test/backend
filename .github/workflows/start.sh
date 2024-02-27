@@ -36,6 +36,8 @@ cat <<EOF > /etc/apache2/sites-available/000-default.conf
 </VirtualHost>
 EOF
 
-java -jar /app/*.jar > /app/app.log &
-# Start Apache
-service apache2 start
+# Start Spring Boot application
+nohup java -jar /app/*.jar > /app/app.log &
+
+# Start Apache in the foreground
+/usr/sbin/apache2ctl -D FOREGROUND
