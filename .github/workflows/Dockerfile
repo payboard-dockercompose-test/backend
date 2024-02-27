@@ -1,40 +1,12 @@
-# Stage 1: Copy the React application
-FROM alpine as frontend-build
+# 베이스 이미지 설정
+FROM openjdk:17
 WORKDIR /app
-COPY frontend/build/ ./
 
-# Stage 2: Copy the Spring Boot application
-FROM alpine as backend-build
-WORKDIR /app
-COPY ../../backend/CardVisor/build/libs/CardVisor-0.0.1-SNAPSHOT.jar ./
+# 빌드된 JAR 파일을 Docker 이미지에 추가
+COPY ./build/libs/*.jar ./app.jar
 
-# Stage 3: Set up the Apache server
-FROM ubuntu:20.04 as server-setup
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository universe && \
-    apt-get install -y apache2 && \
-    a2enmod proxy && \
-    a2enmod proxy_http && \
-    a2enmod rewrite && \
-    service apache2 restart && \
-    apt-get install -y openjdk-17-jdk && \
-    apt-get install -y tzdata && \
-    apt-get install -y locales && \
-    locale-gen ko_KR.UTF-8 && \
-    apt-get install -y tini && \
-    rm -rf /var/lib/apt/lists/*
+# 컨테이너 실행 시 시작 명령어
+CMD ["java", "-jar", "./app.jar"]
 
-ENV LANG ko_KR.UTF-8  
-ENV LANGUAGE ko_KR:ko  
-ENV LC_ALL ko_KR.UTF-8
-
-COPY --from=backend-build /app/CardVisor-0.0.1-SNAPSHOT.jar /app/
-COPY --from=frontend-build /app /var/www/html
-COPY ../../backend/.github/workflows/000-default.conf /etc/apache2/sites-available/
-COPY ../../backend/.github/workflows/start.sh /start.sh
-ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["/bin/bash", "/start.sh"]
-
-EXPOSE 80
+# 컨테이너 내부의 애플리케이션 포트
+EXPOSE 7777
