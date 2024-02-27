@@ -71,5 +71,10 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}  
     - run: |
-        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f ./backend/.github/workflows/Dockerfile .
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest
+        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor-backend:latest -f ./backend/.github/workflows/Dockerfile .
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor-backend:latest
+        docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor-frontend:latest -f ./frontend/Dockerfile .
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor-frontend:latest
+        
+    #    docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest -f ./backend/.github/workflows/Dockerfile .
+    #    docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/cardvisor:latest
