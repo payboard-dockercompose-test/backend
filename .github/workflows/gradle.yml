@@ -45,13 +45,16 @@ jobs:
         ref: 'hwasoo'
         path: ./frontend
         token: ${{ secrets.REPO_PAT }}
-
+    - name: 'Set up .env for frontend'
+      run: |
+        touch ./.env
+        echo "${{ secrets.REACT_ENV }}" > ./.env
+      working-directory: ./frontend
+      
     - name: 'Set up Node.js'
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
-    - run: touch ./.env
-    - run: echo "${{ secrets.REACT_ENV }}" > ./.env    
+        node-version: '14' 
 
     - name: 'Install frontend dependencies and build'
       run: |
