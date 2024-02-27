@@ -2,9 +2,9 @@ name: 'Azure Login And Build Project And Make-Push Docker IMG'
 
 on:
   push:
-    branches: [ "hwasoo" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "hwasoo" ]
+    branches: [ "main" ]
 
 jobs:
   build:
