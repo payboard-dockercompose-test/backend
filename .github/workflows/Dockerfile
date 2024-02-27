@@ -23,7 +23,6 @@ RUN apt-get update && \
     apt-get install -y tzdata && \
     apt-get install -y locales && \
     locale-gen ko_KR.UTF-8 && \
-    apt-get install -y supervisor && \
     apt-get install -y tini && \
     rm -rf /var/lib/apt/lists/*
 
