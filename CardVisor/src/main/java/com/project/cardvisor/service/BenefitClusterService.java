@@ -51,11 +51,10 @@ public class BenefitClusterService {
 	private EntityManager entityManager;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
-	
-	
-	//타겟 필터 입력
-	//타겟 필터 다회 이용 상위 혜택 나열
-	//상위 혜택의 
+
+	// 타겟 필터 입력
+	// 타겟 필터 다회 이용 상위 혜택 나열
+	// 상위 혜택의
 	public Map<String, List<Map<String, Object>>> benefitRecommendForValueEstimation(Map<String, Object> data) {
 
 		// db에서 넘어온 컬럼 정리
@@ -148,7 +147,7 @@ public class BenefitClusterService {
 		QPaymentsVO pvo = QPaymentsVO.paymentsVO;
 		QMccVO mccvo = QMccVO.mccVO;
 		QCardRegInfoVO cardvo = QCardRegInfoVO.cardRegInfoVO;
-		//QCardRegInfoVO cardvo2 = QCardRegInfoVO.cardRegInfoVO;
+		// QCardRegInfoVO cardvo2 = QCardRegInfoVO.cardRegInfoVO;
 		QCustomerVO custvo = QCustomerVO.customerVO;
 		QCardListVO clvo = QCardListVO.cardListVO;
 
@@ -163,20 +162,18 @@ public class BenefitClusterService {
 				ageCondition.or(custvo.custBirth.lt(start));
 			}
 		}
-		
-		//필터 조합에 따른, 적용 혜택 기준 groupby, 적용 혜택id와 적용금액,횟수
+
+		// 필터 조합에 따른, 적용 혜택 기준 groupby, 적용 혜택id와 적용금액,횟수
 		JPAQuery<?> query = new JPAQuery<Void>(entityManager);
 		List<Tuple> queryResult = query
 				.select(pvo.appliedBenefitId, pvo.benefitAmount.sum(), pvo.benefitAmount.count(), mccvo.ctgName)
-				.from(pvo).join(mccvo).on(mccvo.mccCode.eq(pvo.mccCode.mccCode))
-				.where(pvo.regId.regId
-						.in(JPAExpressions.select(cardvo.regId).from(cardvo)
+				.from(pvo).join(mccvo).on(mccvo.mccCode.eq(pvo.mccCode.mccCode)).where(
+						pvo.regId.regId.in(JPAExpressions.select(cardvo.regId).from(cardvo)
 								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
 										custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
 										custvo.custSalary.in(payList))))),
 						pvo.benefitAmount.gt(0), pvo.payDate.year().eq(2023))
 				.groupBy(pvo.appliedBenefitId).orderBy(mccvo.mccCode.asc(), pvo.benefitAmount.count().desc()).fetch();
-		
 
 		List<Map<String, Object>> result = new ArrayList<>();
 
@@ -220,16 +217,13 @@ public class BenefitClusterService {
 			Map<String, Object> item = result.get(i);
 			item.put("rank", i + 1); // 순위 추가
 		}
-		
-		
+
 		// 필터가 사용한 카드의 횟수 계산
-		//JPAQuery 객체 재사용하면, 이전 조건절이 다시 적용됨.
+		// JPAQuery 객체 재사용하면, 이전 조건절이 다시 적용됨.
 		JPAQuery<?> query2 = new JPAQuery<Void>(entityManager);
 		List<Tuple> queryResultForFilteredBenefitCNT = query2
-				.select(clvo.cardType, pvo.payAmount.count(), pvo.payAmount.sum())
-				.from(pvo)
-				.join(cardvo).on(cardvo.regId.eq(pvo.regId.regId))
-				.join(clvo).on(clvo.cardType.eq(cardvo.cardType.cardType))
+				.select(clvo.cardType, pvo.payAmount.count(), pvo.payAmount.sum()).from(pvo).join(cardvo)
+				.on(cardvo.regId.eq(pvo.regId.regId)).join(clvo).on(clvo.cardType.eq(cardvo.cardType.cardType))
 				.where(pvo.regId.regId
 						.in(JPAExpressions.select(cardvo.regId).from(cardvo)
 								.where(cardvo.custId.custId.in(JPAExpressions.select(custvo.custId).from(custvo).where(
@@ -237,29 +231,26 @@ public class BenefitClusterService {
 										custvo.custSalary.in(payList))))),
 						pvo.payDate.year().eq(2023))
 				.groupBy(clvo.cardType).orderBy(pvo.payAmount.count().desc()).fetch();
-		for(Tuple tuple : queryResultForFilteredBenefitCNT) {
+		for (Tuple tuple : queryResultForFilteredBenefitCNT) {
 			log.info(tuple.toString());
 		}
-		//고객 필터
-		JPAQuery<?> subQuery  = new JPAQuery<Void>(entityManager);
+		// 고객 필터
+		JPAQuery<?> subQuery = new JPAQuery<Void>(entityManager);
 		List<String> regIds = subQuery.select(cardvo.regId).from(cardvo)
-				.where(cardvo.custId.custId.in(
-						JPAExpressions.select(custvo.custId)
-										.from(custvo)
-										.where(
-						custvo.jobId.jobId.in(jobList), ageCondition, custvo.custGender.in(genList),
-						custvo.custSalary.in(payList)))).fetch();
-		
+				.where(cardvo.custId.custId
+						.in(JPAExpressions.select(custvo.custId).from(custvo).where(custvo.jobId.jobId.in(jobList),
+								ageCondition, custvo.custGender.in(genList), custvo.custSalary.in(payList))))
+				.fetch();
+
 		// 각 혜택의 예상 가치를 계산
 		for (Map<String, Object> benefit : result) {
 			// 각 카드별로 각 혜택의 사용 건수, 적립금액
-			
+
 			List<jakarta.persistence.Tuple> currentBenefitQueryForRecommend = brep
 					.currentBenefitQueryForRecommend((Integer) benefit.get("benefit_id"), regIds);
 
 			for (jakarta.persistence.Tuple tuple : currentBenefitQueryForRecommend) {
 
-				
 				Map<String, Object> innermap = new HashMap<>();
 				Integer card_type = (Integer) tuple.get("card_type");
 				String card_name = (String) tuple.get("card_name");
@@ -268,26 +259,26 @@ public class BenefitClusterService {
 				Integer card_annual_fee = (Integer) tuple.get("card_annual_fee");
 				Long cnt_benefit = (Long) tuple.get("cnt_benefit");
 				BigDecimal sum_benefit = (BigDecimal) tuple.get("sum_benefit");
-				
+
 				// 카드 자체의 총 결제 건수, 23년 기준
-				//Map<String, Object> cur_pay_result = brep.totalPaybyCurCard(card_type);
+				// Map<String, Object> cur_pay_result = brep.totalPaybyCurCard(card_type);
 				Long curPayCNTbyFilteredCustomer = 0L;
 				Long curPaySUMbyFilteredCusomer = 0L;
-				
-				for(Tuple paytuple : queryResultForFilteredBenefitCNT) {
-					if(((Integer)paytuple.get(clvo.cardType)) == card_type) {
-						curPayCNTbyFilteredCustomer = (Long)paytuple.get(pvo.payAmount.count());
-						curPaySUMbyFilteredCusomer = (Long)paytuple.get(pvo.payAmount.sum());
+
+				for (Tuple paytuple : queryResultForFilteredBenefitCNT) {
+					if (((Integer) paytuple.get(clvo.cardType)) == card_type) {
+						curPayCNTbyFilteredCustomer = (Long) paytuple.get(pvo.payAmount.count());
+						curPaySUMbyFilteredCusomer = (Long) paytuple.get(pvo.payAmount.sum());
 						break;
 					}
 				}
 				// 각 혜택별 각 카드에 해당하는 혜택 예상 가치 산출
 				double cntBenefit = (Long) tuple.get("cnt_benefit");
 				double curPayCnt = curPayCNTbyFilteredCustomer;
-				double benefitPct = (Double)benefit.get("benefit_pct");
-				
-				//1억 기준 혜택 예상 가치 산출
-				double expectedBenefitValue = Math.floor(cntBenefit/curPayCnt*benefitPct*100000000);
+				double benefitPct = (Double) benefit.get("benefit_pct");
+
+				// 1억 기준 혜택 예상 가치 산출
+				double expectedBenefitValue = Math.floor(cntBenefit / curPayCnt * benefitPct * 100000000);
 				innermap.put("card_type", card_type);
 				innermap.put("card_name", card_name);
 				innermap.put("card_img_url", card_img_url);
@@ -943,45 +934,45 @@ public class BenefitClusterService {
 	public List<Map<String, Object>> benefitCombinationResult(Map<String, Object> data) {
 		List<Map<String, Object>> bInfo = brep.benefit_usage_count();
 		List<Map<String, Object>> pInfo = brep.total_pay_count();
-		
+
 		List<Map<String, Object>> result = new ArrayList<>();
-		
-		pInfo.forEach(p-> {
-			Integer card_type = (Integer)p.get("card_type");
-			String card_name = (String)p.get("card_name");
-			Long card_usage_cnt = (Long)p.get("card_usage");
-			Integer card_annual_fee = (Integer)p.get("card_annual_fee");
+
+		pInfo.forEach(p -> {
+			Integer card_type = (Integer) p.get("card_type");
+			String card_name = (String) p.get("card_name");
+			Long card_usage_cnt = (Long) p.get("card_usage");
+			Integer card_annual_fee = (Integer) p.get("card_annual_fee");
 			double totalBenefitValue = 0;
 			Map<String, Object> map = new HashMap<>();
 
-	        for (Map<String, Object> b : bInfo) {
-	        	Integer cur_card_type = (Integer)b.get("card_type");
-	            if(cur_card_type.equals(card_type)) {
-	                Long benefit_usage = (Long)b.get("benefit_usage");
-	                Double benefit_pct = (Double)b.get("benefit_pct");
+			for (Map<String, Object> b : bInfo) {
+				Integer cur_card_type = (Integer) b.get("card_type");
+				if (cur_card_type.equals(card_type)) {
+					Long benefit_usage = (Long) b.get("benefit_usage");
+					Double benefit_pct = (Double) b.get("benefit_pct");
 
-	                // 혜택 가치를 계산하고 합산
-	                totalBenefitValue += (double)benefit_usage / (double)card_usage_cnt * (double)benefit_pct;
-	            }
-	        }
+					// 혜택 가치를 계산하고 합산
+					totalBenefitValue += (double) benefit_usage / (double) card_usage_cnt * (double) benefit_pct;
+				}
+			}
 
-	        // 카드별 총 혜택 가치를 결과 맵에 추가
-	        map.put("card_name", card_name);
-	        map.put("card_type", card_type);
-	        map.put("card_annual_fee", card_annual_fee);
-	        map.put("expectedBenefitValue", totalBenefitValue * 100000000);
+			// 카드별 총 혜택 가치를 결과 맵에 추가
+			map.put("card_name", card_name);
+			map.put("card_type", card_type);
+			map.put("card_annual_fee", card_annual_fee);
+			map.put("expectedBenefitValue", totalBenefitValue * 100000000);
 			result.add(map);
-			
+
 		});
-		
+
 		Collections.sort(result, new Comparator<Map<String, Object>>() {
 
 			@Override
 			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-				Double val1 = (Double)o1.get("expectedBenefitValue");
-				Double val2 = (Double)o2.get("expectedBenefitValue");
-				Double comparison = val2- val1;
-				if(comparison != 0) {
+				Double val1 = (Double) o1.get("expectedBenefitValue");
+				Double val2 = (Double) o2.get("expectedBenefitValue");
+				Double comparison = val2 - val1;
+				if (comparison != 0) {
 					return val2.compareTo(val1);
 				} else {
 					Integer valt1 = (Integer) o1.get("card_annual_fee");
@@ -990,25 +981,29 @@ public class BenefitClusterService {
 				}
 			}
 		});
-		Integer criteria = Integer.parseInt((String)data.get("combival"));
+		Integer criteria = Integer.parseInt((String) data.get("combival"));
 		double minDiff = Double.MAX_VALUE;
 		int minIdx = -1;
 
-		for(int i = 0; i < result.size(); i++) {
-		    double diff = Math.abs((Double)result.get(i).get("expectedBenefitValue") - criteria);
-		    if (diff < minDiff) {
-		        minDiff = diff;
-		        minIdx = i;
-		    }
+		for (int i = 0; i < result.size(); i++) {
+			double diff = Math.abs((Double) result.get(i).get("expectedBenefitValue") - criteria);
+			if (diff < minDiff) {
+				minDiff = diff;
+				minIdx = i;
+			}
 		}
 
 		if (minIdx != -1) {
 		    Map<String, Object> closest = new HashMap<>();
-		    closest.put("cur_rank_val", minIdx );
+		    closest.put("cur_rank_val", minIdx + 1);  // 순위는 1부터 시작하므로 +1을 해줍니다.
+		    result.add(closest);
+		} else {
+		    // 가장 가까운 혜택 가치를 가진 카드를 찾지 못한 경우에 대한 처리
+		    Map<String, Object> closest = new HashMap<>();
+		    closest.put("cur_rank_val", result.size());  // 가장 마지막 순위를 넣습니다.
 		    result.add(closest);
 		}
 
-		
 		return result;
 	}
 }

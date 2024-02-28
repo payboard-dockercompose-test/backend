@@ -23,8 +23,11 @@ public class PaymentsService {
 		return amount;
 	}
 public Long LastMonthTotalAmountPayments() {
-		
+	
 	Long amount1 = payrepo.TotalAmountPayments();
+	if(amount1 == null ) {
+		amount1 = 0L;
+	}
 	Long amount = payrepo.LastMonthTotalAmountPayments(); 
 	Long totalamount= amount1- amount;
 	System.out.println("total:"+totalamount);
