@@ -48,7 +48,7 @@ jobs:
     - name: 'Set up .env for frontend'
       run: |
         touch ./.env
-        echo "REACT_APP_API_SERVER=/api" > .env
+        echo "REACT_APP_API_SERVER=https://cardvisor.azurewebsites.net" > .env
       working-directory: ./frontend
       
     - name: 'Set up Node.js'
