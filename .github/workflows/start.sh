@@ -3,7 +3,7 @@
 # nohup java -jar /app/*.jar > /app/app.log &
 
 # Start Apache in the foreground
-# /usr/sbin/apache2ctl -D FOREGROUND
+/usr/sbin/apache2ctl -D FOREGROUND
 
 # java -jar /app/*.jar > /app/app.log
-service apache2 start
+# service apache2 start
