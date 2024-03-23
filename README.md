@@ -42,9 +42,8 @@
 Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
       <td align="center"><br /><sub><b>방용수</b></sub></a><br /></td>
       <td align="center"><br /><sub><b>유은경</b></sub></a><br /></td>
-     <tr/>
       <td align="center"><br /><sub><b>동지현</b></sub></a><br /></td>
-    </tr>
+     <tr/>
   </tbody>
 </table>
 
@@ -56,13 +55,13 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 <div>
 <img alt="Java" src ="https://img.shields.io/badge/Java-0769AD.svg?&style=for-the-badge&logo=Java&logoColor=white"/>
 <img alt="SpringBoot" src ="https://img.shields.io/badge/SpringBoot-6DB33F.svg?&style=for-the-badge&logo=SpringBoot&logoColor=white"/>
-<img alt="Jpa" src ="https://img.shields.io/badge/hibernate-#59666C.svg?&style=for-the-badge&logo=hibernate&logoColor=white"/>
+<img alt="hibernate" src ="https://img.shields.io/badge/hibernate-#59666C.svg?&style=for-the-badge&logo=hibernate&logoColor=white"/>
 </div>
 
 ### 🖱️ FrontEndReact
 <div>
-<img alt="React" src ="https://img.shields.io/badge/react-#61DAFB.svg?&style=for-the-badge&logo=react&logoColor=white"/>
-<img alt="JavaScript" src ="https://img.shields.io/badge/JavaScriipt-F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=black"/>
+<img alt="React" src ="https://img.shields.io/badge/React-#61DAFB.svg?&style=for-the-badge&logo=React&logoColor=white"/>
+<img alt="JavaScript" src ="https://img.shields.io/badge/JavaScript-F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=black"/>
 </div>
 
 ### 🧱 DataBase & Cloud
