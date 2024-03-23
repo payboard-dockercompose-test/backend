@@ -42,8 +42,9 @@
 Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
       <td align="center"><br /><sub><b>방용수</b></sub></a><br /></td>
       <td align="center"><br /><sub><b>유은경</b></sub></a><br /></td>
-      <td align="center"><br /><sub><b>동지현</b></sub></a><br /></td>
      <tr/>
+      <td align="center"><br /><sub><b>동지현</b></sub></a><br /></td>
+    </tr>
   </tbody>
 </table>
 
@@ -55,13 +56,13 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 <div>
 <img alt="Java" src ="https://img.shields.io/badge/Java-0769AD.svg?&style=for-the-badge&logo=Java&logoColor=white"/>
 <img alt="SpringBoot" src ="https://img.shields.io/badge/SpringBoot-6DB33F.svg?&style=for-the-badge&logo=SpringBoot&logoColor=white"/>
-<img alt="hibernate" src ="https://img.shields.io/badge/hibernate-#59666C.svg?&style=for-the-badge&logo=hibernate&logoColor=white"/>
+<img alt="Jpa" src ="https://img.shields.io/badge/hibernate-#59666C.svg?&style=for-the-badge&logo=hibernate&logoColor=white"/>
 </div>
 
 ### 🖱️ FrontEndReact
 <div>
-<img alt="React" src ="https://img.shields.io/badge/React-#61DAFB.svg?&style=for-the-badge&logo=React&logoColor=white"/>
-<img alt="JavaScript" src ="https://img.shields.io/badge/JavaScript-F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=black"/>
+<img alt="React" src ="https://img.shields.io/badge/react-#61DAFB.svg?&style=for-the-badge&logo=react&logoColor=white"/>
+<img alt="JavaScript" src ="https://img.shields.io/badge/JavaScriipt-F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=black"/>
 </div>
 
 ### 🧱 DataBase & Cloud
@@ -95,74 +96,36 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 # 페이지 구성 및 프리뷰
 
 ### Main
-![Main](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/d7ee4dea-cebc-4d57-9160-9547ee24bcf1)
+![main](https://github.com/CardVisor/BackEnd/assets/134925813/9c45830f-6b5e-40b5-be5d-66597af86989)
 
-### 🎉 로그인 / 회원 가입
-
-![회원가입 - 1](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/44ed9076-f1eb-46e4-9a6a-7ad736ba5455)
-![회원가입 - 2](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/6efac342-2742-4df0-a5ea-e046e60e38cc)
-![회원가입 - 3](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/27fcc0cb-6d25-43fc-a274-0d3fe0e018be)
-
-![로그인](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/ace742a5-fe88-44a1-9d53-2459eff0bb69)
+### International
+![international](https://github.com/CardVisor/BackEnd/assets/134925813/11f2ad9f-d5a0-4f28-aa4f-bf3aafe54c92)
 
  <br/>
 
 
-### 🍎 펀딩페이지
+### Customer
 
-![펀딩페이지](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/60ac026c-66db-4a41-a19f-186b74cbcef1)
+![customer](https://github.com/CardVisor/BackEnd/assets/134925813/9fb9adc6-1e12-4df5-b7d0-ee352dd6b32e)
+![customer_2](https://github.com/CardVisor/BackEnd/assets/134925813/ecf05646-0b81-4669-98e8-b0f52a7a2b8b)
 
-![펀딩참여](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/88463572-c2d8-43ef-9201-a9b4c1bbb6df)
 
  <br/>
 
 
-### 🍏 경매페이지
+### Card
 
-![경매참여](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/cd1b88f0-5f2e-42b3-8e01-0fd9b93f2468)
+![card](https://github.com/CardVisor/BackEnd/assets/134925813/9ae1c2d9-f65a-41c2-be2a-8826f0769af8)
+![card_2](https://github.com/CardVisor/BackEnd/assets/134925813/e62679db-ff41-4829-81c2-fc28d9cb038f)
+
 
  <br/>
  
-### 🔎 파머>프로젝트 등록
+### Benefit
 
-![파머_프로젝트 등록](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/8a0d68d9-a876-41bc-9904-1a0b99649745)
-
- <br/>
- 
-### 📥 계좌등록 / 변경
-
-![계좌등록](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/84ae1c18-6520-456d-9248-3d10164e2a0c)
-
-![계좌변경](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/3c55e5a4-ac13-4dad-aaf9-7cf60bb792da)
+![benefit](https://github.com/CardVisor/BackEnd/assets/134925813/bbcdbe74-75c7-4d7e-99a5-248041a701f7)
+![benefit_2](https://github.com/CardVisor/BackEnd/assets/134925813/f5fc6162-635b-422c-8f04-2620e4b17bbb)
 
  <br/>
  
-### 🎁 팜머니 충전
-
-![팜머니 충전](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/b77a2c98-796a-449c-9383-11a2f55b939e)
-
- <br/>
- 
-### 🫒 경작중 업데이트
-
-![경작중 업데이트](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/88e487e3-1533-477a-9e3a-de1d4e4dc595)
-
- <br/>
- 
-### 🔎 경매등록
-
-![경매등록](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/6fe54bb5-7ae4-4719-9b40-ab74d6743405)
-
- <br/>
-
-### 🎁 채팅
-
-![채팅](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/38a964ef-b991-4052-aee9-f9473272d7b7)
-
-### 💸 정산
-
-![정산](https://github.com/FarmFarm-1/FarmFarm_Develop/assets/141472393/62d63ecd-8212-48c4-9433-4363aa0f4f16)
-
-
- <br/>
  
