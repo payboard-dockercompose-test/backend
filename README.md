@@ -95,8 +95,10 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 
 # 페이지 구성 및 프리뷰
 
+
 ### Main
 ![main](https://github.com/CardVisor/BackEnd/assets/134925813/9c45830f-6b5e-40b5-be5d-66597af86989)
+
 
 ### International
 ![international](https://github.com/CardVisor/BackEnd/assets/134925813/11f2ad9f-d5a0-4f28-aa4f-bf3aafe54c92)
@@ -107,8 +109,8 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 ### Customer
 
 ![customer](https://github.com/CardVisor/BackEnd/assets/134925813/9fb9adc6-1e12-4df5-b7d0-ee352dd6b32e)
-![customer_2](https://github.com/CardVisor/BackEnd/assets/134925813/ecf05646-0b81-4669-98e8-b0f52a7a2b8b)
 
+![customer_2](https://github.com/CardVisor/BackEnd/assets/134925813/ecf05646-0b81-4669-98e8-b0f52a7a2b8b)
 
  <br/>
 
@@ -116,14 +118,16 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 ### Card
 
 ![card](https://github.com/CardVisor/BackEnd/assets/134925813/9ae1c2d9-f65a-41c2-be2a-8826f0769af8)
+
 ![card_2](https://github.com/CardVisor/BackEnd/assets/134925813/e62679db-ff41-4829-81c2-fc28d9cb038f)
 
-
  <br/>
+
  
 ### Benefit
 
 ![benefit](https://github.com/CardVisor/BackEnd/assets/134925813/bbcdbe74-75c7-4d7e-99a5-248041a701f7)
+
 ![benefit_2](https://github.com/CardVisor/BackEnd/assets/134925813/f5fc6162-635b-422c-8f04-2620e4b17bbb)
 
  <br/>
