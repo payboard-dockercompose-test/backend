@@ -61,12 +61,12 @@ Hwasoo-Jeon"><br /><sub><b>전화수</b></sub></a><br /></td>
 <div>
 <img alt="Java" src ="https://img.shields.io/badge/Java-0769AD.svg?&style=for-the-badge&logo=Java&logoColor=white"/>
 <img alt="SpringBoot" src ="https://img.shields.io/badge/SpringBoot-6DB33F.svg?&style=for-the-badge&logo=SpringBoot&logoColor=white"/>
-<img alt="Jpa" src ="https://img.shields.io/badge/Hibernate-#59666C.svg?&style=for-the-badge&logo=Databricks&logoColor=white"/>
+<img alt="Jpa" src ="https://img.shields.io/badge/hibernate-#59666C.svg?&style=for-the-badge&logo=hibernate&logoColor=white"/>
 </div>
 
-### 🖱️ FrontEnd
+### 🖱️ FrontEndReact
 <div>
-<img alt="React" src ="https://img.shields.io/badge/React-#61DAFB.svg?&style=for-the-badge&logo=React&logoColor=white"/>
+<img alt="React" src ="https://img.shields.io/badge/react-#61DAFB.svg?&style=for-the-badge&logo=react&logoColor=white"/>
 <img alt="JavaScript" src ="https://img.shields.io/badge/JavaScriipt-F7DF1E.svg?&style=for-the-badge&logo=JavaScript&logoColor=black"/>
 </div>
 
